@@ -1,5 +1,16 @@
 package model
 
+// TestReview ...
+func TestReview() *Review {
+	return &Review{
+		ID:           1,
+		UserID:       1,
+		LiteratureID: 1,
+		Ratig:        5,
+		Text:         "simple review",
+	}
+}
+
 // TestUser ...
 func TestUser() *User {
 	return &User{
