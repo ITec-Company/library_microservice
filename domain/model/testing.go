@@ -1,6 +1,15 @@
 package model
 
-// TestDevDirection ...
+// TestUser ...
+func TestUser() *User {
+	return &User{
+		ID:       1,
+		Email:    "example@mail.org",
+		FullName: "Ivanov Ivan Ivanovich",
+	}
+}
+
+// TestAuthor ...
 func TestAuthor() *Author {
 	return &Author{
 		ID:       1,
