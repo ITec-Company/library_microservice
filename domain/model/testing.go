@@ -1,6 +1,14 @@
 package model
 
 // TestDevDirection ...
+func TestAuthor() *Author {
+	return &Author{
+		ID:       1,
+		FullName: "Ivanov Ivan Ivanovich",
+	}
+}
+
+// TestDevDirection ...
 func TestDevDirection() *DevDirection {
 	return &DevDirection{
 		ID:        1,
