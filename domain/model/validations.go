@@ -26,6 +26,8 @@ var (
 	ErrInvalidBithDate = errors.New("invalid date of birth. Age must be from 18 to 100. Date format RFC3339")
 	// ErrInvalidDevDirection ...
 	ErrInvalidDevDirection = errors.New("invalid development direction")
+	// ErrInvalidDiffucultyLevel ...
+	ErrInvalidDiffucultyLevel = errors.New("invalid diffuculty level")
 	// ErrInvalidPhoneNumber ...
 	ErrInvalidPhoneNumber = errors.New("invalid phone number format")
 	// ErrInvalidAlphabet ...
@@ -78,6 +80,18 @@ func IsPhone(value interface{}) error {
 func IsDevDirection(value interface{}) error {
 	s := Direction(value.(string))
 	if s == Frontend || s == Backend || s == Database || s == Testing {
+		return nil
+	}
+	return ErrInvalidDevDirection
+}
+
+// IsDiffucultyLevel checks if string matchs to a diffuculty level
+// JuniorLevel DiffucultyLevel = "junior"
+// MiddleLevel DiffucultyLevel = "middle"
+// SeniorLevel DiffucultyLevel = "senior"
+func IsDiffucultyLevel(value interface{}) error {
+	s := DiffucultyLevel(value.(string))
+	if s == JuniorLevel || s == MiddleLevel || s == SeniorLevel {
 		return nil
 	}
 	return ErrInvalidDevDirection
