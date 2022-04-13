@@ -23,14 +23,14 @@ type Config struct {
 }
 
 func init() {
-	godotenv.Load("../../../.env") // the path is true if you start application from current directory
+	godotenv.Load("../.env") // the path is true if you start application from current directory
 }
 
 // Get config
 func Get() *Config {
 	return &Config{
 		Server: struct{ Address string }{
-			Address: fmt.Sprintf("%s:%s", os.Getenv("BOOKING_SERVER_HOST"), os.Getenv("BOOKING_SERVER_PORT")),
+			Address: fmt.Sprintf("%s:%s", os.Getenv("LIBRARY_SERVER_HOST"), os.Getenv("LIBRARY_SERVER_PORT")),
 		},
 		DataBase: struct {
 			Host     string
@@ -40,12 +40,12 @@ func Get() *Config {
 			DbName   string
 			Sslmode  string
 		}{
-			Host:     os.Getenv("BOOKING_POSTGRES_HOST"),
-			Port:     os.Getenv("BOOKING_POSTGRES_PORT"),
-			Username: os.Getenv("BOOKING_POSTGRES_USER"),
-			Password: os.Getenv("BOOKING_POSTGRES_PASSWORD"),
-			DbName:   os.Getenv("BOOKING_POSTGRES_DB"),
-			Sslmode:  os.Getenv("BOOKING_POSTGRES_SSLMODE"),
+			Host:     os.Getenv("LIBRARY_POSTGRES_HOST"),
+			Port:     os.Getenv("LIBRARY_POSTGRES_PORT"),
+			Username: os.Getenv("LIBRARY_POSTGRES_USER"),
+			Password: os.Getenv("LIBRARY_POSTGRES_PASSWORD"),
+			DbName:   os.Getenv("LIBRARY_POSTGRES_DB"),
+			Sslmode:  os.Getenv("LIBRARY_POSTGRES_SSLMODE"),
 		},
 	}
 }

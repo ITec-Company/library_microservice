@@ -478,3 +478,209 @@
 [36mINFO[0m[2022-03-30T17:28:57Z]store.go:45 booking/domain/store.(*Store).Open Booking store opening. Source: host=bookingdb port=5432 user=user password=userpass dbname=bookingdb sslmode=disable 
 [36mINFO[0m[2022-03-30T17:28:57Z]server.go:56 booking/internal/server.(*Server).Start Booking server starts at 0.0.0.0:1113 ...    
 [36mINFO[0m[2022-03-30T17:28:57Z]server.go:56 booking/internal/server.(*Server).Start Booking server starts at 0.0.0.0:1113 ...    
+[37mDEBU[0m[2022-04-13T18:04:08Z]server.go:34 library/internal/server.(*Server).Start Router started successfully                  
+[37mDEBU[0m[2022-04-13T18:04:08Z]server.go:34 library/internal/server.(*Server).Start Router started successfully                  
+[36mINFO[0m[2022-04-13T18:04:08Z]store.go:44 library/domain/store.(*Store).Open Booking store opening. Source: host=librarydb port=1001 user=user password=userpass dbname=librarydb sslmode=disable 
+[36mINFO[0m[2022-04-13T18:04:08Z]store.go:44 library/domain/store.(*Store).Open Booking store opening. Source: host=librarydb port=1001 user=user password=userpass dbname=librarydb sslmode=disable 
+[31mERRO[0m[2022-04-13T18:04:08Z]store.go:53 library/domain/store.(*Store).Open Can't ping DB. Err msg: dial tcp 172.18.0.2:1001: connect: connection refused 
+[31mERRO[0m[2022-04-13T18:04:08Z]store.go:53 library/domain/store.(*Store).Open Can't ping DB. Err msg: dial tcp 172.18.0.2:1001: connect: connection refused 
+[31mERRO[0m[2022-04-13T18:04:08Z]server.go:37 library/internal/server.(*Server).Start err during db opening, err: %!w(*net.OpError=&{dial tcp <nil> 0xc000094030 0xc00009e000}) 
+[31mERRO[0m[2022-04-13T18:04:08Z]server.go:37 library/internal/server.(*Server).Start err during db opening, err: %!w(*net.OpError=&{dial tcp <nil> 0xc000094030 0xc00009e000}) 
+[31mERRO[0m[2022-04-13T18:04:08Z]main.go:14 main.main failed to start server due to error: %!w(*net.OpError=&{dial tcp <nil> 0xc000094030 0xc00009e000}) 
+[31mERRO[0m[2022-04-13T18:04:08Z]main.go:14 main.main failed to start server due to error: %!w(*net.OpError=&{dial tcp <nil> 0xc000094030 0xc00009e000}) 
+[37mDEBU[0m[2022-04-13T18:04:10Z]server.go:34 library/internal/server.(*Server).Start Router started successfully                  
+[37mDEBU[0m[2022-04-13T18:04:10Z]server.go:34 library/internal/server.(*Server).Start Router started successfully                  
+[36mINFO[0m[2022-04-13T18:04:10Z]store.go:44 library/domain/store.(*Store).Open Booking store opening. Source: host=librarydb port=1001 user=user password=userpass dbname=librarydb sslmode=disable 
+[36mINFO[0m[2022-04-13T18:04:10Z]store.go:44 library/domain/store.(*Store).Open Booking store opening. Source: host=librarydb port=1001 user=user password=userpass dbname=librarydb sslmode=disable 
+[31mERRO[0m[2022-04-13T18:04:10Z]store.go:53 library/domain/store.(*Store).Open Can't ping DB. Err msg: dial tcp 172.18.0.2:1001: connect: connection refused 
+[31mERRO[0m[2022-04-13T18:04:10Z]store.go:53 library/domain/store.(*Store).Open Can't ping DB. Err msg: dial tcp 172.18.0.2:1001: connect: connection refused 
+[31mERRO[0m[2022-04-13T18:04:10Z]server.go:37 library/internal/server.(*Server).Start err during db opening, err: %!w(*net.OpError=&{dial tcp <nil> 0xc000073830 0xc000184000}) 
+[31mERRO[0m[2022-04-13T18:04:10Z]server.go:37 library/internal/server.(*Server).Start err during db opening, err: %!w(*net.OpError=&{dial tcp <nil> 0xc000073830 0xc000184000}) 
+[31mERRO[0m[2022-04-13T18:04:10Z]main.go:14 main.main failed to start server due to error: %!w(*net.OpError=&{dial tcp <nil> 0xc000073830 0xc000184000}) 
+[31mERRO[0m[2022-04-13T18:04:10Z]main.go:14 main.main failed to start server due to error: %!w(*net.OpError=&{dial tcp <nil> 0xc000073830 0xc000184000}) 
+[37mDEBU[0m[2022-04-13T18:04:11Z]server.go:34 library/internal/server.(*Server).Start Router started successfully                  
+[37mDEBU[0m[2022-04-13T18:04:11Z]server.go:34 library/internal/server.(*Server).Start Router started successfully                  
+[36mINFO[0m[2022-04-13T18:04:11Z]store.go:44 library/domain/store.(*Store).Open Booking store opening. Source: host=librarydb port=1001 user=user password=userpass dbname=librarydb sslmode=disable 
+[36mINFO[0m[2022-04-13T18:04:11Z]store.go:44 library/domain/store.(*Store).Open Booking store opening. Source: host=librarydb port=1001 user=user password=userpass dbname=librarydb sslmode=disable 
+[31mERRO[0m[2022-04-13T18:04:11Z]store.go:53 library/domain/store.(*Store).Open Can't ping DB. Err msg: dial tcp 172.18.0.2:1001: connect: connection refused 
+[31mERRO[0m[2022-04-13T18:04:11Z]store.go:53 library/domain/store.(*Store).Open Can't ping DB. Err msg: dial tcp 172.18.0.2:1001: connect: connection refused 
+[31mERRO[0m[2022-04-13T18:04:11Z]server.go:37 library/internal/server.(*Server).Start err during db opening, err: %!w(*net.OpError=&{dial tcp <nil> 0xc000073710 0xc000020720}) 
+[31mERRO[0m[2022-04-13T18:04:11Z]server.go:37 library/internal/server.(*Server).Start err during db opening, err: %!w(*net.OpError=&{dial tcp <nil> 0xc000073710 0xc000020720}) 
+[31mERRO[0m[2022-04-13T18:04:11Z]main.go:14 main.main failed to start server due to error: %!w(*net.OpError=&{dial tcp <nil> 0xc000073710 0xc000020720}) 
+[31mERRO[0m[2022-04-13T18:04:11Z]main.go:14 main.main failed to start server due to error: %!w(*net.OpError=&{dial tcp <nil> 0xc000073710 0xc000020720}) 
+[37mDEBU[0m[2022-04-13T18:04:13Z]server.go:34 library/internal/server.(*Server).Start Router started successfully                  
+[37mDEBU[0m[2022-04-13T18:04:13Z]server.go:34 library/internal/server.(*Server).Start Router started successfully                  
+[36mINFO[0m[2022-04-13T18:04:13Z]store.go:44 library/domain/store.(*Store).Open Booking store opening. Source: host=librarydb port=1001 user=user password=userpass dbname=librarydb sslmode=disable 
+[36mINFO[0m[2022-04-13T18:04:13Z]store.go:44 library/domain/store.(*Store).Open Booking store opening. Source: host=librarydb port=1001 user=user password=userpass dbname=librarydb sslmode=disable 
+[31mERRO[0m[2022-04-13T18:04:13Z]store.go:53 library/domain/store.(*Store).Open Can't ping DB. Err msg: dial tcp 172.18.0.2:1001: connect: connection refused 
+[31mERRO[0m[2022-04-13T18:04:13Z]store.go:53 library/domain/store.(*Store).Open Can't ping DB. Err msg: dial tcp 172.18.0.2:1001: connect: connection refused 
+[31mERRO[0m[2022-04-13T18:04:13Z]server.go:37 library/internal/server.(*Server).Start err during db opening, err: %!w(*net.OpError=&{dial tcp <nil> 0xc000092030 0xc000200000}) 
+[31mERRO[0m[2022-04-13T18:04:13Z]server.go:37 library/internal/server.(*Server).Start err during db opening, err: %!w(*net.OpError=&{dial tcp <nil> 0xc000092030 0xc000200000}) 
+[31mERRO[0m[2022-04-13T18:04:13Z]main.go:14 main.main failed to start server due to error: %!w(*net.OpError=&{dial tcp <nil> 0xc000092030 0xc000200000}) 
+[31mERRO[0m[2022-04-13T18:04:13Z]main.go:14 main.main failed to start server due to error: %!w(*net.OpError=&{dial tcp <nil> 0xc000092030 0xc000200000}) 
+[37mDEBU[0m[2022-04-13T18:04:15Z]server.go:34 library/internal/server.(*Server).Start Router started successfully                  
+[37mDEBU[0m[2022-04-13T18:04:15Z]server.go:34 library/internal/server.(*Server).Start Router started successfully                  
+[36mINFO[0m[2022-04-13T18:04:15Z]store.go:44 library/domain/store.(*Store).Open Booking store opening. Source: host=librarydb port=1001 user=user password=userpass dbname=librarydb sslmode=disable 
+[36mINFO[0m[2022-04-13T18:04:15Z]store.go:44 library/domain/store.(*Store).Open Booking store opening. Source: host=librarydb port=1001 user=user password=userpass dbname=librarydb sslmode=disable 
+[31mERRO[0m[2022-04-13T18:04:15Z]store.go:53 library/domain/store.(*Store).Open Can't ping DB. Err msg: dial tcp 172.18.0.2:1001: connect: connection refused 
+[31mERRO[0m[2022-04-13T18:04:15Z]store.go:53 library/domain/store.(*Store).Open Can't ping DB. Err msg: dial tcp 172.18.0.2:1001: connect: connection refused 
+[31mERRO[0m[2022-04-13T18:04:15Z]server.go:37 library/internal/server.(*Server).Start err during db opening, err: %!w(*net.OpError=&{dial tcp <nil> 0xc000202030 0xc00020c000}) 
+[31mERRO[0m[2022-04-13T18:04:15Z]server.go:37 library/internal/server.(*Server).Start err during db opening, err: %!w(*net.OpError=&{dial tcp <nil> 0xc000202030 0xc00020c000}) 
+[31mERRO[0m[2022-04-13T18:04:15Z]main.go:14 main.main failed to start server due to error: %!w(*net.OpError=&{dial tcp <nil> 0xc000202030 0xc00020c000}) 
+[31mERRO[0m[2022-04-13T18:04:15Z]main.go:14 main.main failed to start server due to error: %!w(*net.OpError=&{dial tcp <nil> 0xc000202030 0xc00020c000}) 
+[37mDEBU[0m[2022-04-13T18:04:18Z]server.go:34 library/internal/server.(*Server).Start Router started successfully                  
+[37mDEBU[0m[2022-04-13T18:04:18Z]server.go:34 library/internal/server.(*Server).Start Router started successfully                  
+[36mINFO[0m[2022-04-13T18:04:18Z]store.go:44 library/domain/store.(*Store).Open Booking store opening. Source: host=librarydb port=1001 user=user password=userpass dbname=librarydb sslmode=disable 
+[36mINFO[0m[2022-04-13T18:04:18Z]store.go:44 library/domain/store.(*Store).Open Booking store opening. Source: host=librarydb port=1001 user=user password=userpass dbname=librarydb sslmode=disable 
+[31mERRO[0m[2022-04-13T18:04:18Z]store.go:53 library/domain/store.(*Store).Open Can't ping DB. Err msg: dial tcp 172.18.0.2:1001: connect: connection refused 
+[31mERRO[0m[2022-04-13T18:04:18Z]store.go:53 library/domain/store.(*Store).Open Can't ping DB. Err msg: dial tcp 172.18.0.2:1001: connect: connection refused 
+[31mERRO[0m[2022-04-13T18:04:18Z]server.go:37 library/internal/server.(*Server).Start err during db opening, err: %!w(*net.OpError=&{dial tcp <nil> 0xc000072030 0xc000020040}) 
+[31mERRO[0m[2022-04-13T18:04:18Z]server.go:37 library/internal/server.(*Server).Start err during db opening, err: %!w(*net.OpError=&{dial tcp <nil> 0xc000072030 0xc000020040}) 
+[31mERRO[0m[2022-04-13T18:04:18Z]main.go:14 main.main failed to start server due to error: %!w(*net.OpError=&{dial tcp <nil> 0xc000072030 0xc000020040}) 
+[31mERRO[0m[2022-04-13T18:04:18Z]main.go:14 main.main failed to start server due to error: %!w(*net.OpError=&{dial tcp <nil> 0xc000072030 0xc000020040}) 
+[37mDEBU[0m[2022-04-13T18:04:22Z]server.go:34 library/internal/server.(*Server).Start Router started successfully                  
+[37mDEBU[0m[2022-04-13T18:04:22Z]server.go:34 library/internal/server.(*Server).Start Router started successfully                  
+[36mINFO[0m[2022-04-13T18:04:22Z]store.go:44 library/domain/store.(*Store).Open Booking store opening. Source: host=librarydb port=1001 user=user password=userpass dbname=librarydb sslmode=disable 
+[36mINFO[0m[2022-04-13T18:04:22Z]store.go:44 library/domain/store.(*Store).Open Booking store opening. Source: host=librarydb port=1001 user=user password=userpass dbname=librarydb sslmode=disable 
+[31mERRO[0m[2022-04-13T18:04:22Z]store.go:53 library/domain/store.(*Store).Open Can't ping DB. Err msg: dial tcp 172.18.0.2:1001: connect: connection refused 
+[31mERRO[0m[2022-04-13T18:04:22Z]store.go:53 library/domain/store.(*Store).Open Can't ping DB. Err msg: dial tcp 172.18.0.2:1001: connect: connection refused 
+[31mERRO[0m[2022-04-13T18:04:22Z]server.go:37 library/internal/server.(*Server).Start err during db opening, err: %!w(*net.OpError=&{dial tcp <nil> 0xc0000a3830 0xc0000c26e0}) 
+[31mERRO[0m[2022-04-13T18:04:22Z]server.go:37 library/internal/server.(*Server).Start err during db opening, err: %!w(*net.OpError=&{dial tcp <nil> 0xc0000a3830 0xc0000c26e0}) 
+[31mERRO[0m[2022-04-13T18:04:22Z]main.go:14 main.main failed to start server due to error: %!w(*net.OpError=&{dial tcp <nil> 0xc0000a3830 0xc0000c26e0}) 
+[31mERRO[0m[2022-04-13T18:04:22Z]main.go:14 main.main failed to start server due to error: %!w(*net.OpError=&{dial tcp <nil> 0xc0000a3830 0xc0000c26e0}) 
+[37mDEBU[0m[2022-04-13T18:04:29Z]server.go:34 library/internal/server.(*Server).Start Router started successfully                  
+[37mDEBU[0m[2022-04-13T18:04:29Z]server.go:34 library/internal/server.(*Server).Start Router started successfully                  
+[36mINFO[0m[2022-04-13T18:04:29Z]store.go:44 library/domain/store.(*Store).Open Booking store opening. Source: host=librarydb port=1001 user=user password=userpass dbname=librarydb sslmode=disable 
+[36mINFO[0m[2022-04-13T18:04:29Z]store.go:44 library/domain/store.(*Store).Open Booking store opening. Source: host=librarydb port=1001 user=user password=userpass dbname=librarydb sslmode=disable 
+[31mERRO[0m[2022-04-13T18:04:29Z]store.go:53 library/domain/store.(*Store).Open Can't ping DB. Err msg: dial tcp 172.18.0.2:1001: connect: connection refused 
+[31mERRO[0m[2022-04-13T18:04:29Z]store.go:53 library/domain/store.(*Store).Open Can't ping DB. Err msg: dial tcp 172.18.0.2:1001: connect: connection refused 
+[31mERRO[0m[2022-04-13T18:04:29Z]server.go:37 library/internal/server.(*Server).Start err during db opening, err: %!w(*net.OpError=&{dial tcp <nil> 0xc000073710 0xc000020720}) 
+[31mERRO[0m[2022-04-13T18:04:29Z]server.go:37 library/internal/server.(*Server).Start err during db opening, err: %!w(*net.OpError=&{dial tcp <nil> 0xc000073710 0xc000020720}) 
+[31mERRO[0m[2022-04-13T18:04:29Z]main.go:14 main.main failed to start server due to error: %!w(*net.OpError=&{dial tcp <nil> 0xc000073710 0xc000020720}) 
+[31mERRO[0m[2022-04-13T18:04:29Z]main.go:14 main.main failed to start server due to error: %!w(*net.OpError=&{dial tcp <nil> 0xc000073710 0xc000020720}) 
+[37mDEBU[0m[2022-04-13T18:04:43Z]server.go:34 library/internal/server.(*Server).Start Router started successfully                  
+[37mDEBU[0m[2022-04-13T18:04:43Z]server.go:34 library/internal/server.(*Server).Start Router started successfully                  
+[36mINFO[0m[2022-04-13T18:04:43Z]store.go:44 library/domain/store.(*Store).Open Booking store opening. Source: host=librarydb port=1001 user=user password=userpass dbname=librarydb sslmode=disable 
+[36mINFO[0m[2022-04-13T18:04:43Z]store.go:44 library/domain/store.(*Store).Open Booking store opening. Source: host=librarydb port=1001 user=user password=userpass dbname=librarydb sslmode=disable 
+[31mERRO[0m[2022-04-13T18:04:43Z]store.go:53 library/domain/store.(*Store).Open Can't ping DB. Err msg: dial tcp 172.18.0.2:1001: connect: connection refused 
+[31mERRO[0m[2022-04-13T18:04:43Z]store.go:53 library/domain/store.(*Store).Open Can't ping DB. Err msg: dial tcp 172.18.0.2:1001: connect: connection refused 
+[31mERRO[0m[2022-04-13T18:04:43Z]server.go:37 library/internal/server.(*Server).Start err during db opening, err: %!w(*net.OpError=&{dial tcp <nil> 0xc00018a120 0xc0001ae000}) 
+[31mERRO[0m[2022-04-13T18:04:43Z]server.go:37 library/internal/server.(*Server).Start err during db opening, err: %!w(*net.OpError=&{dial tcp <nil> 0xc00018a120 0xc0001ae000}) 
+[31mERRO[0m[2022-04-13T18:04:43Z]main.go:14 main.main failed to start server due to error: %!w(*net.OpError=&{dial tcp <nil> 0xc00018a120 0xc0001ae000}) 
+[31mERRO[0m[2022-04-13T18:04:43Z]main.go:14 main.main failed to start server due to error: %!w(*net.OpError=&{dial tcp <nil> 0xc00018a120 0xc0001ae000}) 
+[37mDEBU[0m[2022-04-13T18:05:10Z]server.go:34 library/internal/server.(*Server).Start Router started successfully                  
+[37mDEBU[0m[2022-04-13T18:05:10Z]server.go:34 library/internal/server.(*Server).Start Router started successfully                  
+[36mINFO[0m[2022-04-13T18:05:10Z]store.go:44 library/domain/store.(*Store).Open Booking store opening. Source: host=librarydb port=1001 user=user password=userpass dbname=librarydb sslmode=disable 
+[36mINFO[0m[2022-04-13T18:05:10Z]store.go:44 library/domain/store.(*Store).Open Booking store opening. Source: host=librarydb port=1001 user=user password=userpass dbname=librarydb sslmode=disable 
+[31mERRO[0m[2022-04-13T18:05:10Z]store.go:53 library/domain/store.(*Store).Open Can't ping DB. Err msg: dial tcp 172.18.0.2:1001: connect: connection refused 
+[31mERRO[0m[2022-04-13T18:05:10Z]store.go:53 library/domain/store.(*Store).Open Can't ping DB. Err msg: dial tcp 172.18.0.2:1001: connect: connection refused 
+[31mERRO[0m[2022-04-13T18:05:10Z]server.go:37 library/internal/server.(*Server).Start err during db opening, err: %!w(*net.OpError=&{dial tcp <nil> 0xc000186120 0xc0001a6000}) 
+[31mERRO[0m[2022-04-13T18:05:10Z]server.go:37 library/internal/server.(*Server).Start err during db opening, err: %!w(*net.OpError=&{dial tcp <nil> 0xc000186120 0xc0001a6000}) 
+[31mERRO[0m[2022-04-13T18:05:10Z]main.go:14 main.main failed to start server due to error: %!w(*net.OpError=&{dial tcp <nil> 0xc000186120 0xc0001a6000}) 
+[31mERRO[0m[2022-04-13T18:05:10Z]main.go:14 main.main failed to start server due to error: %!w(*net.OpError=&{dial tcp <nil> 0xc000186120 0xc0001a6000}) 
+[37mDEBU[0m[2022-04-13T18:06:03Z]server.go:34 library/internal/server.(*Server).Start Router started successfully                  
+[37mDEBU[0m[2022-04-13T18:06:03Z]server.go:34 library/internal/server.(*Server).Start Router started successfully                  
+[36mINFO[0m[2022-04-13T18:06:03Z]store.go:44 library/domain/store.(*Store).Open Booking store opening. Source: host=librarydb port=1001 user=user password=userpass dbname=librarydb sslmode=disable 
+[36mINFO[0m[2022-04-13T18:06:03Z]store.go:44 library/domain/store.(*Store).Open Booking store opening. Source: host=librarydb port=1001 user=user password=userpass dbname=librarydb sslmode=disable 
+[31mERRO[0m[2022-04-13T18:06:03Z]store.go:53 library/domain/store.(*Store).Open Can't ping DB. Err msg: dial tcp 172.18.0.2:1001: connect: connection refused 
+[31mERRO[0m[2022-04-13T18:06:03Z]store.go:53 library/domain/store.(*Store).Open Can't ping DB. Err msg: dial tcp 172.18.0.2:1001: connect: connection refused 
+[31mERRO[0m[2022-04-13T18:06:03Z]server.go:37 library/internal/server.(*Server).Start err during db opening, err: %!w(*net.OpError=&{dial tcp <nil> 0xc000064120 0xc000020040}) 
+[31mERRO[0m[2022-04-13T18:06:03Z]server.go:37 library/internal/server.(*Server).Start err during db opening, err: %!w(*net.OpError=&{dial tcp <nil> 0xc000064120 0xc000020040}) 
+[31mERRO[0m[2022-04-13T18:06:03Z]main.go:14 main.main failed to start server due to error: %!w(*net.OpError=&{dial tcp <nil> 0xc000064120 0xc000020040}) 
+[31mERRO[0m[2022-04-13T18:06:03Z]main.go:14 main.main failed to start server due to error: %!w(*net.OpError=&{dial tcp <nil> 0xc000064120 0xc000020040}) 
+[37mDEBU[0m[2022-04-13T18:07:04Z]server.go:34 library/internal/server.(*Server).Start Router started successfully                  
+[37mDEBU[0m[2022-04-13T18:07:04Z]server.go:34 library/internal/server.(*Server).Start Router started successfully                  
+[36mINFO[0m[2022-04-13T18:07:04Z]store.go:44 library/domain/store.(*Store).Open Booking store opening. Source: host=librarydb port=1001 user=user password=userpass dbname=librarydb sslmode=disable 
+[36mINFO[0m[2022-04-13T18:07:04Z]store.go:44 library/domain/store.(*Store).Open Booking store opening. Source: host=librarydb port=1001 user=user password=userpass dbname=librarydb sslmode=disable 
+[31mERRO[0m[2022-04-13T18:07:04Z]store.go:53 library/domain/store.(*Store).Open Can't ping DB. Err msg: dial tcp 172.18.0.2:1001: connect: connection refused 
+[31mERRO[0m[2022-04-13T18:07:04Z]store.go:53 library/domain/store.(*Store).Open Can't ping DB. Err msg: dial tcp 172.18.0.2:1001: connect: connection refused 
+[31mERRO[0m[2022-04-13T18:07:04Z]server.go:37 library/internal/server.(*Server).Start err during db opening, err: %!w(*net.OpError=&{dial tcp <nil> 0xc000073740 0xc000020720}) 
+[31mERRO[0m[2022-04-13T18:07:04Z]server.go:37 library/internal/server.(*Server).Start err during db opening, err: %!w(*net.OpError=&{dial tcp <nil> 0xc000073740 0xc000020720}) 
+[31mERRO[0m[2022-04-13T18:07:04Z]main.go:14 main.main failed to start server due to error: %!w(*net.OpError=&{dial tcp <nil> 0xc000073740 0xc000020720}) 
+[31mERRO[0m[2022-04-13T18:07:04Z]main.go:14 main.main failed to start server due to error: %!w(*net.OpError=&{dial tcp <nil> 0xc000073740 0xc000020720}) 
+[37mDEBU[0m[2022-04-13T18:13:09Z]server.go:34 library/internal/server.(*Server).Start Router started successfully                  
+[37mDEBU[0m[2022-04-13T18:13:09Z]server.go:34 library/internal/server.(*Server).Start Router started successfully                  
+[36mINFO[0m[2022-04-13T18:13:09Z]store.go:44 library/domain/store.(*Store).Open Library store opening. Source: host=librarydb port=1001 user=user password=userpass dbname=librarydb sslmode=disable 
+[36mINFO[0m[2022-04-13T18:13:09Z]store.go:44 library/domain/store.(*Store).Open Library store opening. Source: host=librarydb port=1001 user=user password=userpass dbname=librarydb sslmode=disable 
+[31mERRO[0m[2022-04-13T18:13:09Z]store.go:53 library/domain/store.(*Store).Open Can't ping DB. Err msg: dial tcp 172.19.0.3:1001: connect: connection refused 
+[31mERRO[0m[2022-04-13T18:13:09Z]store.go:53 library/domain/store.(*Store).Open Can't ping DB. Err msg: dial tcp 172.19.0.3:1001: connect: connection refused 
+[31mERRO[0m[2022-04-13T18:13:09Z]server.go:37 library/internal/server.(*Server).Start err during db opening, err: %!w(*net.OpError=&{dial tcp <nil> 0xc000090030 0xc00009c000}) 
+[31mERRO[0m[2022-04-13T18:13:09Z]server.go:37 library/internal/server.(*Server).Start err during db opening, err: %!w(*net.OpError=&{dial tcp <nil> 0xc000090030 0xc00009c000}) 
+[31mERRO[0m[2022-04-13T18:13:09Z]main.go:14 main.main failed to start server due to error: %!w(*net.OpError=&{dial tcp <nil> 0xc000090030 0xc00009c000}) 
+[31mERRO[0m[2022-04-13T18:13:09Z]main.go:14 main.main failed to start server due to error: %!w(*net.OpError=&{dial tcp <nil> 0xc000090030 0xc00009c000}) 
+[37mDEBU[0m[2022-04-13T18:13:11Z]server.go:34 library/internal/server.(*Server).Start Router started successfully                  
+[37mDEBU[0m[2022-04-13T18:13:11Z]server.go:34 library/internal/server.(*Server).Start Router started successfully                  
+[36mINFO[0m[2022-04-13T18:13:11Z]store.go:44 library/domain/store.(*Store).Open Library store opening. Source: host=librarydb port=1001 user=user password=userpass dbname=librarydb sslmode=disable 
+[36mINFO[0m[2022-04-13T18:13:11Z]store.go:44 library/domain/store.(*Store).Open Library store opening. Source: host=librarydb port=1001 user=user password=userpass dbname=librarydb sslmode=disable 
+[31mERRO[0m[2022-04-13T18:13:11Z]store.go:53 library/domain/store.(*Store).Open Can't ping DB. Err msg: dial tcp 172.19.0.3:1001: connect: connection refused 
+[31mERRO[0m[2022-04-13T18:13:11Z]store.go:53 library/domain/store.(*Store).Open Can't ping DB. Err msg: dial tcp 172.19.0.3:1001: connect: connection refused 
+[31mERRO[0m[2022-04-13T18:13:11Z]server.go:37 library/internal/server.(*Server).Start err during db opening, err: %!w(*net.OpError=&{dial tcp <nil> 0xc00018e120 0xc0001ac000}) 
+[31mERRO[0m[2022-04-13T18:13:11Z]server.go:37 library/internal/server.(*Server).Start err during db opening, err: %!w(*net.OpError=&{dial tcp <nil> 0xc00018e120 0xc0001ac000}) 
+[31mERRO[0m[2022-04-13T18:13:11Z]main.go:14 main.main failed to start server due to error: %!w(*net.OpError=&{dial tcp <nil> 0xc00018e120 0xc0001ac000}) 
+[31mERRO[0m[2022-04-13T18:13:11Z]main.go:14 main.main failed to start server due to error: %!w(*net.OpError=&{dial tcp <nil> 0xc00018e120 0xc0001ac000}) 
+[37mDEBU[0m[2022-04-13T18:13:12Z]server.go:34 library/internal/server.(*Server).Start Router started successfully                  
+[37mDEBU[0m[2022-04-13T18:13:12Z]server.go:34 library/internal/server.(*Server).Start Router started successfully                  
+[36mINFO[0m[2022-04-13T18:13:12Z]store.go:44 library/domain/store.(*Store).Open Library store opening. Source: host=librarydb port=1001 user=user password=userpass dbname=librarydb sslmode=disable 
+[36mINFO[0m[2022-04-13T18:13:12Z]store.go:44 library/domain/store.(*Store).Open Library store opening. Source: host=librarydb port=1001 user=user password=userpass dbname=librarydb sslmode=disable 
+[31mERRO[0m[2022-04-13T18:13:12Z]store.go:53 library/domain/store.(*Store).Open Can't ping DB. Err msg: dial tcp 172.19.0.3:1001: connect: connection refused 
+[31mERRO[0m[2022-04-13T18:13:12Z]store.go:53 library/domain/store.(*Store).Open Can't ping DB. Err msg: dial tcp 172.19.0.3:1001: connect: connection refused 
+[31mERRO[0m[2022-04-13T18:13:12Z]server.go:37 library/internal/server.(*Server).Start err during db opening, err: %!w(*net.OpError=&{dial tcp <nil> 0xc000184030 0xc00018e000}) 
+[31mERRO[0m[2022-04-13T18:13:12Z]server.go:37 library/internal/server.(*Server).Start err during db opening, err: %!w(*net.OpError=&{dial tcp <nil> 0xc000184030 0xc00018e000}) 
+[31mERRO[0m[2022-04-13T18:13:12Z]main.go:14 main.main failed to start server due to error: %!w(*net.OpError=&{dial tcp <nil> 0xc000184030 0xc00018e000}) 
+[31mERRO[0m[2022-04-13T18:13:12Z]main.go:14 main.main failed to start server due to error: %!w(*net.OpError=&{dial tcp <nil> 0xc000184030 0xc00018e000}) 
+[37mDEBU[0m[2022-04-13T18:13:14Z]server.go:34 library/internal/server.(*Server).Start Router started successfully                  
+[37mDEBU[0m[2022-04-13T18:13:14Z]server.go:34 library/internal/server.(*Server).Start Router started successfully                  
+[36mINFO[0m[2022-04-13T18:13:14Z]store.go:44 library/domain/store.(*Store).Open Library store opening. Source: host=librarydb port=1001 user=user password=userpass dbname=librarydb sslmode=disable 
+[36mINFO[0m[2022-04-13T18:13:14Z]store.go:44 library/domain/store.(*Store).Open Library store opening. Source: host=librarydb port=1001 user=user password=userpass dbname=librarydb sslmode=disable 
+[31mERRO[0m[2022-04-13T18:13:14Z]store.go:53 library/domain/store.(*Store).Open Can't ping DB. Err msg: dial tcp 172.19.0.3:1001: connect: connection refused 
+[31mERRO[0m[2022-04-13T18:13:14Z]store.go:53 library/domain/store.(*Store).Open Can't ping DB. Err msg: dial tcp 172.19.0.3:1001: connect: connection refused 
+[31mERRO[0m[2022-04-13T18:13:14Z]server.go:37 library/internal/server.(*Server).Start err during db opening, err: %!w(*net.OpError=&{dial tcp <nil> 0xc00020a120 0xc00022c000}) 
+[31mERRO[0m[2022-04-13T18:13:14Z]server.go:37 library/internal/server.(*Server).Start err during db opening, err: %!w(*net.OpError=&{dial tcp <nil> 0xc00020a120 0xc00022c000}) 
+[31mERRO[0m[2022-04-13T18:13:14Z]main.go:14 main.main failed to start server due to error: %!w(*net.OpError=&{dial tcp <nil> 0xc00020a120 0xc00022c000}) 
+[31mERRO[0m[2022-04-13T18:13:14Z]main.go:14 main.main failed to start server due to error: %!w(*net.OpError=&{dial tcp <nil> 0xc00020a120 0xc00022c000}) 
+[37mDEBU[0m[2022-04-13T18:13:16Z]server.go:34 library/internal/server.(*Server).Start Router started successfully                  
+[37mDEBU[0m[2022-04-13T18:13:16Z]server.go:34 library/internal/server.(*Server).Start Router started successfully                  
+[36mINFO[0m[2022-04-13T18:13:16Z]store.go:44 library/domain/store.(*Store).Open Library store opening. Source: host=librarydb port=1001 user=user password=userpass dbname=librarydb sslmode=disable 
+[36mINFO[0m[2022-04-13T18:13:16Z]store.go:44 library/domain/store.(*Store).Open Library store opening. Source: host=librarydb port=1001 user=user password=userpass dbname=librarydb sslmode=disable 
+[31mERRO[0m[2022-04-13T18:13:16Z]store.go:53 library/domain/store.(*Store).Open Can't ping DB. Err msg: dial tcp 172.19.0.3:1001: connect: connection refused 
+[31mERRO[0m[2022-04-13T18:13:16Z]store.go:53 library/domain/store.(*Store).Open Can't ping DB. Err msg: dial tcp 172.19.0.3:1001: connect: connection refused 
+[31mERRO[0m[2022-04-13T18:13:16Z]server.go:37 library/internal/server.(*Server).Start err during db opening, err: %!w(*net.OpError=&{dial tcp <nil> 0xc00006a030 0xc000020040}) 
+[31mERRO[0m[2022-04-13T18:13:16Z]server.go:37 library/internal/server.(*Server).Start err during db opening, err: %!w(*net.OpError=&{dial tcp <nil> 0xc00006a030 0xc000020040}) 
+[31mERRO[0m[2022-04-13T18:13:16Z]main.go:14 main.main failed to start server due to error: %!w(*net.OpError=&{dial tcp <nil> 0xc00006a030 0xc000020040}) 
+[31mERRO[0m[2022-04-13T18:13:16Z]main.go:14 main.main failed to start server due to error: %!w(*net.OpError=&{dial tcp <nil> 0xc00006a030 0xc000020040}) 
+[37mDEBU[0m[2022-04-13T18:13:18Z]server.go:34 library/internal/server.(*Server).Start Router started successfully                  
+[37mDEBU[0m[2022-04-13T18:13:18Z]server.go:34 library/internal/server.(*Server).Start Router started successfully                  
+[36mINFO[0m[2022-04-13T18:13:18Z]store.go:44 library/domain/store.(*Store).Open Library store opening. Source: host=librarydb port=1001 user=user password=userpass dbname=librarydb sslmode=disable 
+[36mINFO[0m[2022-04-13T18:13:18Z]store.go:44 library/domain/store.(*Store).Open Library store opening. Source: host=librarydb port=1001 user=user password=userpass dbname=librarydb sslmode=disable 
+[31mERRO[0m[2022-04-13T18:13:18Z]store.go:53 library/domain/store.(*Store).Open Can't ping DB. Err msg: dial tcp 172.19.0.3:1001: connect: connection refused 
+[31mERRO[0m[2022-04-13T18:13:18Z]store.go:53 library/domain/store.(*Store).Open Can't ping DB. Err msg: dial tcp 172.19.0.3:1001: connect: connection refused 
+[31mERRO[0m[2022-04-13T18:13:18Z]server.go:37 library/internal/server.(*Server).Start err during db opening, err: %!w(*net.OpError=&{dial tcp <nil> 0xc00006a030 0xc000020040}) 
+[31mERRO[0m[2022-04-13T18:13:18Z]server.go:37 library/internal/server.(*Server).Start err during db opening, err: %!w(*net.OpError=&{dial tcp <nil> 0xc00006a030 0xc000020040}) 
+[31mERRO[0m[2022-04-13T18:13:18Z]main.go:14 main.main failed to start server due to error: %!w(*net.OpError=&{dial tcp <nil> 0xc00006a030 0xc000020040}) 
+[31mERRO[0m[2022-04-13T18:13:18Z]main.go:14 main.main failed to start server due to error: %!w(*net.OpError=&{dial tcp <nil> 0xc00006a030 0xc000020040}) 
+[37mDEBU[0m[2022-04-13T18:13:23Z]server.go:34 library/internal/server.(*Server).Start Router started successfully                  
+[37mDEBU[0m[2022-04-13T18:13:23Z]server.go:34 library/internal/server.(*Server).Start Router started successfully                  
+[36mINFO[0m[2022-04-13T18:13:23Z]store.go:44 library/domain/store.(*Store).Open Library store opening. Source: host=librarydb port=1001 user=user password=userpass dbname=librarydb sslmode=disable 
+[36mINFO[0m[2022-04-13T18:13:23Z]store.go:44 library/domain/store.(*Store).Open Library store opening. Source: host=librarydb port=1001 user=user password=userpass dbname=librarydb sslmode=disable 
+[31mERRO[0m[2022-04-13T18:13:23Z]store.go:53 library/domain/store.(*Store).Open Can't ping DB. Err msg: dial tcp 172.19.0.3:1001: connect: connection refused 
+[31mERRO[0m[2022-04-13T18:13:23Z]store.go:53 library/domain/store.(*Store).Open Can't ping DB. Err msg: dial tcp 172.19.0.3:1001: connect: connection refused 
+[31mERRO[0m[2022-04-13T18:13:23Z]server.go:37 library/internal/server.(*Server).Start err during db opening, err: %!w(*net.OpError=&{dial tcp <nil> 0xc00020e120 0xc00022c000}) 
+[31mERRO[0m[2022-04-13T18:13:23Z]server.go:37 library/internal/server.(*Server).Start err during db opening, err: %!w(*net.OpError=&{dial tcp <nil> 0xc00020e120 0xc00022c000}) 
+[31mERRO[0m[2022-04-13T18:13:23Z]main.go:14 main.main failed to start server due to error: %!w(*net.OpError=&{dial tcp <nil> 0xc00020e120 0xc00022c000}) 
+[31mERRO[0m[2022-04-13T18:13:23Z]main.go:14 main.main failed to start server due to error: %!w(*net.OpError=&{dial tcp <nil> 0xc00020e120 0xc00022c000}) 
+[37mDEBU[0m[2022-04-13T18:13:30Z]server.go:34 library/internal/server.(*Server).Start Router started successfully                  
+[37mDEBU[0m[2022-04-13T18:13:30Z]server.go:34 library/internal/server.(*Server).Start Router started successfully                  
+[36mINFO[0m[2022-04-13T18:13:30Z]store.go:44 library/domain/store.(*Store).Open Library store opening. Source: host=librarydb port=1001 user=user password=userpass dbname=librarydb sslmode=disable 
+[36mINFO[0m[2022-04-13T18:13:30Z]store.go:44 library/domain/store.(*Store).Open Library store opening. Source: host=librarydb port=1001 user=user password=userpass dbname=librarydb sslmode=disable 
+[31mERRO[0m[2022-04-13T18:13:30Z]store.go:53 library/domain/store.(*Store).Open Can't ping DB. Err msg: dial tcp 172.19.0.3:1001: connect: connection refused 
+[31mERRO[0m[2022-04-13T18:13:30Z]store.go:53 library/domain/store.(*Store).Open Can't ping DB. Err msg: dial tcp 172.19.0.3:1001: connect: connection refused 
+[31mERRO[0m[2022-04-13T18:13:30Z]server.go:37 library/internal/server.(*Server).Start err during db opening, err: %!w(*net.OpError=&{dial tcp <nil> 0xc0000725d0 0xc0000201e0}) 
+[31mERRO[0m[2022-04-13T18:13:30Z]server.go:37 library/internal/server.(*Server).Start err during db opening, err: %!w(*net.OpError=&{dial tcp <nil> 0xc0000725d0 0xc0000201e0}) 
+[31mERRO[0m[2022-04-13T18:13:30Z]main.go:14 main.main failed to start server due to error: %!w(*net.OpError=&{dial tcp <nil> 0xc0000725d0 0xc0000201e0}) 
+[31mERRO[0m[2022-04-13T18:13:30Z]main.go:14 main.main failed to start server due to error: %!w(*net.OpError=&{dial tcp <nil> 0xc0000725d0 0xc0000201e0}) 
+[37mDEBU[0m[2022-04-13T18:14:17Z]server.go:34 library/internal/server.(*Server).Start Router started successfully                  
+[37mDEBU[0m[2022-04-13T18:14:17Z]server.go:34 library/internal/server.(*Server).Start Router started successfully                  
+[36mINFO[0m[2022-04-13T18:14:17Z]store.go:44 library/domain/store.(*Store).Open Library store opening. Source: host=librarydb port=5432 user=user password=userpass dbname=librarydb sslmode=disable 
+[36mINFO[0m[2022-04-13T18:14:17Z]store.go:44 library/domain/store.(*Store).Open Library store opening. Source: host=librarydb port=5432 user=user password=userpass dbname=librarydb sslmode=disable 
+[36mINFO[0m[2022-04-13T18:14:17Z]server.go:56 library/internal/server.(*Server).Start Server started successfully at 0.0.0.0:1000  
+[36mINFO[0m[2022-04-13T18:14:17Z]server.go:56 library/internal/server.(*Server).Start Server started successfully at 0.0.0.0:1000  

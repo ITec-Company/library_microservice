@@ -7,7 +7,7 @@ require (
 	github.com/go-ozzo/ozzo-validation v3.6.0+incompatible
 	github.com/joho/godotenv v1.4.0
 	github.com/julienschmidt/httprouter v1.3.0
-	github.com/lib/pq v1.10.4
+	github.com/lib/pq v1.10.5
 	github.com/rs/cors v1.8.2
 	github.com/sirupsen/logrus v1.8.1
 	github.com/stretchr/testify v1.7.1
