@@ -41,7 +41,7 @@ func (s *Store) Open() error {
 		s.Config.DataBase.DbName,
 		s.Config.DataBase.Sslmode,
 	)
-	s.Logger.Infof("Booking store opening. Source: %s", dataSourceName)
+	s.Logger.Infof("Library store opening. Source: %s", dataSourceName)
 
 	db, err := sql.Open("postgres", dataSourceName)
 	if err != nil {
