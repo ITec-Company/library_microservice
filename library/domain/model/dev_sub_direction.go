@@ -21,10 +21,10 @@ type SubDirection string
 
 // SubDirection of the development
 var (
-	Java       SubDirection = "frontend"
-	Golang     SubDirection = "backend"
-	Python     SubDirection = "database"
-	JavaScript SubDirection = "testing"
+	Java       SubDirection = "java"
+	Golang     SubDirection = "golang"
+	Python     SubDirection = "python"
+	JavaScript SubDirection = "javascript"
 	Postgres   SubDirection = "postgres"
 )
 

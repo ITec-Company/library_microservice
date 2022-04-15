@@ -17,9 +17,10 @@ var (
 
 // Store ...
 type Store struct {
-	Config *config.Config
-	Db     *sql.DB
-	Logger *logging.Logger
+	Config         *config.Config
+	Db             *sql.DB
+	Logger         *logging.Logger
+	BookRepository *BookRepository
 }
 
 // New ...
@@ -62,4 +63,17 @@ func (s *Store) Open() error {
 // Close ...
 func (s *Store) Close() {
 	s.Db.Close()
+}
+
+// Book ...
+func (s *Store) Book() *BookRepository {
+	if s.BookRepository != nil {
+		return s.BookRepository
+	}
+
+	s.BookRepository = &BookRepository{
+		Store: s,
+	}
+
+	return s.BookRepository
 }

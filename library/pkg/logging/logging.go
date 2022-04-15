@@ -59,12 +59,12 @@ func init() {
 		FullTimestamp: true,
 	}
 
-	err := os.MkdirAll("../../logs", 0644)
+	err := os.MkdirAll("./logs", 0644)
 
 	if err != nil || os.IsExist(err) {
 		panic("can't create log dir. no configured logging to files")
 	} else {
-		allFile, err := os.OpenFile("../../logs/all.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0660)
+		allFile, err := os.OpenFile("./logs/all.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0660)
 		if err != nil {
 			panic(fmt.Sprintf("[Message]: %s", err))
 		}

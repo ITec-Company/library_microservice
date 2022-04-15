@@ -24,9 +24,10 @@ services:
             - .env
         restart: always
         volumes:
-            - ./library/logs:/logs
+            - ./library/logs:/library/logs
+            - ./library/store:/library/store
         depends_on:
-            - "librarydb"
+            - librarymigrate
 
     librarydb:
         container_name: db_library
@@ -43,7 +44,25 @@ services:
             - "1001:5432"
         restart: always
         volumes:
-            - database:/var/lib/postgresql/library/data/
+            - ./database:/var/lib/postgresql/data/
+
+    librarymigrate:
+        container_name: migrate_library
+        image: migrate/migrate
+        restart: on-failure
+        volumes:
+            - ./library/migrations:/library/migrations
+
+        command:
+            [
+                "-path",
+                "library/migrations",
+                "-database",
+                "postgres://user:userpass@librarydb:5432/librarydb?sslmode=disable",
+                "up"
+            ]
+        depends_on:
+            - librarydb
 
 volumes:
     database: null

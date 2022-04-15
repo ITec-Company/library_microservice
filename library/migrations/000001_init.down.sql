@@ -1,0 +1,2 @@
+DROP TABLE  book CASCADE;
+DROP TYPE  diffuculty CASCADE;
