@@ -45,6 +45,8 @@ services:
         restart: always
         volumes:
             - ./database:/var/lib/postgresql/data/
+            # - database:/var/lib/postgresql/data/ 
+
 
     librarymigrate:
         container_name: migrate_library
