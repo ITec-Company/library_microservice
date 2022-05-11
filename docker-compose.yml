@@ -6,9 +6,6 @@ services:
         image: dpage/pgadmin4
         env_file:
             - .env
-        environment:
-            - PGADMIN_DEFAULT_EMAIL=${PGADMIN_DEFAULT_EMAIL}
-            - PGADMIN_DEFAULT_PASSWORD=${PGADMIN_DEFAULT_PASSWORD}
         ports:
             - "5050:80"
         restart: unless-stopped
@@ -17,15 +14,15 @@ services:
         container_name: service_library
         build:
             dockerfile: dockerfile
-            context: ./library
+            context: ./library-go
         ports:
             - "1000:1000"
         env_file:
             - .env
         restart: always
         volumes:
-            - ./library/logs:/library/logs
-            - ./library/store:/library/store
+            - ./logs:/logs
+            - ./store:/store
         depends_on:
             - librarymigrate
 
@@ -34,18 +31,11 @@ services:
         image: postgres:13-alpine
         env_file:
             - .env
-        environment:
-            - POSTGRES_USER=${LIBRARY_POSTGRES_USER}
-            - POSTGRES_PASSWORD=${LIBRARY_POSTGRES_PASSWORD}
-            - POSTGRES_DB=${LIBRARY_POSTGRES_DB}
-            - POSTGRES_HOST=${LIBRARY_POSTGRES_HOST}
-            - POSTGRES_SSLMODE=${LIBRARY_POSTGRES_SSLMODE}
         ports:
             - "1001:5432"
         restart: always
         volumes:
-            - ./database:/var/lib/postgresql/data/
-            # - database:/var/lib/postgresql/data/ 
+            - ./database/postgres/data:/var/lib/postgresql/data/
 
 
     librarymigrate:
@@ -53,18 +43,16 @@ services:
         image: migrate/migrate
         restart: on-failure
         volumes:
-            - ./library/migrations:/library/migrations
+            - ./database/postgres/migrations:/database/postgres/migrations
 
         command:
             [
                 "-path",
-                "library/migrations",
+                "database/postgres/migrations",
                 "-database",
-                "postgres://user:userpass@librarydb:5432/librarydb?sslmode=disable",
+                "postgres://user:12345@librarydb:5432/librarydb?sslmode=disable",
                 "up"
             ]
         depends_on:
             - librarydb
 
-volumes:
-    database: null

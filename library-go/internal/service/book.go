@@ -1,0 +1,40 @@
+package service
+
+import (
+	"context"
+	"library-go/internal/domain"
+	"library-go/internal/store"
+	"library-go/pkg/logging"
+)
+
+type bookService struct {
+	logger  *logging.Logger
+	storage store.BookStorage
+}
+
+func NewBookService(storage store.BookStorage, logger *logging.Logger) BookService {
+	return &bookService{
+		logger:  logger,
+		storage: storage,
+	}
+}
+
+func (s *bookService) GetByUUID(ctx context.Context, UUID string) (*domain.Book, error) {
+	return s.storage.GetOne(UUID)
+}
+
+func (s *bookService) GetAll(ctx context.Context, limit, offset int) ([]*domain.Book, error) {
+	return s.storage.GetAll(limit, offset)
+}
+
+func (s *bookService) Delete(ctx context.Context, UUID string) error {
+	return s.storage.Delete(UUID)
+}
+
+func (s *bookService) Create(ctx context.Context, book *domain.CreateBookDTO) (string, error) {
+	return s.storage.Create(book)
+}
+
+func (s *bookService) Update(ctx context.Context, book *domain.UpdateBookDTO) error {
+	return s.storage.Update(book)
+}
