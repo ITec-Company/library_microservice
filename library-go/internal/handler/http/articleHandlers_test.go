@@ -10,7 +10,6 @@ import (
 	"github.com/julienschmidt/httprouter"
 	"github.com/stretchr/testify/assert"
 	"io"
-	"io/ioutil"
 	"library-go/internal/domain"
 	mock_service "library-go/internal/service/mocks"
 	"library-go/pkg/logging"
@@ -124,7 +123,7 @@ func TestArticleHandler_GetByUUID(t *testing.T) {
 				s.EXPECT().GetByUUID(ctx, uuid).Return(domain.TestArticle(), nil)
 			},
 			expectedStatusCode:  200,
-			expectedRequestBody: fmt.Sprintln(`{"uuid":"1","title":"Test Title","direction":{"uuid":"1","name":"test direction"},"difficulty":"Test Difficulty","author":{"uuid":"1","full_name":"test Author"},"edition_date":"2000-01-01T00:00:00Z","rating":5,"description":"Test Description","url":"Test URL","language":"Test Language","tags":[{"uuid":"1","name":"test Tag"}],"download_count":10}`),
+			expectedRequestBody: "{\"uuid\":\"1\",\"title\":\"Test Title\",\"direction\":{\"uuid\":\"1\",\"name\":\"test Direction\"},\"difficulty\":\"Test Difficulty\",\"author\":{\"uuid\":\"1\",\"full_name\":\"test Author\"},\"edition_date\":\"2000-01-01T00:00:00Z\",\"rating\":5,\"description\":\"Test Description\",\"url\":\"Test URL\",\"language\":\"Test Language\",\"tags\":[{\"uuid\":\"1\",\"name\":\"test Tag\"}],\"download_count\":10}\n",
 		},
 		{
 			name:                "invalid uuid",
@@ -195,17 +194,17 @@ func TestArticleHandler_Create(t *testing.T) {
 	type mockBehavior func(s *mock_service.MockArticleService, ctx context.Context, createArticleDTO domain.CreateArticleDTO)
 
 	testTable := []struct {
-		name string
-		ctx  context.Context
-		//inputBody           *io.PipeReader
+		name                string
+		ctx                 context.Context
 		mockBehavior        mockBehavior
-		createArticleDTO    domain.CreateArticleDTO
+		createArticleDTO    *domain.CreateArticleDTO
 		expectedStatusCode  int
 		expectedRequestBody string
 	}{
 		{
-			name: "OK",
-			ctx:  context.Background(),
+			name:             "OK",
+			ctx:              context.Background(),
+			createArticleDTO: domain.TestArticleCreateDTO(),
 			mockBehavior: func(s *mock_service.MockArticleService, ctx context.Context, createArticleDTO domain.CreateArticleDTO) {
 				s.EXPECT().Create(ctx, createArticleDTO).Return("1", nil)
 			},
@@ -219,32 +218,35 @@ func TestArticleHandler_Create(t *testing.T) {
 			defer c.Finish()
 
 			service := mock_service.NewMockArticleService(c)
-			testCase.mockBehavior(service, testCase.ctx, testCase.createArticleDTO)
+			testCase.mockBehavior(service, testCase.ctx, *testCase.createArticleDTO)
 
 			ArticleHandler := NewArticleHandler(service, logging.GetLogger())
 
 			router := httprouter.New()
 			ArticleHandler.Register(router)
 
-			pr, pw := io.Pipe()
-			file, _ := os.CreateTemp("./", "test_file")
+			body := bytes.Buffer{}
+			writer := multipart.NewWriter(&body)
+			file, _ := os.Open("test_file.txt")
+
+			part, _ := writer.CreateFormFile("file", "file")
+			io.Copy(part, file)
 			defer file.Close()
-			fileBytes, _ := ioutil.ReadAll(file)
-			writer := multipart.NewWriter(pw)
-			part, _ := writer.CreateFormFile("file", "article.pdf")
-			part.Write(fileBytes)
-			writer.WriteField("file", "test file")
+
 			writer.WriteField("title", "test title")
 			writer.WriteField("direction_uuid", "1")
 			writer.WriteField("author_uuid", "1")
 			writer.WriteField("difficulty", "test difficulty")
-			writer.WriteField("edition_date", "test edition_date")
+			writer.WriteField("edition_date", "2000-01-01 00:00:00 +0000 UTC")
 			writer.WriteField("description", "test description")
 			writer.WriteField("language", "test language")
-			writer.WriteField("tags_uuids", `{"1"}`)
+			writer.WriteField("tags_uuids", `[1]`)
 
 			w := httptest.NewRecorder()
-			req := httptest.NewRequest("POST", fmt.Sprintf("/article"), pr)
+
+			writer.Close()
+			req := httptest.NewRequest("POST", "/article", bytes.NewReader(body.Bytes()))
+			req.Header.Set("Content-Type", writer.FormDataContentType())
 
 			router.ServeHTTP(w, req)
 

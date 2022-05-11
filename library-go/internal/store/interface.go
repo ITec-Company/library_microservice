@@ -1,0 +1,70 @@
+package store
+
+import (
+	"library-go/internal/domain"
+)
+
+type ArticleStorage interface {
+	GetOne(UUID string) (*domain.Article, error)
+	GetAll(limit, offset int) ([]*domain.Article, error)
+	Create(article *domain.CreateArticleDTO) (string, error)
+	Delete(UUID string) error
+	Update(article *domain.UpdateArticleDTO) error
+}
+
+type AudioStorage interface {
+	GetOne(UUID string) (*domain.Audio, error)
+	GetAll(limit, offset int) ([]*domain.Audio, error)
+	Create(audio *domain.CreateAudioDTO) (string, error)
+	Delete(UUID string) error
+	Update(audio *domain.UpdateAudioDTO) error
+}
+
+type AuthorStorage interface {
+	GetOne(UUID string) (*domain.Author, error)
+	GetAll(limit, offset int) ([]*domain.Author, error)
+	Create(author *domain.CreateAuthorDTO) (string, error)
+	Delete(UUID string) error
+	Update(author *domain.UpdateAuthorDTO) error
+}
+
+type BookStorage interface {
+	GetOne(UUID string) (*domain.Book, error)
+	GetAll(limit, offset int) ([]*domain.Book, error)
+	Create(book *domain.CreateBookDTO) (string, error)
+	Delete(UUID string) error
+	Update(book *domain.UpdateBookDTO) error
+}
+
+type DirectionStorage interface {
+	GetOne(UUID string) (*domain.Direction, error)
+	GetAll(limit, offset int) ([]*domain.Direction, error)
+	Create(direction *domain.CreateDirectionDTO) (string, error)
+	Delete(UUID string) error
+	Update(direction *domain.UpdateDirectionDTO) error
+}
+
+type ReviewStorage interface {
+	GetOne(UUID string) (*domain.Review, error)
+	GetAll(limit, offset int) ([]*domain.Review, error)
+	Create(review *domain.CreateReviewDTO) (string, error)
+	Delete(UUID string) error
+	Update(review *domain.UpdateReviewDTO) error
+}
+
+type TagStorage interface {
+	GetOne(UUID string) (*domain.Tag, error)
+	GetMany(UUIDs []string) ([]*domain.Tag, error)
+	GetAll(limit, offset int) ([]*domain.Tag, error)
+	Create(tag *domain.CreateTagDTO) (string, error)
+	Delete(UUID string) error
+	Update(tag *domain.UpdateTagDTO) error
+}
+
+type VideoStorage interface {
+	GetOne(UUID string) (*domain.Video, error)
+	GetAll(limit, offset int) ([]*domain.Video, error)
+	Create(video *domain.CreateVideoDTO) (string, error)
+	Delete(UUID string) error
+	Update(video *domain.UpdateVideoDTO) error
+}
