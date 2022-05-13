@@ -13,6 +13,7 @@ type ArticleService interface {
 	Delete(ctx context.Context, UUID string) error
 	Create(ctx context.Context, article *domain.CreateArticleDTO) (string, error)
 	Update(ctx context.Context, article *domain.UpdateArticleDTO) error
+	LoadLocalFIle(ctx context.Context, path string) ([]byte, error)
 }
 
 type AudioService interface {
@@ -21,6 +22,7 @@ type AudioService interface {
 	Delete(ctx context.Context, UUID string) error
 	Create(ctx context.Context, audio *domain.CreateAudioDTO) (string, error)
 	Update(ctx context.Context, audio *domain.UpdateAudioDTO) error
+	LoadLocalFIle(ctx context.Context, path string) ([]byte, error)
 }
 
 type AuthorService interface {
@@ -37,6 +39,7 @@ type BookService interface {
 	Delete(ctx context.Context, UUID string) error
 	Create(ctx context.Context, book *domain.CreateBookDTO) (string, error)
 	Update(ctx context.Context, book *domain.UpdateBookDTO) error
+	LoadLocalFIle(ctx context.Context, path string) ([]byte, error)
 }
 
 type DirectionService interface {

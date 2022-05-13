@@ -40,7 +40,7 @@ func TestArticleHandler_GetAll(t *testing.T) {
 				s.EXPECT().GetAll(ctx, limit, offset).Return([]*domain.Article{domain.TestArticle(), domain.TestArticle()}, nil)
 			},
 			expectedStatusCode:  200,
-			expectedRequestBody: fmt.Sprintln(`[{"uuid":"1","title":"Test Title","direction":{"uuid":"1","name":"test direction"},"difficulty":"Test Difficulty","author":{"uuid":"1","full_name":"test Author"},"edition_date":"2000-01-01T00:00:00Z","rating":5,"description":"Test Description","url":"Test URL","language":"Test Language","tags":[{"uuid":"1","name":"test Tag"}],"download_count":10},{"uuid":"1","title":"Test Title","direction":{"uuid":"1","name":"test direction"},"difficulty":"Test Difficulty","author":{"uuid":"1","full_name":"test Author"},"edition_date":"2000-01-01T00:00:00Z","rating":5,"description":"Test Description","url":"Test URL","language":"Test Language","tags":[{"uuid":"1","name":"test Tag"}],"download_count":10}]`),
+			expectedRequestBody: "[{\"uuid\":\"1\",\"title\":\"Test Title\",\"direction\":{\"uuid\":\"1\",\"name\":\"test Direction\"},\"difficulty\":\"Test Difficulty\",\"author\":{\"uuid\":\"1\",\"full_name\":\"test Author\"},\"edition_date\":\"2000-01-01T00:00:00Z\",\"rating\":5,\"description\":\"Test Description\",\"url\":\"Test URL\",\"language\":\"Test Language\",\"tags\":[{\"uuid\":\"1\",\"name\":\"test Tag\"}],\"download_count\":10},{\"uuid\":\"1\",\"title\":\"Test Title\",\"direction\":{\"uuid\":\"1\",\"name\":\"test Direction\"},\"difficulty\":\"Test Difficulty\",\"author\":{\"uuid\":\"1\",\"full_name\":\"test Author\"},\"edition_date\":\"2000-01-01T00:00:00Z\",\"rating\":5,\"description\":\"Test Description\",\"url\":\"Test URL\",\"language\":\"Test Language\",\"tags\":[{\"uuid\":\"1\",\"name\":\"test Tag\"}],\"download_count\":10}]\n",
 		},
 		{
 			name:   "OK empty input",
@@ -52,7 +52,7 @@ func TestArticleHandler_GetAll(t *testing.T) {
 				s.EXPECT().GetAll(ctx, limit, offset).Return([]*domain.Article{domain.TestArticle(), domain.TestArticle()}, nil)
 			},
 			expectedStatusCode:  200,
-			expectedRequestBody: fmt.Sprintln(`[{"uuid":"1","title":"Test Title","direction":{"uuid":"1","name":"test direction"},"difficulty":"Test Difficulty","author":{"uuid":"1","full_name":"test Author"},"edition_date":"2000-01-01T00:00:00Z","rating":5,"description":"Test Description","url":"Test URL","language":"Test Language","tags":[{"uuid":"1","name":"test Tag"}],"download_count":10},{"uuid":"1","title":"Test Title","direction":{"uuid":"1","name":"test direction"},"difficulty":"Test Difficulty","author":{"uuid":"1","full_name":"test Author"},"edition_date":"2000-01-01T00:00:00Z","rating":5,"description":"Test Description","url":"Test URL","language":"Test Language","tags":[{"uuid":"1","name":"test Tag"}],"download_count":10}]`),
+			expectedRequestBody: "[{\"uuid\":\"1\",\"title\":\"Test Title\",\"direction\":{\"uuid\":\"1\",\"name\":\"test Direction\"},\"difficulty\":\"Test Difficulty\",\"author\":{\"uuid\":\"1\",\"full_name\":\"test Author\"},\"edition_date\":\"2000-01-01T00:00:00Z\",\"rating\":5,\"description\":\"Test Description\",\"url\":\"Test URL\",\"language\":\"Test Language\",\"tags\":[{\"uuid\":\"1\",\"name\":\"test Tag\"}],\"download_count\":10},{\"uuid\":\"1\",\"title\":\"Test Title\",\"direction\":{\"uuid\":\"1\",\"name\":\"test Direction\"},\"difficulty\":\"Test Difficulty\",\"author\":{\"uuid\":\"1\",\"full_name\":\"test Author\"},\"edition_date\":\"2000-01-01T00:00:00Z\",\"rating\":5,\"description\":\"Test Description\",\"url\":\"Test URL\",\"language\":\"Test Language\",\"tags\":[{\"uuid\":\"1\",\"name\":\"test Tag\"}],\"download_count\":10}]\n",
 		},
 		{
 			name:   "OK invalid input",
@@ -64,7 +64,7 @@ func TestArticleHandler_GetAll(t *testing.T) {
 				s.EXPECT().GetAll(ctx, limit, offset).Return([]*domain.Article{domain.TestArticle(), domain.TestArticle()}, nil)
 			},
 			expectedStatusCode:  200,
-			expectedRequestBody: fmt.Sprintln(`[{"uuid":"1","title":"Test Title","direction":{"uuid":"1","name":"test direction"},"difficulty":"Test Difficulty","author":{"uuid":"1","full_name":"test Author"},"edition_date":"2000-01-01T00:00:00Z","rating":5,"description":"Test Description","url":"Test URL","language":"Test Language","tags":[{"uuid":"1","name":"test Tag"}],"download_count":10},{"uuid":"1","title":"Test Title","direction":{"uuid":"1","name":"test direction"},"difficulty":"Test Difficulty","author":{"uuid":"1","full_name":"test Author"},"edition_date":"2000-01-01T00:00:00Z","rating":5,"description":"Test Description","url":"Test URL","language":"Test Language","tags":[{"uuid":"1","name":"test Tag"}],"download_count":10}]`),
+			expectedRequestBody: "[{\"uuid\":\"1\",\"title\":\"Test Title\",\"direction\":{\"uuid\":\"1\",\"name\":\"test Direction\"},\"difficulty\":\"Test Difficulty\",\"author\":{\"uuid\":\"1\",\"full_name\":\"test Author\"},\"edition_date\":\"2000-01-01T00:00:00Z\",\"rating\":5,\"description\":\"Test Description\",\"url\":\"Test URL\",\"language\":\"Test Language\",\"tags\":[{\"uuid\":\"1\",\"name\":\"test Tag\"}],\"download_count\":10},{\"uuid\":\"1\",\"title\":\"Test Title\",\"direction\":{\"uuid\":\"1\",\"name\":\"test Direction\"},\"difficulty\":\"Test Difficulty\",\"author\":{\"uuid\":\"1\",\"full_name\":\"test Author\"},\"edition_date\":\"2000-01-01T00:00:00Z\",\"rating\":5,\"description\":\"Test Description\",\"url\":\"Test URL\",\"language\":\"Test Language\",\"tags\":[{\"uuid\":\"1\",\"name\":\"test Tag\"}],\"download_count\":10}]\n",
 		},
 		{
 			name:   "No rows in result",
@@ -191,7 +191,7 @@ func TestArticleHandler_GetByUUID(t *testing.T) {
 }
 
 func TestArticleHandler_Create(t *testing.T) {
-	type mockBehavior func(s *mock_service.MockArticleService, ctx context.Context, createArticleDTO domain.CreateArticleDTO)
+	type mockBehavior func(s *mock_service.MockArticleService, ctx context.Context, createArticleDTO *domain.CreateArticleDTO)
 
 	testTable := []struct {
 		name                string
@@ -205,11 +205,23 @@ func TestArticleHandler_Create(t *testing.T) {
 			name:             "OK",
 			ctx:              context.Background(),
 			createArticleDTO: domain.TestArticleCreateDTO(),
-			mockBehavior: func(s *mock_service.MockArticleService, ctx context.Context, createArticleDTO domain.CreateArticleDTO) {
+			mockBehavior: func(s *mock_service.MockArticleService, ctx context.Context, createArticleDTO *domain.CreateArticleDTO) {
+				createArticleDTO.URL = "load/article/1-Test Difficulty-file"
 				s.EXPECT().Create(ctx, createArticleDTO).Return("1", nil)
 			},
 			expectedStatusCode:  201,
-			expectedRequestBody: "Article created successfully. UUID: 1",
+			expectedRequestBody: "{\"infoMsg\":\"Article created successfully. UUID: 1\"}\n",
+		},
+		{
+			name:             "service error",
+			ctx:              context.Background(),
+			createArticleDTO: domain.TestArticleCreateDTO(),
+			mockBehavior: func(s *mock_service.MockArticleService, ctx context.Context, createArticleDTO *domain.CreateArticleDTO) {
+				createArticleDTO.URL = "load/article/1-Test Difficulty-file"
+				s.EXPECT().Create(ctx, createArticleDTO).Return("", errors.New("some service error"))
+			},
+			expectedStatusCode:  500,
+			expectedRequestBody: "{\"ErrorMsg\":\"error occurred while creating article into DB. err: some service error\"}\n",
 		},
 	}
 	for _, testCase := range testTable {
@@ -218,7 +230,7 @@ func TestArticleHandler_Create(t *testing.T) {
 			defer c.Finish()
 
 			service := mock_service.NewMockArticleService(c)
-			testCase.mockBehavior(service, testCase.ctx, *testCase.createArticleDTO)
+			testCase.mockBehavior(service, testCase.ctx, testCase.createArticleDTO)
 
 			ArticleHandler := NewArticleHandler(service, logging.GetLogger())
 
@@ -233,14 +245,14 @@ func TestArticleHandler_Create(t *testing.T) {
 			io.Copy(part, file)
 			defer file.Close()
 
-			writer.WriteField("title", "test title")
+			writer.WriteField("title", "Test Title")
 			writer.WriteField("direction_uuid", "1")
 			writer.WriteField("author_uuid", "1")
-			writer.WriteField("difficulty", "test difficulty")
-			writer.WriteField("edition_date", "2000-01-01 00:00:00 +0000 UTC")
-			writer.WriteField("description", "test description")
-			writer.WriteField("language", "test language")
-			writer.WriteField("tags_uuids", `[1]`)
+			writer.WriteField("difficulty", "Test Difficulty")
+			writer.WriteField("edition_date", "2000-01-01")
+			writer.WriteField("description", "Test Description")
+			writer.WriteField("language", "Test Language")
+			writer.WriteField("tags_uuids", `1`)
 
 			w := httptest.NewRecorder()
 
@@ -438,49 +450,48 @@ func TestArticleHandler_Update(t *testing.T) {
 	}
 }
 
-//func TestArticleHandler_Load(t *testing.T) {
-//	type mockBehavior func(s *mock_service.MockArticleService, ctx context.Context, uuid string)
-//
-//	testTable := []struct {
-//		name, uuid, input   string
-//		ctx                 context.Context
-//		mockBehavior        mockBehavior
-//		expectedStatusCode  int
-//		expectedRequestBody string
-//	}{
-//		{
-//			name:  "OK",
-//			input: "1",
-//			uuid:  "1",
-//			ctx:   context.Background(),
-//			mockBehavior: func(s *mock_service.MockArticleService, ctx context.Context, uuid string) {
-//				s.EXPECT().GetByUUID(ctx, uuid).Return(domain.TestArticle(), nil)
-//			},
-//			expectedStatusCode:  200,
-//			expectedRequestBody: fmt.Sprintln(`{"uuid":"1","title":"Test Title","direction":{"uuid":"1","name":"test direction"},"difficulty":"Test Difficulty","author":{"uuid":"1","full_name":"test Author"},"edition_date":"2000-01-01T00:00:00Z","rating":5,"description":"Test Description","url":"Test URL","language":"Test Language","tags":[{"uuid":"1","name":"test Tag"}],"download_count":10}`),
-//		},
-//	}
-//	for _, testCase := range testTable {
-//		t.Run(testCase.name, func(t *testing.T) {
-//			c := gomock.NewController(t)
-//			defer c.Finish()
-//
-//			service := mock_service.NewMockArticleService(c)
-//			testCase.mockBehavior(service, testCase.ctx, testCase.uuid)
-//
-//			ArticleHandler := NewArticleHandler(service, logging.GetLogger())
-//
-//			router := httprouter.New()
-//			ArticleHandler.Register(router)
-//
-//			w := httptest.NewRecorder()
-//
-//			req := httptest.NewRequest("GET", fmt.Sprintf("/article/%s", testCase.input), nil)
-//
-//			router.ServeHTTP(w, req)
-//
-//			assert.Equal(t, testCase.expectedStatusCode, w.Code)
-//			assert.Equal(t, testCase.expectedRequestBody, w.Body.String())
-//		})
-//	}
-//}
+func TestArticleHandler_Load(t *testing.T) {
+	type mockBehavior func(s *mock_service.MockArticleService, ctx context.Context, path string)
+
+	testTable := []struct {
+		name, url           string
+		ctx                 context.Context
+		mockBehavior        mockBehavior
+		expectedStatusCode  int
+		expectedRequestBody []byte
+	}{
+		{
+			name: "OK",
+			url:  "load-article-1-Test-Difficulty-file",
+			ctx:  context.Background(),
+			mockBehavior: func(s *mock_service.MockArticleService, ctx context.Context, path string) {
+				s.EXPECT().LoadLocalFIle(ctx, path).Return([]byte("some file"), nil)
+			},
+			expectedStatusCode:  200,
+			expectedRequestBody: nil,
+		},
+	}
+	for _, testCase := range testTable {
+		t.Run(testCase.name, func(t *testing.T) {
+			c := gomock.NewController(t)
+			defer c.Finish()
+
+			service := mock_service.NewMockArticleService(c)
+			testCase.mockBehavior(service, testCase.ctx, testCase.url)
+
+			ArticleHandler := NewArticleHandler(service, logging.GetLogger())
+
+			router := httprouter.New()
+			ArticleHandler.Register(router)
+
+			w := httptest.NewRecorder()
+
+			req := httptest.NewRequest("GET", fmt.Sprintf("/load/article/%s", testCase.url), nil)
+
+			router.ServeHTTP(w, req)
+
+			assert.Equal(t, testCase.expectedStatusCode, w.Code)
+			assert.Equal(t, testCase.expectedRequestBody, w.Body.String())
+		})
+	}
+}

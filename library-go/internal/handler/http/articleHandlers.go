@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/julienschmidt/httprouter"
-	"io/ioutil"
 	"library-go/internal/domain"
 	"library-go/internal/handler"
 	"library-go/internal/service"
@@ -14,7 +13,6 @@ import (
 	"library-go/pkg/logging"
 	"library-go/pkg/utils"
 	"net/http"
-	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -235,22 +233,13 @@ func (ah *articleHandler) Load(w http.ResponseWriter, r *http.Request, ps httpro
 
 	path := strings.Replace(url, "-", "/", -1)
 
-	file, err := os.Open(fmt.Sprintf("%s/%s", articleLocalStoragePath, path))
+	fileBytes, err := ah.Service.LoadLocalFIle(context.Background(), fmt.Sprintf("%s/%s", articleLocalStoragePath, path))
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		ah.logger.Errorf("error occurred while reading file. err: %v", err)
 		json.NewEncoder(w).Encode(JSON.Error{Msg: fmt.Sprintf("error occurred while reading file. err: %v", err)})
 		return
 	}
-	defer file.Close()
-
-	fileBytes, err := ioutil.ReadAll(file)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		ah.logger.Errorf("error occurred while reading file. err: %v", err)
-		json.NewEncoder(w).Encode(JSON.Error{Msg: fmt.Sprintf("error occurred while reading file. err: %v", err)})
-		return
-	}
-
+	w.WriteHeader(http.StatusOK)
 	w.Write(fileBytes)
 }

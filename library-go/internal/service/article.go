@@ -5,6 +5,7 @@ import (
 	"library-go/internal/domain"
 	"library-go/internal/store"
 	"library-go/pkg/logging"
+	"library-go/pkg/utils"
 )
 
 type articleService struct {
@@ -37,4 +38,8 @@ func (s *articleService) Create(ctx context.Context, article *domain.CreateArtic
 
 func (s *articleService) Update(ctx context.Context, article *domain.UpdateArticleDTO) error {
 	return s.storage.Update(article)
+}
+
+func (s *articleService) LoadLocalFIle(ctx context.Context, path string) ([]byte, error) {
+	return utils.LoadLocalFIle(path)
 }

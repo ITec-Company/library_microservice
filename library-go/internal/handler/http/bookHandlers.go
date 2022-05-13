@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/julienschmidt/httprouter"
-	"io/ioutil"
 	"library-go/internal/domain"
 	"library-go/internal/handler"
 	"library-go/internal/service"
@@ -14,7 +13,6 @@ import (
 	"library-go/pkg/logging"
 	"library-go/pkg/utils"
 	"net/http"
-	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -236,16 +234,7 @@ func (bh *bookHandler) Load(w http.ResponseWriter, r *http.Request, ps httproute
 
 	path := strings.Replace(url, "-", "/", -1)
 
-	file, err := os.Open(fmt.Sprintf("%s/%s", bookLocalStoragePath, path))
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		bh.logger.Errorf("error occurred while reading file. err: %v", err)
-		json.NewEncoder(w).Encode(JSON.Error{Msg: fmt.Sprintf("error occurred while reading file. err: %v", err)})
-		return
-	}
-	defer file.Close()
-
-	fileBytes, err := ioutil.ReadAll(file)
+	fileBytes, err := bh.Service.LoadLocalFIle(context.Background(), fmt.Sprintf("%s/%s", bookLocalStoragePath, path))
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		bh.logger.Errorf("error occurred while reading file. err: %v", err)

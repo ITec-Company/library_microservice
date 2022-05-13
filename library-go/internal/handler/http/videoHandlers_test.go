@@ -9,10 +9,13 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/julienschmidt/httprouter"
 	"github.com/stretchr/testify/assert"
+	"io"
 	"library-go/internal/domain"
 	mock_service "library-go/internal/service/mocks"
 	"library-go/pkg/logging"
+	"mime/multipart"
 	"net/http/httptest"
+	"os"
 	"testing"
 )
 
@@ -187,71 +190,82 @@ func TestVideoHandler_GetByUUID(t *testing.T) {
 	}
 }
 
-//func TestVideoHandler_Create(t *testing.T) {
-//	type mockBehavior func(s *mock_service.MockVideoService, ctx context.Context, createVideoDTO domain.CreateVideoDTO)
-//
-//	testTable := []struct {
-//		name                string
-//		ctx                 context.Context
-//		inputBody           func() *io.PipeReader
-//		mockBehavior        mockBehavior
-//		createVideoDTO      domain.CreateVideoDTO
-//		expectedStatusCode  int
-//		expectedRequestBody string
-//	}{
-//		{
-//			name: "OK",
-//			ctx:  context.Background(),
-//			inputBody: func() *io.PipeReader {
-//				pr, pw := io.Pipe()
-//				file, _ := os.CreateTemp("./", "test_file")
-//				defer file.Close()
-//				fileBytes, _ := ioutil.ReadAll(file)
-//				writer := multipart.NewWriter(pw)
-//				part, _ := writer.CreateFormFile("file", "video.pdf")
-//				part.Write(fileBytes)
-//				writer.WriteField("file", "test file")
-//				writer.WriteField("title", "test title")
-//				writer.WriteField("direction_uuid", "1")
-//				writer.WriteField("author_uuid", "1")
-//				writer.WriteField("difficulty", "test difficulty")
-//				writer.WriteField("edition_date", "test edition_date")
-//				writer.WriteField("description", "test description")
-//				writer.WriteField("language", "test language")
-//				writer.WriteField("tags_uuids", `{"1"}`)
-//				return pr
-//			},
-//			mockBehavior: func(s *mock_service.MockVideoService, ctx context.Context, createVideoDTO domain.CreateVideoDTO) {
-//				s.EXPECT().Create(ctx, createVideoDTO).Return("1", nil)
-//			},
-//			expectedStatusCode:  201,
-//			expectedRequestBody: "Video created successfully. UUID: 1",
-//		},
-//	}
-//	for _, testCase := range testTable {
-//		t.Run(testCase.name, func(t *testing.T) {
-//			c := gomock.NewController(t)
-//			defer c.Finish()
-//
-//			service := mock_service.NewMockVideoService(c)
-//			testCase.mockBehavior(service, testCase.ctx, testCase.createVideoDTO)
-//
-//			VideoHandler := NewVideoHandler(service, logging.GetLogger())
-//
-//			router := httprouter.New()
-//			VideoHandler.Register(router)
-//
-//			w := httptest.NewRecorder()
-//			req := httptest.NewRequest("POST", fmt.Sprintf("/video"), nil)
-//
-//			router.ServeHTTP(w, req)
-//
-//			assert.Equal(t, testCase.expectedStatusCode, w.Code)
-//			assert.Equal(t, testCase.expectedRequestBody, w.Body.String())
-//		})
-//	}
-//
-//}
+func TestVideoHandler_Create(t *testing.T) {
+	type mockBehavior func(s *mock_service.MockVideoService, ctx context.Context, createVideoDTO *domain.CreateVideoDTO)
+
+	testTable := []struct {
+		name                string
+		ctx                 context.Context
+		mockBehavior        mockBehavior
+		createVideoDTO      *domain.CreateVideoDTO
+		expectedStatusCode  int
+		expectedRequestBody string
+	}{
+		{
+			name:           "OK",
+			ctx:            context.Background(),
+			createVideoDTO: domain.TestVideoCreateDTO(),
+			mockBehavior: func(s *mock_service.MockVideoService, ctx context.Context, createVideoDTO *domain.CreateVideoDTO) {
+				createVideoDTO.URL = "load/video/1-Test Difficulty-file"
+				s.EXPECT().Create(ctx, createVideoDTO).Return("1", nil)
+			},
+			expectedStatusCode:  201,
+			expectedRequestBody: "{\"infoMsg\":\"Video created successfully. UUID: 1\"}\n",
+		},
+		{
+			name:           "service error",
+			ctx:            context.Background(),
+			createVideoDTO: domain.TestVideoCreateDTO(),
+			mockBehavior: func(s *mock_service.MockVideoService, ctx context.Context, createVideoDTO *domain.CreateVideoDTO) {
+				createVideoDTO.URL = "load/video/1-Test Difficulty-file"
+				s.EXPECT().Create(ctx, createVideoDTO).Return("", errors.New("some service error"))
+			},
+			expectedStatusCode:  500,
+			expectedRequestBody: "{\"ErrorMsg\":\"error occurred while creating video into DB. err: some service error\"}\n",
+		},
+	}
+	for _, testCase := range testTable {
+		t.Run(testCase.name, func(t *testing.T) {
+			c := gomock.NewController(t)
+			defer c.Finish()
+
+			service := mock_service.NewMockVideoService(c)
+			testCase.mockBehavior(service, testCase.ctx, testCase.createVideoDTO)
+
+			VideoHandler := NewVideoHandler(service, logging.GetLogger())
+
+			router := httprouter.New()
+			VideoHandler.Register(router)
+
+			body := bytes.Buffer{}
+			writer := multipart.NewWriter(&body)
+			file, _ := os.Open("test_file.txt")
+
+			part, _ := writer.CreateFormFile("file", "file")
+			io.Copy(part, file)
+			defer file.Close()
+
+			writer.WriteField("title", "Test Title")
+			writer.WriteField("direction_uuid", "1")
+			writer.WriteField("author_uuid", "1")
+			writer.WriteField("difficulty", "Test Difficulty")
+			writer.WriteField("language", "Test Language")
+			writer.WriteField("tags_uuids", `1`)
+
+			w := httptest.NewRecorder()
+
+			writer.Close()
+			req := httptest.NewRequest("POST", "/video", bytes.NewReader(body.Bytes()))
+			req.Header.Set("Content-Type", writer.FormDataContentType())
+
+			router.ServeHTTP(w, req)
+
+			assert.Equal(t, testCase.expectedStatusCode, w.Code)
+			assert.Equal(t, testCase.expectedRequestBody, w.Body.String())
+		})
+	}
+
+}
 
 func TestVideoHandler_Delete(t *testing.T) {
 	type mockBehavior func(s *mock_service.MockVideoService, ctx context.Context, uuid string)

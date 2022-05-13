@@ -107,6 +107,21 @@ func (mr *MockArticleServiceMockRecorder) Update(ctx, article interface{}) *gomo
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*MockArticleService)(nil).Update), ctx, article)
 }
 
+// LoadLocalFIle mocks base method
+func (m *MockArticleService) LoadLocalFIle(ctx context.Context, path string) ([]byte, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "LoadLocalFIle", ctx, path)
+	ret0, _ := ret[0].([]byte)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// LoadLocalFIle indicates an expected call of LoadLocalFIle
+func (mr *MockArticleServiceMockRecorder) LoadLocalFIle(ctx, path interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "LoadLocalFIle", reflect.TypeOf((*MockArticleService)(nil).LoadLocalFIle), ctx, path)
+}
+
 // MockAudioService is a mock of AudioService interface
 type MockAudioService struct {
 	ctrl     *gomock.Controller
@@ -201,6 +216,21 @@ func (m *MockAudioService) Update(ctx context.Context, audio *domain.UpdateAudio
 func (mr *MockAudioServiceMockRecorder) Update(ctx, audio interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*MockAudioService)(nil).Update), ctx, audio)
+}
+
+// LoadLocalFIle mocks base method
+func (m *MockAudioService) LoadLocalFIle(ctx context.Context, path string) ([]byte, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "LoadLocalFIle", ctx, path)
+	ret0, _ := ret[0].([]byte)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// LoadLocalFIle indicates an expected call of LoadLocalFIle
+func (mr *MockAudioServiceMockRecorder) LoadLocalFIle(ctx, path interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "LoadLocalFIle", reflect.TypeOf((*MockAudioService)(nil).LoadLocalFIle), ctx, path)
 }
 
 // MockAuthorService is a mock of AuthorService interface
@@ -393,6 +423,21 @@ func (m *MockBookService) Update(ctx context.Context, book *domain.UpdateBookDTO
 func (mr *MockBookServiceMockRecorder) Update(ctx, book interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*MockBookService)(nil).Update), ctx, book)
+}
+
+// LoadLocalFIle mocks base method
+func (m *MockBookService) LoadLocalFIle(ctx context.Context, path string) ([]byte, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "LoadLocalFIle", ctx, path)
+	ret0, _ := ret[0].([]byte)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// LoadLocalFIle indicates an expected call of LoadLocalFIle
+func (mr *MockBookServiceMockRecorder) LoadLocalFIle(ctx, path interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "LoadLocalFIle", reflect.TypeOf((*MockBookService)(nil).LoadLocalFIle), ctx, path)
 }
 
 // MockDirectionService is a mock of DirectionService interface

@@ -9,10 +9,13 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/julienschmidt/httprouter"
 	"github.com/stretchr/testify/assert"
+	"io"
 	"library-go/internal/domain"
 	mock_service "library-go/internal/service/mocks"
 	"library-go/pkg/logging"
+	"mime/multipart"
 	"net/http/httptest"
+	"os"
 	"testing"
 )
 
@@ -187,71 +190,82 @@ func TestAudioHandler_GetByUUID(t *testing.T) {
 	}
 }
 
-//func TestAudioHandler_Create(t *testing.T) {
-//	type mockBehavior func(s *mock_service.MockAudioService, ctx context.Context, createAudioDTO domain.CreateAudioDTO)
-//
-//	testTable := []struct {
-//		name                string
-//		ctx                 context.Context
-//		inputBody           func() *io.PipeReader
-//		mockBehavior        mockBehavior
-//		createAudioDTO      domain.CreateAudioDTO
-//		expectedStatusCode  int
-//		expectedRequestBody string
-//	}{
-//		{
-//			name: "OK",
-//			ctx:  context.Background(),
-//			inputBody: func() *io.PipeReader {
-//				pr, pw := io.Pipe()
-//				file, _ := os.CreateTemp("./", "test_file")
-//				defer file.Close()
-//				fileBytes, _ := ioutil.ReadAll(file)
-//				writer := multipart.NewWriter(pw)
-//				part, _ := writer.CreateFormFile("file", "audio.pdf")
-//				part.Write(fileBytes)
-//				writer.WriteField("file", "test file")
-//				writer.WriteField("title", "test title")
-//				writer.WriteField("direction_uuid", "1")
-//				writer.WriteField("author_uuid", "1")
-//				writer.WriteField("difficulty", "test difficulty")
-//				writer.WriteField("edition_date", "test edition_date")
-//				writer.WriteField("description", "test description")
-//				writer.WriteField("language", "test language")
-//				writer.WriteField("tags_uuids", `{"1"}`)
-//				return pr
-//			},
-//			mockBehavior: func(s *mock_service.MockAudioService, ctx context.Context, createAudioDTO domain.CreateAudioDTO) {
-//				s.EXPECT().Create(ctx, createAudioDTO).Return("1", nil)
-//			},
-//			expectedStatusCode:  201,
-//			expectedRequestBody: "Audio created successfully. UUID: 1",
-//		},
-//	}
-//	for _, testCase := range testTable {
-//		t.Run(testCase.name, func(t *testing.T) {
-//			c := gomock.NewController(t)
-//			defer c.Finish()
-//
-//			service := mock_service.NewMockAudioService(c)
-//			testCase.mockBehavior(service, testCase.ctx, testCase.createAudioDTO)
-//
-//			AudioHandler := NewAudioHandler(service, logging.GetLogger())
-//
-//			router := httprouter.New()
-//			AudioHandler.Register(router)
-//
-//			w := httptest.NewRecorder()
-//			req := httptest.NewRequest("POST", fmt.Sprintf("/audio"), nil)
-//
-//			router.ServeHTTP(w, req)
-//
-//			assert.Equal(t, testCase.expectedStatusCode, w.Code)
-//			assert.Equal(t, testCase.expectedRequestBody, w.Body.String())
-//		})
-//	}
-//
-//}
+func TestAudioHandler_Create(t *testing.T) {
+	type mockBehavior func(s *mock_service.MockAudioService, ctx context.Context, createAudioDTO *domain.CreateAudioDTO)
+
+	testTable := []struct {
+		name                string
+		ctx                 context.Context
+		mockBehavior        mockBehavior
+		createAudioDTO      *domain.CreateAudioDTO
+		expectedStatusCode  int
+		expectedRequestBody string
+	}{
+		{
+			name:           "OK",
+			ctx:            context.Background(),
+			createAudioDTO: domain.TestAudioCreateDTO(),
+			mockBehavior: func(s *mock_service.MockAudioService, ctx context.Context, createAudioDTO *domain.CreateAudioDTO) {
+				createAudioDTO.URL = "load/audio/1-Test Difficulty-file"
+				s.EXPECT().Create(ctx, createAudioDTO).Return("1", nil)
+			},
+			expectedStatusCode:  201,
+			expectedRequestBody: "{\"infoMsg\":\"Audio created successfully. UUID: 1\"}\n",
+		},
+		{
+			name:           "service error",
+			ctx:            context.Background(),
+			createAudioDTO: domain.TestAudioCreateDTO(),
+			mockBehavior: func(s *mock_service.MockAudioService, ctx context.Context, createAudioDTO *domain.CreateAudioDTO) {
+				createAudioDTO.URL = "load/audio/1-Test Difficulty-file"
+				s.EXPECT().Create(ctx, createAudioDTO).Return("", errors.New("some service error"))
+			},
+			expectedStatusCode:  500,
+			expectedRequestBody: "{\"ErrorMsg\":\"error occurred while creating audio into DB. err: some service error\"}\n",
+		},
+	}
+	for _, testCase := range testTable {
+		t.Run(testCase.name, func(t *testing.T) {
+			c := gomock.NewController(t)
+			defer c.Finish()
+
+			service := mock_service.NewMockAudioService(c)
+			testCase.mockBehavior(service, testCase.ctx, testCase.createAudioDTO)
+
+			AudioHandler := NewAudioHandler(service, logging.GetLogger())
+
+			router := httprouter.New()
+			AudioHandler.Register(router)
+
+			body := bytes.Buffer{}
+			writer := multipart.NewWriter(&body)
+			file, _ := os.Open("test_file.txt")
+
+			part, _ := writer.CreateFormFile("file", "file")
+			io.Copy(part, file)
+			defer file.Close()
+
+			writer.WriteField("title", "Test Title")
+			writer.WriteField("direction_uuid", "1")
+			writer.WriteField("author_uuid", "1")
+			writer.WriteField("difficulty", "Test Difficulty")
+			writer.WriteField("language", "Test Language")
+			writer.WriteField("tags_uuids", `1`)
+
+			w := httptest.NewRecorder()
+
+			writer.Close()
+			req := httptest.NewRequest("POST", "/audio", bytes.NewReader(body.Bytes()))
+			req.Header.Set("Content-Type", writer.FormDataContentType())
+
+			router.ServeHTTP(w, req)
+
+			assert.Equal(t, testCase.expectedStatusCode, w.Code)
+			assert.Equal(t, testCase.expectedRequestBody, w.Body.String())
+		})
+	}
+
+}
 
 func TestAudioHandler_Delete(t *testing.T) {
 	type mockBehavior func(s *mock_service.MockAudioService, ctx context.Context, uuid string)
