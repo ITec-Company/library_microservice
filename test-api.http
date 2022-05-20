@@ -5,14 +5,20 @@ GET http://localhost:1000/articles?limit=10&page=1
 Content-Type: application/json
 
 ### Get audios
-GET http://localhost:1000/audios?sort_by=uuid&sort_order=asc&limit=5&page=2
+GET http://localhost:1000/audios?sort_by=uuid&sort_order=desc&limit=5&page=2
 Content-Type: application/json
 
+// SQL injectiom detection
 ### Get videos
-GET http://localhost:1000/videos?filter=difficulty%3Amiddle
+GET http://localhost:1000/videos?filter=ALTER%20table%3Amiddle
 Content-Type: application/json
 
 ### Get books
 GET http://localhost:1000/books?limit=5&page=2
 Content-Type: application/json
 
+//image to book and article
+//read article in browser
+//sql injections -
+//query refactor
+//tests

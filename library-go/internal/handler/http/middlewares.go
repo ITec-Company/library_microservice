@@ -245,48 +245,75 @@ func (m *Middleware) sortAndFilters(next http.HandlerFunc) httprouter.Handle {
 		// Sorting
 
 		if sortBy := r.URL.Query().Get("sort_by"); sortBy != "" {
-			sortAndFilters.SortBy = sortBy
+			if err := utils.IsSQL(sortBy); err != nil {
+				m.logger.Errorf("sql injectin detected. Assign nil to value sort_by: %s", sortBy)
+				sortBy = ""
+			} else {
+				sortAndFilters.SortBy = sortBy
 
-			if so := r.URL.Query().Get("sort_order"); so != "" {
-				sortOrder := domain.Order(strings.ToLower(so))
-				if sortOrder == domain.OrderDESC || sortOrder == domain.OrderASC {
-					sortAndFilters.Order = sortOrder
-				} else {
-					m.logger.Errorf("sort oeder must be only 'asc' or 'desc'")
+				if so := r.URL.Query().Get("sort_order"); so != "" {
+					if err := utils.IsSQL(so); err != nil {
+						m.logger.Errorf("sql injectin detected. Assign nil to value sort_order: %s", so)
+						so = ""
+					} else {
+						sortOrder := domain.Order(strings.ToLower(so))
+						if sortOrder == domain.OrderDESC || sortOrder == domain.OrderASC {
+							sortAndFilters.Order = sortOrder
+						} else {
+							m.logger.Errorf("sort oeder must be only 'asc' or 'desc'")
+						}
+					}
+
 				}
 			}
 		}
 
 		// Filters filer:1,2,3,|filter2:2,4,5
 		if filters := r.URL.Query().Get("filter"); filters != "" {
-			filtersMap := make(map[string]interface{})
-			filtersSplit := strings.Split(filters, "|")
-			for _, s := range filtersSplit {
-				filterAndArgs := strings.Split(s, ":")
-				filter := filterAndArgs[0]
-				args := strings.Split(filterAndArgs[1], ",")
-				filtersMap[filter] = args
+			if err := utils.IsSQL(filters); err != nil {
+				m.logger.Errorf("sql injectin detected. Assign nil to value filters: %s", filters)
+				filters = ""
+			} else {
+				filtersMap := make(map[string]interface{})
+				filtersSplit := strings.Split(filters, "|")
+				for _, s := range filtersSplit {
+					filterAndArgs := strings.Split(s, ":")
+					filter := filterAndArgs[0]
+					args := strings.Split(filterAndArgs[1], ",")
+					filtersMap[filter] = args
+				}
+				sortAndFilters.FiltersAndArgs = filtersMap
 			}
-			sortAndFilters.FiltersAndArgs = filtersMap
 		}
 
 		if limitStr := r.URL.Query().Get("limit"); limitStr != "" {
-			limit, err := strconv.ParseUint(limitStr, 10, 64)
-			if err != nil {
+			if err := utils.IsSQL(limitStr); err != nil {
+				m.logger.Errorf("sql injectin detected. Assign defailt value to limit: %s", limitStr)
 				sortAndFilters.Limit = defaultLimit
-				m.logger.Errorf("limit was assigned with default value %d cause error occured while converting input value to string. err: %v", defaultLimit, err)
 			} else {
-				sortAndFilters.Limit = limit
-			}
-			if pageStr := r.URL.Query().Get("page"); pageStr != "" {
-				page, err := strconv.ParseUint(pageStr, 10, 64)
+				limit, err := strconv.ParseUint(limitStr, 10, 64)
 				if err != nil {
-					sortAndFilters.Page = 1
-					m.logger.Errorf("page was assigned with value 0 cause error occured while converting input value to string. err: %v", err)
+					sortAndFilters.Limit = defaultLimit
+					m.logger.Errorf("limit was assigned with default value %d cause error occured while converting input value to string. err: %v", defaultLimit, err)
 				} else {
-					sortAndFilters.Page = page
+					sortAndFilters.Limit = limit
+				}
+				if pageStr := r.URL.Query().Get("page"); pageStr != "" {
+					if err := utils.IsSQL(pageStr); err != nil {
+						m.logger.Errorf("sql injectin detected. Assign 1 to value page: %s", pageStr)
+						sortAndFilters.Page = 1
+					} else {
+						page, err := strconv.ParseUint(pageStr, 10, 64)
+						if err != nil {
+							sortAndFilters.Page = 1
+							m.logger.Errorf("page was assigned with value 0 cause error occured while converting input value to string. err: %v", err)
+						} else {
+							sortAndFilters.Page = page
+						}
+					}
 				}
 			}
+
 		}
 
 		r = r.WithContext(context.WithValue(r.Context(), CtxKeySortAndFilters, sortAndFilters))
