@@ -10,7 +10,7 @@ import (
 )
 
 func Run() {
-	logger := logging.GetLogger()
+	logger := logging.GetLogger("../../logs", "all.log")
 
 	logger.Info("Initializing config...")
 	config := Config{}

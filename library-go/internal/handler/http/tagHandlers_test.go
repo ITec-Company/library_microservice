@@ -84,7 +84,7 @@ func TestTagHandler_GetAll(t *testing.T) {
 			service := mock_service.NewMockTagService(c)
 			testCase.mockBehavior(service, testCase.ctx, testCase.limit, testCase.offset)
 
-			logger := logging.GetLogger()
+			logger := logging.GetLogger("../../../../logs", "test.log")
 			middleware := NewMiddlewares(logger)
 			TagHandler := NewTagHandler(service, logger, &middleware)
 
@@ -172,7 +172,7 @@ func TestTagHandler_GetByUUID(t *testing.T) {
 			service := mock_service.NewMockTagService(c)
 			testCase.mockBehavior(service, testCase.ctx, testCase.uuid)
 
-			logger := logging.GetLogger()
+			logger := logging.GetLogger("../../../../logs", "test.log")
 			middleware := NewMiddlewares(logger)
 			TagHandler := NewTagHandler(service, logger, &middleware)
 
@@ -261,7 +261,7 @@ func TestTagHandler_GetManyByUUIDs(t *testing.T) {
 			service := mock_service.NewMockTagService(c)
 			testCase.mockBehavior(service, testCase.ctx, testCase.uuids)
 
-			logger := logging.GetLogger()
+			logger := logging.GetLogger("../../../../logs", "test.log")
 			middleware := NewMiddlewares(logger)
 			TagHandler := NewTagHandler(service, logger, &middleware)
 
@@ -327,7 +327,7 @@ func TestTagHandler_Create(t *testing.T) {
 			service := mock_service.NewMockTagService(c)
 			testCase.mockBehavior(service, testCase.ctx, testCase.dto)
 
-			logger := logging.GetLogger()
+			logger := logging.GetLogger("../../../../logs", "test.log")
 			middleware := NewMiddlewares(logger)
 			TagHandler := NewTagHandler(service, logger, &middleware)
 
@@ -416,7 +416,7 @@ func TestTagHandler_Delete(t *testing.T) {
 			service := mock_service.NewMockTagService(c)
 			testCase.mockBehavior(service, testCase.ctx, testCase.uuid)
 
-			logger := logging.GetLogger()
+			logger := logging.GetLogger("../../../../logs", "test.log")
 			middleware := NewMiddlewares(logger)
 			TagHandler := NewTagHandler(service, logger, &middleware)
 
@@ -493,7 +493,7 @@ func TestTagHandler_Update(t *testing.T) {
 			service := mock_service.NewMockTagService(c)
 			testCase.mockBehavior(service, testCase.ctx, &testCase.dto)
 
-			logger := logging.GetLogger()
+			logger := logging.GetLogger("../../../../logs", "test.log")
 			middleware := NewMiddlewares(logger)
 			TagHandler := NewTagHandler(service, logger, &middleware)
 

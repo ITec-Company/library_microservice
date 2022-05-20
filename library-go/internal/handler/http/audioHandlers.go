@@ -116,7 +116,7 @@ func (ah *audioHandler) Create() http.Handler {
 		createAudioDTO.TagsUUIDs = strings.Split(data["tags_uuids"].(string), ",")
 
 		fileName := data["fileName"].(string)
-		createAudioDTO.URL = fmt.Sprintf("%s?url=%s", loadBookURL, fileName)
+		createAudioDTO.URL = fmt.Sprintf("%s?url=%s", loadAudioURL, fileName)
 
 		err := ah.Service.Save(context.Background(), audioLocalStoragePath, fileName, file)
 		if err != nil {

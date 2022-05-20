@@ -11,7 +11,7 @@ import (
 )
 
 func TestAuthorStorage_GetOne(t *testing.T) {
-	logger := logging.GetLogger()
+	logger := logging.GetLogger("../../../../logs", "test.log")
 	db, mock, err := sqlmock.New()
 	if err != nil {
 		logger.Fatal(err)
@@ -66,7 +66,7 @@ func TestAuthorStorage_GetOne(t *testing.T) {
 }
 
 func TestAuthorStorage_GetAll(t *testing.T) {
-	logger := logging.GetLogger()
+	logger := logging.GetLogger("../../../../logs", "test.log")
 	db, mock, err := sqlmock.New()
 	if err != nil {
 		logger.Fatal(err)
@@ -122,7 +122,7 @@ func TestAuthorStorage_GetAll(t *testing.T) {
 }
 
 func TestAuthorStorage_Create(t *testing.T) {
-	logger := logging.GetLogger()
+	logger := logging.GetLogger("../../../../logs", "test.log")
 	db, mock, err := sqlmock.New()
 	if err != nil {
 		logger.Fatal(err)
@@ -177,7 +177,7 @@ func TestAuthorStorage_Create(t *testing.T) {
 }
 
 func TestAuthorStorage_Delete(t *testing.T) {
-	logger := logging.GetLogger()
+	logger := logging.GetLogger("../../../../logs", "test.log")
 	db, mock, err := sqlmock.New()
 	if err != nil {
 		logger.Fatal(err)
@@ -239,7 +239,7 @@ func TestAuthorStorage_Delete(t *testing.T) {
 }
 
 func TestAuthorStorage_Update(t *testing.T) {
-	logger := logging.GetLogger()
+	logger := logging.GetLogger("../../../../logs", "test.log")
 	db, mock, err := sqlmock.New()
 	if err != nil {
 		logger.Fatal(err)

@@ -117,7 +117,7 @@ func (vh *videoHandler) Create() http.Handler {
 		createVideoDTO.TagsUUIDs = strings.Split(data["tags_uuids"].(string), ",")
 
 		fileName := data["fileName"].(string)
-		createVideoDTO.URL = fmt.Sprintf("%s?url=%s", loadBookURL, fileName)
+		createVideoDTO.URL = fmt.Sprintf("%s?url=%s", loadVideoURL, fileName)
 
 		err := vh.Service.Save(context.Background(), videoLocalStoragePath, fileName, file)
 		if err != nil {

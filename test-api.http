@@ -16,5 +16,3 @@ Content-Type: application/json
 GET http://localhost:1000/books?limit=5&page=2
 Content-Type: application/json
 
-//pages count
-

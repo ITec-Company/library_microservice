@@ -13,7 +13,7 @@ import (
 )
 
 func TestBookStorage_GetOne(t *testing.T) {
-	logger := logging.GetLogger()
+	logger := logging.GetLogger("../../../../logs", "test.log")
 	db, mock, err := sqlmock.New()
 	if err != nil {
 		logger.Fatal(err)
@@ -68,7 +68,7 @@ func TestBookStorage_GetOne(t *testing.T) {
 }
 
 func TestBookStorage_GetAll(t *testing.T) {
-	logger := logging.GetLogger()
+	logger := logging.GetLogger("../../../../logs", "test.log")
 	db, mock, err := sqlmock.New()
 	if err != nil {
 		logger.Fatal(err)
@@ -124,7 +124,7 @@ func TestBookStorage_GetAll(t *testing.T) {
 }
 
 func TestBookStorage_Create(t *testing.T) {
-	logger := logging.GetLogger()
+	logger := logging.GetLogger("../../../../logs", "test.log")
 	db, mock, err := sqlmock.New()
 	if err != nil {
 		logger.Fatal(err)
@@ -179,7 +179,7 @@ func TestBookStorage_Create(t *testing.T) {
 }
 
 func TestBookStorage_Delete(t *testing.T) {
-	logger := logging.GetLogger()
+	logger := logging.GetLogger("../../../../logs", "test.log")
 	db, mock, err := sqlmock.New()
 	if err != nil {
 		logger.Fatal(err)
@@ -241,7 +241,7 @@ func TestBookStorage_Delete(t *testing.T) {
 }
 
 func TestBookStorage_Update(t *testing.T) {
-	logger := logging.GetLogger()
+	logger := logging.GetLogger("../../../../logs", "test.log")
 	db, mock, err := sqlmock.New()
 	if err != nil {
 		logger.Fatal(err)

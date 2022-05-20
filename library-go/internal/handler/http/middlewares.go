@@ -184,7 +184,7 @@ func (m *Middleware) createVideo(next http.Handler) httprouter.Handle {
 		}
 
 		data["title"] = strings.Replace(data["title"].(string), " ", "_", -1)
-		data["fileName"] = fmt.Sprintf("author(%s)-title(%s).%s", data["author_uuid"].(string), data["title"].(string), kind.Extension)
+		data["fileName"] = fmt.Sprintf("title(%s).%s", data["title"].(string), kind.Extension)
 
 		next.ServeHTTP(w, r.WithContext(context.WithValue(context.Background(), CtxKeyCreateVideo, data)))
 	}
@@ -211,7 +211,9 @@ func (m *Middleware) createAudio(next http.Handler) httprouter.Handle {
 		}
 
 		file := data["file"].(*bytes.Buffer)
-
+		if file != nil {
+			m.logger.Errorf("file is not nil %v", file)
+		}
 		if !filetype.IsAudio(file.Bytes()) {
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusBadRequest)
@@ -230,7 +232,7 @@ func (m *Middleware) createAudio(next http.Handler) httprouter.Handle {
 		}
 
 		data["title"] = strings.Replace(data["title"].(string), " ", "_", -1)
-		data["fileName"] = fmt.Sprintf("author(%s)-title(%s).%s", data["author_uuid"].(string), data["title"].(string), kind.Extension)
+		data["fileName"] = fmt.Sprintf("title(%s).%s", data["title"].(string), kind.Extension)
 
 		next.ServeHTTP(w, r.WithContext(context.WithValue(context.Background(), CtxKeyCreateAudio, data)))
 	}

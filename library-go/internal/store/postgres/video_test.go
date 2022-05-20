@@ -12,7 +12,7 @@ import (
 )
 
 func TestVideoStorage_GetOne(t *testing.T) {
-	logger := logging.GetLogger()
+	logger := logging.GetLogger("../../../../logs", "test.log")
 	db, mock, err := sqlmock.New()
 	if err != nil {
 		logger.Fatal(err)
@@ -67,7 +67,7 @@ func TestVideoStorage_GetOne(t *testing.T) {
 }
 
 func TestVideoStorage_GetAll(t *testing.T) {
-	logger := logging.GetLogger()
+	logger := logging.GetLogger("../../../../logs", "test.log")
 	db, mock, err := sqlmock.New()
 	if err != nil {
 		logger.Fatal(err)
@@ -123,7 +123,7 @@ func TestVideoStorage_GetAll(t *testing.T) {
 }
 
 func TestVideoStorage_Create(t *testing.T) {
-	logger := logging.GetLogger()
+	logger := logging.GetLogger("../../../../logs", "test.log")
 	db, mock, err := sqlmock.New()
 	if err != nil {
 		logger.Fatal(err)
@@ -178,7 +178,7 @@ func TestVideoStorage_Create(t *testing.T) {
 }
 
 func TestVideoStorage_Delete(t *testing.T) {
-	logger := logging.GetLogger()
+	logger := logging.GetLogger("../../../../logs", "test.log")
 	db, mock, err := sqlmock.New()
 	if err != nil {
 		logger.Fatal(err)
@@ -240,7 +240,7 @@ func TestVideoStorage_Delete(t *testing.T) {
 }
 
 func TestVideoStorage_Update(t *testing.T) {
-	logger := logging.GetLogger()
+	logger := logging.GetLogger("../../../../logs", "test.log")
 	db, mock, err := sqlmock.New()
 	if err != nil {
 		logger.Fatal(err)

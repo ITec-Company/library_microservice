@@ -84,7 +84,7 @@ func TestAuthorHandler_GetAll(t *testing.T) {
 			service := mock_service.NewMockAuthorService(c)
 			testCase.mockBehavior(service, testCase.ctx, testCase.limit, testCase.offset)
 
-			logger := logging.GetLogger()
+			logger := logging.GetLogger("../../../../logs", "test.log")
 			middleware := NewMiddlewares(logger)
 			AuthorHandler := NewAuthorHandler(service, logger, &middleware)
 
@@ -172,7 +172,7 @@ func TestAuthorHandler_GetByUUID(t *testing.T) {
 			service := mock_service.NewMockAuthorService(c)
 			testCase.mockBehavior(service, testCase.ctx, testCase.uuid)
 
-			logger := logging.GetLogger()
+			logger := logging.GetLogger("../../../../logs", "test.log")
 			middleware := NewMiddlewares(logger)
 			AuthorHandler := NewAuthorHandler(service, logger, &middleware)
 
@@ -238,7 +238,7 @@ func TestAuthorHandler_Create(t *testing.T) {
 			service := mock_service.NewMockAuthorService(c)
 			testCase.mockBehavior(service, testCase.ctx, testCase.dto)
 
-			logger := logging.GetLogger()
+			logger := logging.GetLogger("../../../../logs", "test.log")
 			middleware := NewMiddlewares(logger)
 			AuthorHandler := NewAuthorHandler(service, logger, &middleware)
 
@@ -327,7 +327,7 @@ func TestAuthorHandler_Delete(t *testing.T) {
 			service := mock_service.NewMockAuthorService(c)
 			testCase.mockBehavior(service, testCase.ctx, testCase.uuid)
 
-			logger := logging.GetLogger()
+			logger := logging.GetLogger("../../../../logs", "test.log")
 			middleware := NewMiddlewares(logger)
 			AuthorHandler := NewAuthorHandler(service, logger, &middleware)
 
@@ -404,7 +404,7 @@ func TestAuthorHandler_Update(t *testing.T) {
 			service := mock_service.NewMockAuthorService(c)
 			testCase.mockBehavior(service, testCase.ctx, &testCase.dto)
 
-			logger := logging.GetLogger()
+			logger := logging.GetLogger("../../../../logs", "test.log")
 			middleware := NewMiddlewares(logger)
 			AuthorHandler := NewAuthorHandler(service, logger, &middleware)
 

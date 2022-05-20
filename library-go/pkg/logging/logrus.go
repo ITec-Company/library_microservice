@@ -37,9 +37,9 @@ type Logger struct {
 }
 
 // GetLogger ...
-func GetLogger() *Logger {
-	return &Logger{e}
-}
+//func GetLogger() *Logger {
+//	return &Logger{e}
+//}
 
 // GetLoggerWithField ...
 func (l *Logger) GetLoggerWithField(k string, v interface{}) Logger {
@@ -47,7 +47,41 @@ func (l *Logger) GetLoggerWithField(k string, v interface{}) Logger {
 }
 
 // Init ...
-func init() {
+//func init() {
+//	l := logrus.New()
+//	l.SetReportCaller(true)
+//	l.Formatter = &logrus.TextFormatter{
+//		CallerPrettyfier: func(f *runtime.Frame) (function string, file string) {
+//			return fmt.Sprintf(f.Function), fmt.Sprintf("%s:%d", path.Base(f.File), f.Line) // return File name (path.Base(f.File)) and File line
+//		},
+//		ForceColors:   true,
+//		FullTimestamp: true,
+//	}
+//
+//	err := os.MkdirAll("../../logs", 0644)
+//
+//	if err != nil || os.IsExist(err) {
+//		panic("can't create log dir. no configured logging to files")
+//	} else {
+//		allFile, err := os.OpenFile("../../logs/all.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0660)
+//		if err != nil {
+//			panic(fmt.Sprintf("[Message]: %s", err))
+//		}
+//
+//		l.SetOutput(allFile)
+//
+//		l.AddHook(&writerHook{
+//			Writer:    []io.Writer{allFile, os.Stdout},
+//			LogLevels: logrus.AllLevels,
+//		})
+//	}
+//
+//	l.SetLevel(logrus.TraceLevel)
+//
+//	e = logrus.NewEntry(l)
+//}
+
+func GetLogger(localPath, fileName string) *Logger {
 	l := logrus.New()
 	l.SetReportCaller(true)
 	l.Formatter = &logrus.TextFormatter{
@@ -58,12 +92,12 @@ func init() {
 		FullTimestamp: true,
 	}
 
-	err := os.MkdirAll("../../logs", 0644)
+	err := os.MkdirAll(localPath, 0644)
 
 	if err != nil || os.IsExist(err) {
 		panic("can't create log dir. no configured logging to files")
 	} else {
-		allFile, err := os.OpenFile("../../logs/all.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0660)
+		allFile, err := os.OpenFile(fmt.Sprintf("%s/%s", localPath, fileName), os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0660)
 		if err != nil {
 			panic(fmt.Sprintf("[Message]: %s", err))
 		}
@@ -79,4 +113,6 @@ func init() {
 	l.SetLevel(logrus.TraceLevel)
 
 	e = logrus.NewEntry(l)
+	logger := Logger{e}
+	return &logger
 }

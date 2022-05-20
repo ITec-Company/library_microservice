@@ -84,7 +84,7 @@ func TestReviewHandler_GetAll(t *testing.T) {
 			service := mock_service.NewMockReviewService(c)
 			testCase.mockBehavior(service, testCase.ctx, testCase.limit, testCase.offset)
 
-			logger := logging.GetLogger()
+			logger := logging.GetLogger("../../../../logs", "test.log")
 			middleware := NewMiddlewares(logger)
 			ReviewHandler := NewReviewHandler(service, logger, &middleware)
 
@@ -172,7 +172,7 @@ func TestReviewHandler_GetByUUID(t *testing.T) {
 			service := mock_service.NewMockReviewService(c)
 			testCase.mockBehavior(service, testCase.ctx, testCase.uuid)
 
-			logger := logging.GetLogger()
+			logger := logging.GetLogger("../../../../logs", "test.log")
 			middleware := NewMiddlewares(logger)
 			ReviewHandler := NewReviewHandler(service, logger, &middleware)
 
@@ -244,7 +244,7 @@ func TestReviewHandler_Create(t *testing.T) {
 			service := mock_service.NewMockReviewService(c)
 			testCase.mockBehavior(service, testCase.ctx, testCase.dto)
 
-			logger := logging.GetLogger()
+			logger := logging.GetLogger("../../../../logs", "test.log")
 			middleware := NewMiddlewares(logger)
 			ReviewHandler := NewReviewHandler(service, logger, &middleware)
 
@@ -333,7 +333,7 @@ func TestReviewHandler_Delete(t *testing.T) {
 			service := mock_service.NewMockReviewService(c)
 			testCase.mockBehavior(service, testCase.ctx, testCase.uuid)
 
-			logger := logging.GetLogger()
+			logger := logging.GetLogger("../../../../logs", "test.log")
 			middleware := NewMiddlewares(logger)
 			ReviewHandler := NewReviewHandler(service, logger, &middleware)
 
@@ -414,7 +414,7 @@ func TestReviewHandler_Update(t *testing.T) {
 			service := mock_service.NewMockReviewService(c)
 			testCase.mockBehavior(service, testCase.ctx, &testCase.dto)
 
-			logger := logging.GetLogger()
+			logger := logging.GetLogger("../../../../logs", "test.log")
 			middleware := NewMiddlewares(logger)
 			ReviewHandler := NewReviewHandler(service, logger, &middleware)
 

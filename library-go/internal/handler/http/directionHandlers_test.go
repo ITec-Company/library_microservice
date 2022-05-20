@@ -84,7 +84,7 @@ func TestDirectionHandler_GetAll(t *testing.T) {
 			service := mock_service.NewMockDirectionService(c)
 			testCase.mockBehavior(service, testCase.ctx, testCase.limit, testCase.offset)
 
-			logger := logging.GetLogger()
+			logger := logging.GetLogger("../../../../logs", "test.log")
 			middleware := NewMiddlewares(logger)
 			DirectionHandler := NewDirectionHandler(service, logger, &middleware)
 
@@ -172,7 +172,7 @@ func TestDirectionHandler_GetByUUID(t *testing.T) {
 			service := mock_service.NewMockDirectionService(c)
 			testCase.mockBehavior(service, testCase.ctx, testCase.uuid)
 
-			logger := logging.GetLogger()
+			logger := logging.GetLogger("../../../../logs", "test.log")
 			middleware := NewMiddlewares(logger)
 			DirectionHandler := NewDirectionHandler(service, logger, &middleware)
 
@@ -238,7 +238,7 @@ func TestDirectionHandler_Create(t *testing.T) {
 			service := mock_service.NewMockDirectionService(c)
 			testCase.mockBehavior(service, testCase.ctx, testCase.dto)
 
-			logger := logging.GetLogger()
+			logger := logging.GetLogger("../../../../logs", "test.log")
 			middleware := NewMiddlewares(logger)
 			DirectionHandler := NewDirectionHandler(service, logger, &middleware)
 
@@ -327,7 +327,7 @@ func TestDirectionHandler_Delete(t *testing.T) {
 			service := mock_service.NewMockDirectionService(c)
 			testCase.mockBehavior(service, testCase.ctx, testCase.uuid)
 
-			logger := logging.GetLogger()
+			logger := logging.GetLogger("../../../../logs", "test.log")
 			middleware := NewMiddlewares(logger)
 			DirectionHandler := NewDirectionHandler(service, logger, &middleware)
 
@@ -404,7 +404,7 @@ func TestDirectionHandler_Update(t *testing.T) {
 			service := mock_service.NewMockDirectionService(c)
 			testCase.mockBehavior(service, testCase.ctx, &testCase.dto)
 
-			logger := logging.GetLogger()
+			logger := logging.GetLogger("../../../../logs", "test.log")
 			middleware := NewMiddlewares(logger)
 			DirectionHandler := NewDirectionHandler(service, logger, &middleware)
 

@@ -12,7 +12,7 @@ import (
 )
 
 func TestTagStorage_GetOne(t *testing.T) {
-	logger := logging.GetLogger()
+	logger := logging.GetLogger("../../../../logs", "test.log")
 	db, mock, err := sqlmock.New()
 	if err != nil {
 		logger.Fatal(err)
@@ -67,7 +67,7 @@ func TestTagStorage_GetOne(t *testing.T) {
 }
 
 func TestTagStorage_GetMany(t *testing.T) {
-	logger := logging.GetLogger()
+	logger := logging.GetLogger("../../../../logs", "test.log")
 	db, mock, err := sqlmock.New()
 	if err != nil {
 		logger.Fatal(err)
@@ -123,7 +123,7 @@ func TestTagStorage_GetMany(t *testing.T) {
 }
 
 func TestTagStorage_GetAll(t *testing.T) {
-	logger := logging.GetLogger()
+	logger := logging.GetLogger("../../../../logs", "test.log")
 	db, mock, err := sqlmock.New()
 	if err != nil {
 		logger.Fatal(err)
@@ -179,7 +179,7 @@ func TestTagStorage_GetAll(t *testing.T) {
 }
 
 func TestTagStorage_Create(t *testing.T) {
-	logger := logging.GetLogger()
+	logger := logging.GetLogger("../../../../logs", "test.log")
 	db, mock, err := sqlmock.New()
 	if err != nil {
 		logger.Fatal(err)
@@ -234,7 +234,7 @@ func TestTagStorage_Create(t *testing.T) {
 }
 
 func TestTagStorage_Delete(t *testing.T) {
-	logger := logging.GetLogger()
+	logger := logging.GetLogger("../../../../logs", "test.log")
 	db, mock, err := sqlmock.New()
 	if err != nil {
 		logger.Fatal(err)
@@ -296,7 +296,7 @@ func TestTagStorage_Delete(t *testing.T) {
 }
 
 func TestTagStorage_Update(t *testing.T) {
-	logger := logging.GetLogger()
+	logger := logging.GetLogger("../../../../logs", "test.log")
 	db, mock, err := sqlmock.New()
 	if err != nil {
 		logger.Fatal(err)

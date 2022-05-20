@@ -12,7 +12,7 @@ import (
 )
 
 func TestAudioStorage_GetOne(t *testing.T) {
-	logger := logging.GetLogger()
+	logger := logging.GetLogger("../../../../logs", "test.log")
 	db, mock, err := sqlmock.New()
 	if err != nil {
 		logger.Fatal(err)
@@ -67,7 +67,7 @@ func TestAudioStorage_GetOne(t *testing.T) {
 }
 
 func TestAudioStorage_GetAll(t *testing.T) {
-	logger := logging.GetLogger()
+	logger := logging.GetLogger("../../../../logs", "test.log")
 	db, mock, err := sqlmock.New()
 	if err != nil {
 		logger.Fatal(err)
@@ -123,7 +123,7 @@ func TestAudioStorage_GetAll(t *testing.T) {
 }
 
 func TestAudioStorage_Create(t *testing.T) {
-	logger := logging.GetLogger()
+	logger := logging.GetLogger("../../../../logs", "test.log")
 	db, mock, err := sqlmock.New()
 	if err != nil {
 		logger.Fatal(err)
@@ -178,7 +178,7 @@ func TestAudioStorage_Create(t *testing.T) {
 }
 
 func TestAudioStorage_Delete(t *testing.T) {
-	logger := logging.GetLogger()
+	logger := logging.GetLogger("../../../../logs", "test.log")
 	db, mock, err := sqlmock.New()
 	if err != nil {
 		logger.Fatal(err)
@@ -240,7 +240,7 @@ func TestAudioStorage_Delete(t *testing.T) {
 }
 
 func TestAudioStorage_Update(t *testing.T) {
-	logger := logging.GetLogger()
+	logger := logging.GetLogger("../../../../logs", "test.log")
 	db, mock, err := sqlmock.New()
 	if err != nil {
 		logger.Fatal(err)
