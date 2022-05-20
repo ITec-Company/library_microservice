@@ -42,7 +42,7 @@ func NewAudioHandler(service service.AudioService, logger *logging.Logger, middl
 }
 
 func (ah *audioHandler) Register(router *httprouter.Router) {
-	router.GET(getAllAudiosURL, ah.GetAll)
+	router.GET(getAllAudiosURL, ah.Middleware.sortAndFilters(ah.GetAll()))
 	router.GET(getAudioByUUIDURL, ah.GetByUUID)
 	router.POST(createAudioURL, ah.Middleware.createAudio(ah.Create()))
 	router.DELETE(deleteAudioURL, ah.Delete)
@@ -50,30 +50,22 @@ func (ah *audioHandler) Register(router *httprouter.Router) {
 	router.GET(loadAudioURL, ah.Load)
 }
 
-func (ah *audioHandler) GetAll(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	w.Header().Set("Content-Type", "application/json")
+func (ah *audioHandler) GetAll() http.HandlerFunc {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
 
-	limit, err := strconv.Atoi(r.URL.Query().Get("limit"))
-	if err != nil || limit < 0 {
-		limit = 0
-		ah.logger.Debugf("error occurred while parsing limit. err: %v. Assigning '0' to limit", err)
-	}
+		sortingOptions := r.Context().Value(CtxKeySortAndFilters).(domain.SortFilterPagination)
 
-	offset, err := strconv.Atoi(r.URL.Query().Get("offset"))
-	if err != nil || offset < 0 {
-		offset = 0
-		ah.logger.Debugf("error occurred while parsing offset. err: %v. Assigning '0' to offset", err)
-	}
+		audios, err := ah.Service.GetAll(&sortingOptions)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			json.NewEncoder(w).Encode(JSON.Error{Msg: fmt.Sprintf("error occurred while getting all audios. err: %v", err)})
+			return
+		}
 
-	audios, err := ah.Service.GetAll(context.Background(), limit, offset)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(JSON.Error{Msg: fmt.Sprintf("error occurred while getting all audios. err: %v", err)})
-		return
-	}
-
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(audios)
+		w.WriteHeader(http.StatusOK)
+		json.NewEncoder(w).Encode(audios)
+	})
 }
 
 func (ah *audioHandler) GetByUUID(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {

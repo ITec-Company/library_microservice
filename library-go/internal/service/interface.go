@@ -20,7 +20,7 @@ type ArticleService interface {
 
 type AudioService interface {
 	GetByUUID(ctx context.Context, UUID string) (*domain.Audio, error)
-	GetAll(ctx context.Context, limit, offset int) ([]*domain.Audio, error)
+	GetAll(sortingOptions *domain.SortFilterPagination) ([]*domain.Audio, error)
 	Delete(ctx context.Context, UUID string) error
 	Create(ctx context.Context, audio *domain.CreateAudioDTO) (string, error)
 	Update(ctx context.Context, audio *domain.UpdateAudioDTO) error
@@ -38,7 +38,7 @@ type AuthorService interface {
 
 type BookService interface {
 	GetByUUID(ctx context.Context, UUID string) (*domain.Book, error)
-	GetAll(ctx context.Context, limit, offset int) ([]*domain.Book, error)
+	GetAll(sortingOptions *domain.SortFilterPagination) ([]*domain.Book, error)
 	Delete(ctx context.Context, UUID string) error
 	Create(ctx context.Context, book *domain.CreateBookDTO) (string, error)
 	Update(ctx context.Context, book *domain.UpdateBookDTO) error
@@ -73,7 +73,7 @@ type TagService interface {
 
 type VideoService interface {
 	GetByUUID(ctx context.Context, UUID string) (*domain.Video, error)
-	GetAll(ctx context.Context, limit, offset int) ([]*domain.Video, error)
+	GetAll(sortingOptions *domain.SortFilterPagination) ([]*domain.Video, error)
 	Delete(ctx context.Context, UUID string) error
 	Create(ctx context.Context, video *domain.CreateVideoDTO) (string, error)
 	Update(ctx context.Context, video *domain.UpdateVideoDTO) error

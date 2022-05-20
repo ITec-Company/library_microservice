@@ -1,7 +1,20 @@
 // ?sort_by?sort_order
 // ?filter=filterName1%3Aarg1%2Carg2%2Carg3%7CfilterName2%3Aarg1%2carg2
 // ?limit=15&page=1
-GET http://localhost:1000/articles?limit=15&page=2
+GET http://localhost:1000/articles?filter=difficulty%3Ajunior
+Content-Type: application/json
+
+### Get audios
+GET http://localhost:1000/audios?sort_by=uuid&sort_order=asc&limit=5&page=2
+Content-Type: application/json
+
+### Get videos
+GET http://localhost:1000/videos?filter=difficulty%3Amiddle
+Content-Type: application/json
+
+### Get books
+GET http://localhost:1000/books?limit=5&page=2
 Content-Type: application/json
 
 //pages count
+

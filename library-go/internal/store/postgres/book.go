@@ -2,6 +2,8 @@ package postgres
 
 import (
 	"database/sql"
+	"fmt"
+	"github.com/Masterminds/squirrel"
 	"github.com/lib/pq"
 	"library-go/internal/domain"
 	"library-go/internal/store"
@@ -130,8 +132,33 @@ func (bs *bookStorage) GetOne(UUID string) (*domain.Book, error) {
 	return &book, nil
 }
 
-func (bs *bookStorage) GetAll(limit, offset int) ([]*domain.Book, error) {
-	rows, err := bs.db.Query(getAllBooksQuery)
+func (bs *bookStorage) GetAll(sortOptions *domain.SortFilterPagination) ([]*domain.Book, error) {
+	s := squirrel.Select("B.uuid, B.title, B.difficulty, B.edition_date, B.rating, B.description, B.url, B.language, B.download_count, Au.uuid, Au.full_name, D.uuid as direction_uuid, D.name as direction_name, array_agg(DISTINCT T) as tags").
+		From("book AS B").
+		LeftJoin("author AS Au ON Au.uuid = B.author_uuid").
+		LeftJoin("direction AS D ON D.uuid = B.direction_uuid").
+		LeftJoin("tag AS T ON  T.uuid = any (B.tags_uuids)").
+		GroupBy("B.uuid, B.title, B.difficulty, B.edition_date, B.rating, B.description, B.url, B.language, B.download_count, Au.uuid, Au.full_name, D.uuid, D.name")
+
+	if sortOptions.Limit != 0 {
+		s = s.Limit(sortOptions.Limit)
+		if sortOptions.Page != 0 {
+			offset := (sortOptions.Page - 1) * sortOptions.Limit
+			s = s.Offset(offset)
+		}
+	}
+
+	if sortOptions.FiltersAndArgs != nil {
+		s = s.Where(sortOptions.FiltersAndArgs).PlaceholderFormat(squirrel.Dollar)
+	}
+
+	if sortOptions.SortBy != "" {
+		s = s.OrderBy(fmt.Sprintf("%s %s", sortOptions.SortBy, sortOptions.Order))
+	}
+
+	query, args, _ := s.ToSql()
+
+	rows, err := bs.db.Query(query, args...)
 	if err != nil {
 		bs.logger.Errorf("error occurred while selecting all books. err: %v", err)
 		return nil, err

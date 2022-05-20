@@ -2,6 +2,8 @@ package postgres
 
 import (
 	"database/sql"
+	"fmt"
+	"github.com/Masterminds/squirrel"
 	"github.com/lib/pq"
 	"library-go/internal/domain"
 	"library-go/internal/store"
@@ -29,7 +31,7 @@ const (
 	getAllVideosQuery = `SELECT
 		V.uuid,
 		V.title,
-		v.difficulty,
+		V.difficulty,
 		V.rating,
 		V.url,
 		V.language,
@@ -40,7 +42,7 @@ const (
 	FROM video AS V
 	LEFT JOIN direction AS D ON D.uuid = V.direction_uuid
 	LEFT JOIN tag AS T ON  T.uuid = any (V.tags_uuids)
-	GROUP BY V.uuid, V.title, V.rating, V.url, V.language, V.download_count, D.uuid, D.name`
+	GROUP BY V.uuid, V.title, V.difficulty, V.rating, V.url, V.language, V.download_count, D.uuid, D.name`
 	createVideoQuery = `INSERT INTO video (
                      title, 
                    	 difficulty,
@@ -109,8 +111,32 @@ func (vs *videoStorage) GetOne(UUID string) (*domain.Video, error) {
 	return &video, nil
 }
 
-func (vs *videoStorage) GetAll(limit, offset int) ([]*domain.Video, error) {
-	rows, err := vs.db.Query(getAllVideosQuery)
+func (vs *videoStorage) GetAll(sortOptions *domain.SortFilterPagination) ([]*domain.Video, error) {
+	s := squirrel.Select("V.uuid, V.title, V.difficulty, V.rating, V.url, V.language, V.download_count, D.uuid as direction_uuid, D.name as direction_name, array_agg(DISTINCT T) as tags").
+		From("video AS V").
+		LeftJoin("direction AS D ON D.uuid = V.direction_uuid").
+		LeftJoin("tag AS T ON  T.uuid = any (V.tags_uuids)").
+		GroupBy("V.uuid, V.title, V.difficulty, V.rating, V.url, V.language, V.download_count, D.uuid, D.name")
+
+	if sortOptions.Limit != 0 {
+		s = s.Limit(sortOptions.Limit)
+		if sortOptions.Page != 0 {
+			offset := (sortOptions.Page - 1) * sortOptions.Limit
+			s = s.Offset(offset)
+		}
+	}
+
+	if sortOptions.FiltersAndArgs != nil {
+		s = s.Where(sortOptions.FiltersAndArgs).PlaceholderFormat(squirrel.Dollar)
+	}
+
+	if sortOptions.SortBy != "" {
+		s = s.OrderBy(fmt.Sprintf("%s %s", sortOptions.SortBy, sortOptions.Order))
+	}
+
+	query, args, _ := s.ToSql()
+
+	rows, err := vs.db.Query(query, args...)
 	if err != nil {
 		vs.logger.Errorf("error occurred while selecting all videos. err: %v", err)
 		return nil, err

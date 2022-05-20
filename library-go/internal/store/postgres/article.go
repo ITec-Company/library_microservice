@@ -134,7 +134,7 @@ func (as *articleStorage) GetOne(UUID string) (*domain.Article, error) {
 
 func (as *articleStorage) GetAll(sortOptions *domain.SortFilterPagination) ([]*domain.Article, error) {
 
-	s := squirrel.Select("A.uuid,\n\t\tA.title,\n\t\tA.difficulty,\n\t\tA.edition_date,\n\t\tA.rating,\n\t\tA.description,\n\t\tA.url,\n\t\tA.language,\n\t\tA.download_count,\n\t\tAu.uuid,\n\t\tAu.full_name,\n\t\tD.uuid as direction_uuid,\n\t\tD.name as direction_name,\n\t\tarray_agg(DISTINCT T) as tags").
+	s := squirrel.Select("A.uuid, A.title, A.difficulty, A.edition_date, A.rating, A.description, A.url, A.language, A.download_count, Au.uuid, Au.full_name, D.uuid as direction_uuid, D.name as direction_name, array_agg(DISTINCT T) as tags").
 		From("article AS A").
 		LeftJoin("author AS Au ON Au.uuid = A.author_uuid").
 		LeftJoin("direction AS D ON D.uuid = A.direction_uuid").

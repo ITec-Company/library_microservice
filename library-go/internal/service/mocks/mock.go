@@ -176,7 +176,7 @@ func (mr *MockAudioServiceMockRecorder) GetByUUID(ctx, UUID interface{}) *gomock
 }
 
 // GetAll mocks base method
-func (m *MockAudioService) GetAll(ctx context.Context, limit, offset int) ([]*domain.Audio, error) {
+func (m *MockAudioService) GetAll(sortingOptions *domain.SortFilterPagination) ([]*domain.Audio, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetAll", ctx, limit, offset)
 	ret0, _ := ret[0].([]*domain.Audio)

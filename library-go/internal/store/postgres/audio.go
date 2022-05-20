@@ -2,6 +2,8 @@ package postgres
 
 import (
 	"database/sql"
+	"fmt"
+	"github.com/Masterminds/squirrel"
 	"github.com/lib/pq"
 	"library-go/internal/domain"
 	"library-go/internal/store"
@@ -110,8 +112,32 @@ func (as *audioStorage) GetOne(UUID string) (*domain.Audio, error) {
 	return &audio, nil
 }
 
-func (as *audioStorage) GetAll(limit, offset int) ([]*domain.Audio, error) {
-	rows, err := as.db.Query(getAllAudiosQuery)
+func (as *audioStorage) GetAll(sortOptions *domain.SortFilterPagination) ([]*domain.Audio, error) {
+	s := squirrel.Select("A.uuid, A.title, A.difficulty, A.rating, A.url, A.language, A.download_count, D.uuid as direction_uuid, D.name as direction_name, array_agg(DISTINCT T) as tags").
+		From("audio AS A").
+		LeftJoin("direction AS D ON D.uuid = A.direction_uuid").
+		LeftJoin("tag AS T ON  T.uuid = any (A.tags_uuids)").
+		GroupBy("A.uuid, A.title, A.difficulty, A.rating, A.url, A.language, A.download_count, D.uuid, D.name")
+
+	if sortOptions.Limit != 0 {
+		s = s.Limit(sortOptions.Limit)
+		if sortOptions.Page != 0 {
+			offset := (sortOptions.Page - 1) * sortOptions.Limit
+			s = s.Offset(offset)
+		}
+	}
+
+	if sortOptions.FiltersAndArgs != nil {
+		s = s.Where(sortOptions.FiltersAndArgs).PlaceholderFormat(squirrel.Dollar)
+	}
+
+	if sortOptions.SortBy != "" {
+		s = s.OrderBy(fmt.Sprintf("%s %s", sortOptions.SortBy, sortOptions.Order))
+	}
+
+	query, args, _ := s.ToSql()
+
+	rows, err := as.db.Query(query, args...)
 	if err != nil {
 		as.logger.Errorf("error occurred while selecting all audios. err: %v", err)
 		return nil, err

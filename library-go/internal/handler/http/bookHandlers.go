@@ -43,7 +43,7 @@ func NewBookHandler(service service.BookService, logger *logging.Logger, middlew
 }
 
 func (bh *bookHandler) Register(router *httprouter.Router) {
-	router.GET(getAllBooksURL, bh.GetAll)
+	router.GET(getAllBooksURL, bh.Middleware.sortAndFilters(bh.GetAll()))
 	router.GET(getBookByUUIDURL, bh.GetByUUID)
 	router.POST(createBookURL, bh.Middleware.createBook(bh.Create()))
 	router.DELETE(deleteBookURL, bh.Delete)
@@ -51,30 +51,22 @@ func (bh *bookHandler) Register(router *httprouter.Router) {
 	router.GET(loadBookURL, bh.Load)
 }
 
-func (bh *bookHandler) GetAll(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	w.Header().Set("Content-Type", "application/json")
+func (bh *bookHandler) GetAll() http.HandlerFunc {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
 
-	limit, err := strconv.Atoi(r.URL.Query().Get("limit"))
-	if err != nil || limit < 0 {
-		limit = 0
-		bh.logger.Debugf("error occurred while parsing limit. err: %v. Assigning '0' to limit", err)
-	}
+		sortingOptions := r.Context().Value(CtxKeySortAndFilters).(domain.SortFilterPagination)
 
-	offset, err := strconv.Atoi(r.URL.Query().Get("offset"))
-	if err != nil || offset < 0 {
-		offset = 0
-		bh.logger.Debugf("error occurred while parsing offset. err: %v. Assigning '0' to offset", err)
-	}
+		books, err := bh.Service.GetAll(&sortingOptions)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			json.NewEncoder(w).Encode(JSON.Error{Msg: fmt.Sprintf("error occurred while getting all books. err: %v", err)})
+			return
+		}
 
-	books, err := bh.Service.GetAll(context.Background(), limit, offset)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(JSON.Error{Msg: fmt.Sprintf("error occurred while getting all books. err: %v", err)})
-		return
-	}
-
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(books)
+		w.WriteHeader(http.StatusOK)
+		json.NewEncoder(w).Encode(books)
+	})
 }
 
 func (bh *bookHandler) GetByUUID(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {

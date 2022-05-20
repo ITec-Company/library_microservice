@@ -42,7 +42,7 @@ func NewVideoHandler(service service.VideoService, logger *logging.Logger, middl
 }
 
 func (vh *videoHandler) Register(router *httprouter.Router) {
-	router.GET(getAllVideosURL, vh.GetAll)
+	router.GET(getAllVideosURL, vh.Middleware.sortAndFilters(vh.GetAll()))
 	router.GET(getVideoByUUIDURL, vh.GetByUUID)
 	router.POST(createVideoURL, vh.Middleware.createVideo(vh.Create()))
 	router.DELETE(deleteVideoURL, vh.Delete)
@@ -50,30 +50,22 @@ func (vh *videoHandler) Register(router *httprouter.Router) {
 	router.GET(loadVideoURL, vh.Load)
 }
 
-func (vh *videoHandler) GetAll(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	w.Header().Set("Content-Type", "application/json")
+func (vh *videoHandler) GetAll() http.HandlerFunc {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
 
-	limit, err := strconv.Atoi(r.URL.Query().Get("limit"))
-	if err != nil || limit < 0 {
-		limit = 0
-		vh.logger.Debugf("error occurred while parsing limit. err: %v. Assigning '0' to limit", err)
-	}
+		sortingOptions := r.Context().Value(CtxKeySortAndFilters).(domain.SortFilterPagination)
 
-	offset, err := strconv.Atoi(r.URL.Query().Get("offset"))
-	if err != nil || offset < 0 {
-		offset = 0
-		vh.logger.Debugf("error occurred while parsing offset. err: %v. Assigning '0' to offset", err)
-	}
+		videos, err := vh.Service.GetAll(&sortingOptions)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			json.NewEncoder(w).Encode(JSON.Error{Msg: fmt.Sprintf("error occurred while getting all videos. err: %v", err)})
+			return
+		}
 
-	videos, err := vh.Service.GetAll(context.Background(), limit, offset)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(JSON.Error{Msg: fmt.Sprintf("error occurred while getting all videos. err: %v", err)})
-		return
-	}
-
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(videos)
+		w.WriteHeader(http.StatusOK)
+		json.NewEncoder(w).Encode(videos)
+	})
 }
 
 func (vh *videoHandler) GetByUUID(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
