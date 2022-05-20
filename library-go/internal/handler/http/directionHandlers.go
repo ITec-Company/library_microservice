@@ -23,14 +23,16 @@ const (
 )
 
 type directionHandler struct {
-	Service service.DirectionService
-	logger  *logging.Logger
+	Service    service.DirectionService
+	logger     *logging.Logger
+	Middleware *Middleware
 }
 
-func NewDirectionHandler(service service.DirectionService, logger *logging.Logger) handler.Handler {
+func NewDirectionHandler(service service.DirectionService, logger *logging.Logger, middleware *Middleware) handler.Handler {
 	return &directionHandler{
-		Service: service,
-		logger:  logger,
+		Service:    service,
+		logger:     logger,
+		Middleware: middleware,
 	}
 }
 

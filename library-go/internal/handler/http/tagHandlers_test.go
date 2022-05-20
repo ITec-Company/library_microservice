@@ -37,7 +37,7 @@ func TestTagHandler_GetAll(t *testing.T) {
 				s.EXPECT().GetAll(ctx, limit, offset).Return([]*domain.Tag{domain.TestTag(), domain.TestTag()}, nil)
 			},
 			expectedStatusCode:  200,
-			expectedRequestBody: "[{\"uuid\":\"1\",\"name\":\"test Tag\"},{\"uuid\":\"1\",\"name\":\"test Tag\"}]\n",
+			expectedRequestBody: "[{\"uuid\":\"1\",\"name\":\"Test Tag\"},{\"uuid\":\"1\",\"name\":\"Test Tag\"}]\n",
 		},
 		{
 			name:   "OK empty input",
@@ -49,7 +49,7 @@ func TestTagHandler_GetAll(t *testing.T) {
 				s.EXPECT().GetAll(ctx, limit, offset).Return([]*domain.Tag{domain.TestTag(), domain.TestTag()}, nil)
 			},
 			expectedStatusCode:  200,
-			expectedRequestBody: "[{\"uuid\":\"1\",\"name\":\"test Tag\"},{\"uuid\":\"1\",\"name\":\"test Tag\"}]\n",
+			expectedRequestBody: "[{\"uuid\":\"1\",\"name\":\"Test Tag\"},{\"uuid\":\"1\",\"name\":\"Test Tag\"}]\n",
 		},
 		{
 			name:   "OK invalid input",
@@ -61,7 +61,7 @@ func TestTagHandler_GetAll(t *testing.T) {
 				s.EXPECT().GetAll(ctx, limit, offset).Return([]*domain.Tag{domain.TestTag(), domain.TestTag()}, nil)
 			},
 			expectedStatusCode:  200,
-			expectedRequestBody: "[{\"uuid\":\"1\",\"name\":\"test Tag\"},{\"uuid\":\"1\",\"name\":\"test Tag\"}]\n",
+			expectedRequestBody: "[{\"uuid\":\"1\",\"name\":\"Test Tag\"},{\"uuid\":\"1\",\"name\":\"Test Tag\"}]\n",
 		},
 		{
 			name:   "No rows in result",
@@ -84,7 +84,9 @@ func TestTagHandler_GetAll(t *testing.T) {
 			service := mock_service.NewMockTagService(c)
 			testCase.mockBehavior(service, testCase.ctx, testCase.limit, testCase.offset)
 
-			TagHandler := NewTagHandler(service, logging.GetLogger())
+			logger := logging.GetLogger()
+			middleware := NewMiddlewares(logger)
+			TagHandler := NewTagHandler(service, logger, &middleware)
 
 			router := httprouter.New()
 			TagHandler.Register(router)
@@ -120,7 +122,7 @@ func TestTagHandler_GetByUUID(t *testing.T) {
 				s.EXPECT().GetByUUID(ctx, uuid).Return(domain.TestTag(), nil)
 			},
 			expectedStatusCode:  200,
-			expectedRequestBody: "{\"uuid\":\"1\",\"name\":\"test Tag\"}\n",
+			expectedRequestBody: "{\"uuid\":\"1\",\"name\":\"Test Tag\"}\n",
 		},
 		{
 			name:                "invalid uuid",
@@ -170,7 +172,9 @@ func TestTagHandler_GetByUUID(t *testing.T) {
 			service := mock_service.NewMockTagService(c)
 			testCase.mockBehavior(service, testCase.ctx, testCase.uuid)
 
-			TagHandler := NewTagHandler(service, logging.GetLogger())
+			logger := logging.GetLogger()
+			middleware := NewMiddlewares(logger)
+			TagHandler := NewTagHandler(service, logger, &middleware)
 
 			router := httprouter.New()
 			TagHandler.Register(router)
@@ -204,10 +208,10 @@ func TestTagHandler_GetManyByUUIDs(t *testing.T) {
 			uuids: []string{"1", "2"},
 			ctx:   context.Background(),
 			mockBehavior: func(s *mock_service.MockTagService, ctx context.Context, uuids []string) {
-				s.EXPECT().GetManyByUUIDs(ctx, uuids).Return([]*domain.Tag{domain.TestTag(), &domain.Tag{UUID: "2", Name: "test Tag2"}}, nil)
+				s.EXPECT().GetManyByUUIDs(ctx, uuids).Return([]*domain.Tag{domain.TestTag(), &domain.Tag{UUID: "2", Name: "Test Tag2"}}, nil)
 			},
 			expectedStatusCode:  200,
-			expectedRequestBody: "[{\"uuid\":\"1\",\"name\":\"test Tag\"},{\"uuid\":\"2\",\"name\":\"test Tag2\"}]\n",
+			expectedRequestBody: "[{\"uuid\":\"1\",\"name\":\"Test Tag\"},{\"uuid\":\"2\",\"name\":\"Test Tag2\"}]\n",
 		},
 		{
 			name:                "invalid uuid",
@@ -257,7 +261,9 @@ func TestTagHandler_GetManyByUUIDs(t *testing.T) {
 			service := mock_service.NewMockTagService(c)
 			testCase.mockBehavior(service, testCase.ctx, testCase.uuids)
 
-			TagHandler := NewTagHandler(service, logging.GetLogger())
+			logger := logging.GetLogger()
+			middleware := NewMiddlewares(logger)
+			TagHandler := NewTagHandler(service, logger, &middleware)
 
 			router := httprouter.New()
 			TagHandler.Register(router)
@@ -289,7 +295,7 @@ func TestTagHandler_Create(t *testing.T) {
 		{
 			name: "OK",
 			inputBodyJSON: map[string]interface{}{
-				"name": "test Tag",
+				"name": "Test Tag",
 			},
 			ctx: context.Background(),
 			dto: *domain.TestTagCreateDTO(),
@@ -302,7 +308,7 @@ func TestTagHandler_Create(t *testing.T) {
 		{
 			name: "service error",
 			inputBodyJSON: map[string]interface{}{
-				"name": "test Tag",
+				"name": "Test Tag",
 			},
 			ctx: context.Background(),
 			dto: *domain.TestTagCreateDTO(),
@@ -321,7 +327,9 @@ func TestTagHandler_Create(t *testing.T) {
 			service := mock_service.NewMockTagService(c)
 			testCase.mockBehavior(service, testCase.ctx, testCase.dto)
 
-			TagHandler := NewTagHandler(service, logging.GetLogger())
+			logger := logging.GetLogger()
+			middleware := NewMiddlewares(logger)
+			TagHandler := NewTagHandler(service, logger, &middleware)
 
 			router := httprouter.New()
 			TagHandler.Register(router)
@@ -408,7 +416,9 @@ func TestTagHandler_Delete(t *testing.T) {
 			service := mock_service.NewMockTagService(c)
 			testCase.mockBehavior(service, testCase.ctx, testCase.uuid)
 
-			TagHandler := NewTagHandler(service, logging.GetLogger())
+			logger := logging.GetLogger()
+			middleware := NewMiddlewares(logger)
+			TagHandler := NewTagHandler(service, logger, &middleware)
 
 			router := httprouter.New()
 			TagHandler.Register(router)
@@ -441,7 +451,7 @@ func TestTagHandler_Update(t *testing.T) {
 			name: "OK",
 			inputBodyJSON: map[string]interface{}{
 				"uuid": "1",
-				"name": "test Tag",
+				"name": "Test Tag",
 			},
 			ctx: context.Background(),
 			dto: *domain.TestTagUpdateDTO(),
@@ -455,7 +465,7 @@ func TestTagHandler_Update(t *testing.T) {
 			name: "no rows in result",
 			inputBodyJSON: map[string]interface{}{
 				"uuid": "1",
-				"name": "test Tag",
+				"name": "Test Tag",
 			},
 			ctx: context.Background(),
 			dto: *domain.TestTagUpdateDTO(),
@@ -483,7 +493,9 @@ func TestTagHandler_Update(t *testing.T) {
 			service := mock_service.NewMockTagService(c)
 			testCase.mockBehavior(service, testCase.ctx, &testCase.dto)
 
-			TagHandler := NewTagHandler(service, logging.GetLogger())
+			logger := logging.GetLogger()
+			middleware := NewMiddlewares(logger)
+			TagHandler := NewTagHandler(service, logger, &middleware)
 
 			router := httprouter.New()
 			TagHandler.Register(router)

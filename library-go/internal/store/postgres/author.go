@@ -7,6 +7,18 @@ import (
 	"library-go/pkg/logging"
 )
 
+const (
+	getOneAuthorQuery  = `SELECT * FROM author WHERE uuid = $1`
+	getAllAuthorsQuery = `SELECT * FROM author`
+	createAuthorQuery  = `INSERT INTO author (
+                     full_name
+	) VALUES ($1) RETURNING uuid`
+	deleteAuthorQuery = `DELETE FROM author WHERE uuid = $1`
+	updateAuthorQuery = `UPDATE author SET
+						full_name = COALESCE(NULLIF($1, ''), full_name)
+						WHERE uuid = $2`
+)
+
 type authorStorage struct {
 	logger *logging.Logger
 	db     *sql.DB
@@ -21,7 +33,7 @@ func NewAuthorStorage(db *sql.DB, logger *logging.Logger) store.AuthorStorage {
 
 func (as *authorStorage) GetOne(UUID string) (*domain.Author, error) {
 	var author domain.Author
-	if err := as.db.QueryRow("SELECT * FROM author WHERE uuid = $1",
+	if err := as.db.QueryRow(getOneAuthorQuery,
 		UUID).Scan(
 		&author.UUID,
 		&author.FullName,
@@ -34,7 +46,7 @@ func (as *authorStorage) GetOne(UUID string) (*domain.Author, error) {
 }
 
 func (as *authorStorage) GetAll(limit, offset int) ([]*domain.Author, error) {
-	rows, err := as.db.Query("SELECT * FROM author")
+	rows, err := as.db.Query(getAllAuthorsQuery)
 	if err != nil {
 		as.logger.Errorf("error occurred while selecting all authors. err: %v", err)
 		return nil, err
@@ -57,68 +69,86 @@ func (as *authorStorage) GetAll(limit, offset int) ([]*domain.Author, error) {
 }
 
 func (as *authorStorage) Create(authorCreateDTO *domain.CreateAuthorDTO) (string, error) {
+	tx, err := as.db.Begin()
+	if err != nil {
+		as.logger.Errorf("error occurred while creating transaction. err: %v", err)
+		return "", err
+	}
 
 	var UUID string
 
-	if err := as.db.QueryRow(
-		`INSERT INTO author (
-                     full_name
-	) VALUES ($1) RETURNING uuid`,
+	row := tx.QueryRow(createAuthorQuery,
 		authorCreateDTO.FullName,
-	).Scan(
+	)
+	if err := row.Scan(
 		&UUID,
 	); err != nil {
+		tx.Rollback()
 		as.logger.Errorf("error occurred while creating author. err: %v", err)
 		return UUID, err
 	}
-	as.logger.Errorf("%v", UUID)
 
-	return UUID, nil
+	return UUID, tx.Commit()
 }
 
 func (as *authorStorage) Delete(UUID string) error {
-	result, err := as.db.Exec("DELETE FROM author WHERE uuid = $1", UUID)
+	tx, err := as.db.Begin()
 	if err != nil {
+		as.logger.Errorf("error occurred while creating transaction. err: %v", err)
+		return err
+	}
+
+	result, err := tx.Exec(deleteAuthorQuery, UUID)
+	if err != nil {
+		tx.Rollback()
 		as.logger.Errorf("error occurred while deleting author. err: %v.", err)
 		return err
 	}
 
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
+		tx.Rollback()
 		as.logger.Errorf("error occurred while deleting author (getting affected rows). err: %v", err)
 		return err
 	}
 
 	if rowsAffected < 1 {
-		as.logger.Errorf("error occurred while deleting author. err: %v.", ErrNoRowsAffected)
+		tx.Rollback()
+		as.logger.Errorf("Author with uuid %s was deleted.", UUID)
 		return ErrNoRowsAffected
 	}
 	as.logger.Infof("Author with uuid %s was deleted.", UUID)
-	return nil
+	return tx.Commit()
 }
 
 func (as *authorStorage) Update(authorUpdateDTO *domain.UpdateAuthorDTO) error {
-	result, err := as.db.Exec(
-		`UPDATE author SET
-	              full_name = COALESCE(NULLIF($1, ''), full_name)
-		WHERE uuid = $2`,
+	tx, err := as.db.Begin()
+	if err != nil {
+		as.logger.Errorf("error occurred while creating transaction. err: %v", err)
+		return err
+	}
+
+	result, err := tx.Exec(updateAuthorQuery,
 		authorUpdateDTO.FullName,
 		authorUpdateDTO.UUID)
 
 	if err != nil {
+		tx.Rollback()
 		as.logger.Errorf("error occurred while updating author. err: %v", err)
 		return err
 	}
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
+		tx.Rollback()
 		as.logger.Errorf("Error occurred while updating author. Err msg: %v.", err)
 		return err
 	}
 
 	if rowsAffected < 1 {
+		tx.Rollback()
 		as.logger.Errorf("Error occurred while updating author. Err msg: %v.", ErrNoRowsAffected)
 		return ErrNoRowsAffected
 	}
 
-	return nil
+	return tx.Commit()
 }

@@ -9,6 +9,63 @@ import (
 	"strings"
 )
 
+const (
+	getOneVideoQuery = `SELECT 
+		V.uuid,
+		V.title,
+		V.difficulty,
+		V.rating,
+		V.url,
+		V.language,
+		V.download_count,
+		D.uuid as direction_uuid,
+		D.name as direction_name,
+		array_agg(DISTINCT T) as tags
+	FROM video AS V
+	LEFT JOIN direction AS D ON D.uuid = V.direction_uuid
+	LEFT JOIN tag AS T ON  T.uuid = any (V.tags_uuids)
+	WHERE  V.uuid = $1
+	GROUP BY V.uuid, V.title, V.rating, V.url, V.language, V.download_count, D.uuid, D.name`
+	getAllVideosQuery = `SELECT
+		V.uuid,
+		V.title,
+		v.difficulty,
+		V.rating,
+		V.url,
+		V.language,
+		V.download_count,
+		D.uuid as direction_uuid,
+		D.name as direction_name,
+		array_agg(DISTINCT T) as tags
+	FROM video AS V
+	LEFT JOIN direction AS D ON D.uuid = V.direction_uuid
+	LEFT JOIN tag AS T ON  T.uuid = any (V.tags_uuids)
+	GROUP BY V.uuid, V.title, V.rating, V.url, V.language, V.download_count, D.uuid, D.name`
+	createVideoQuery = `INSERT INTO video (
+                     title, 
+                   	 difficulty,
+                     direction_uuid, 
+                     rating, 
+                     url, 
+                     language, 
+                     tags_uuids, 
+                     download_count
+				) SELECT $1, $2 , $3, $4, $5, $6, $7, $8
+				WHERE EXISTS(SELECT uuid FROM direction where $3 = direction.uuid) AND
+				EXISTS(SELECT uuid FROM tag where tag.uuid = any($7)) RETURNING video.uuid`
+	deleteVideoQuery = `DELETE FROM video WHERE uuid = $1`
+	updateVideoQuery = `UPDATE video SET 
+			title = COALESCE(NULLIF($1, ''), title), 
+			difficulty = COALESCE($2, difficulty), 
+			direction_uuid = (CASE WHEN (EXISTS(SELECT uuid FROM direction where direction.uuid = $3)) THEN $3 ELSE COALESCE(NULLIF($3, 0), direction_uuid) END), 
+			rating = COALESCE(NULLIF($4, 0), rating), 
+			url = COALESCE(NULLIF($5, ''), url), 
+			language = COALESCE(NULLIF($6, ''), language), 
+			tags_uuids = (CASE WHEN (EXISTS(SELECT uuid FROM tag where tag.uuid = any($7))) THEN $7 ELSE COALESCE($7, tags_uuids) END),
+			download_count = COALESCE(NULLIF($8, 0), download_count)
+		WHERE uuid = $9`
+)
+
 type videoStorage struct {
 	logger *logging.Logger
 	db     *sql.DB
@@ -24,22 +81,7 @@ func NewVideoStorage(db *sql.DB, logger *logging.Logger) store.VideoStorage {
 func (vs *videoStorage) GetOne(UUID string) (*domain.Video, error) {
 	var video domain.Video
 	var tagsStr []string
-	if err := vs.db.QueryRow(`SELECT 
-		V.uuid,
-		V.title,
-		V.difficulty,
-		V.rating,
-		V.url,
-		V.language,
-		V.download_count,
-		D.uuid as direction_uuid,
-		D.name as direction_name,
-		array_agg(DISTINCT T) as tags
-	FROM video AS V
-	LEFT JOIN direction AS D ON D.uuid = V.direction_uuid
-	LEFT JOIN tag AS T ON  T.uuid = any (V.tags_uuids)
-	WHERE  V.uuid = $1
-	GROUP BY V.uuid, V.title, V.rating, V.url, V.language, V.download_count, D.uuid, D.name`,
+	if err := vs.db.QueryRow(getOneVideoQuery,
 		UUID).Scan(
 		&video.UUID,
 		&video.Title,
@@ -68,21 +110,7 @@ func (vs *videoStorage) GetOne(UUID string) (*domain.Video, error) {
 }
 
 func (vs *videoStorage) GetAll(limit, offset int) ([]*domain.Video, error) {
-	rows, err := vs.db.Query(`SELECT
-		V.uuid,
-		V.title,
-		v.difficulty,
-		V.rating,
-		V.url,
-		V.language,
-		V.download_count,
-		D.uuid as direction_uuid,
-		D.name as direction_name,
-		array_agg(DISTINCT T) as tags
-	FROM video AS V
-	LEFT JOIN direction AS D ON D.uuid = V.direction_uuid
-	LEFT JOIN tag AS T ON  T.uuid = any (V.tags_uuids)
-	GROUP BY V.uuid, V.title, V.rating, V.url, V.language, V.download_count, D.uuid, D.name`)
+	rows, err := vs.db.Query(getAllVideosQuery)
 	if err != nil {
 		vs.logger.Errorf("error occurred while selecting all videos. err: %v", err)
 		return nil, err
@@ -124,20 +152,15 @@ func (vs *videoStorage) GetAll(limit, offset int) ([]*domain.Video, error) {
 }
 
 func (vs *videoStorage) Create(videoCreateDTO *domain.CreateVideoDTO) (string, error) {
+	tx, err := vs.db.Begin()
+	if err != nil {
+		vs.logger.Errorf("error occurred while creating transaction. err: %v", err)
+		return "", err
+	}
+
 	var UUID string
-	if err := vs.db.QueryRow(
-		`INSERT INTO video (
-                     title, 
-                   	 difficulty,
-                     direction_uuid, 
-                     rating, 
-                     url, 
-                     language, 
-                     tags_uuids, 
-                     download_count
-				) SELECT $1, $2 , $3, $4, $5, $6, $7, $8
-				WHERE EXISTS(SELECT uuid FROM direction where $3 = direction.uuid) AND
-				EXISTS(SELECT uuid FROM tag where tag.uuid = any($7)) RETURNING video.uuid`,
+
+	row := tx.QueryRow(createVideoQuery,
 		videoCreateDTO.Title,
 		videoCreateDTO.Difficulty,
 		videoCreateDTO.DirectionUUID,
@@ -146,47 +169,54 @@ func (vs *videoStorage) Create(videoCreateDTO *domain.CreateVideoDTO) (string, e
 		videoCreateDTO.Language,
 		pq.Array(videoCreateDTO.TagsUUIDs),
 		0,
-	).Scan(&UUID); err != nil {
+	)
+	if err := row.Scan(&UUID); err != nil {
+		tx.Rollback()
 		vs.logger.Errorf("error occurred while creating video. err: %v", err)
 		return UUID, err
 	}
 
-	return UUID, nil
+	return UUID, tx.Commit()
 }
 
 func (vs *videoStorage) Delete(UUID string) error {
-	result, err := vs.db.Exec("DELETE FROM video WHERE uuid = $1", UUID)
+	tx, err := vs.db.Begin()
 	if err != nil {
+		vs.logger.Errorf("error occurred while creating transaction. err: %v", err)
+		return err
+	}
+
+	result, err := vs.db.Exec(deleteVideoQuery, UUID)
+	if err != nil {
+		tx.Rollback()
 		vs.logger.Errorf("error occurred while deleting video. err: %v.", err)
 		return err
 	}
 
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
+		tx.Rollback()
 		vs.logger.Errorf("error occurred while deleting video (getting affected rows). err: %v", err)
 		return err
 	}
 
 	if rowsAffected < 1 {
-		vs.logger.Errorf("error occurred while deleting video. err: %v.", ErrNoRowsAffected)
+		tx.Rollback()
+		vs.logger.Errorf("Video with uuid %s was deleted.", UUID)
 		return ErrNoRowsAffected
 	}
 	vs.logger.Infof("Video with uuid %s wvs deleted.", UUID)
-	return nil
+	return tx.Commit()
 }
 
 func (vs *videoStorage) Update(videoUpdateDTO *domain.UpdateVideoDTO) error {
-	result, err := vs.db.Exec(
-		`UPDATE video SET 
-			title = COALESCE(NULLIF($1, ''), title), 
-			difficulty = COALESCE($2, difficulty), 
-			direction_uuid = (CASE WHEN (EXISTS(SELECT uuid FROM direction where direction.uuid = $3)) THEN $3 ELSE COALESCE(NULLIF($3, 0), direction_uuid) END), 
-			rating = COALESCE(NULLIF($4, 0), rating), 
-			url = COALESCE(NULLIF($5, ''), url), 
-			language = COALESCE(NULLIF($6, ''), language), 
-			tags_uuids = (CASE WHEN (EXISTS(SELECT uuid FROM tag where tag.uuid = any($7))) THEN $7 ELSE COALESCE($7, tags_uuids) END),
-			download_count = COALESCE(NULLIF($8, 0), download_count)
-		WHERE uuid = $9`,
+	tx, err := vs.db.Begin()
+	if err != nil {
+		vs.logger.Errorf("error occurred while creating transaction. err: %v", err)
+		return err
+	}
+
+	result, err := tx.Exec(updateVideoQuery,
 		videoUpdateDTO.Title,
 		videoUpdateDTO.Difficulty,
 		videoUpdateDTO.DirectionUUID,
@@ -198,20 +228,23 @@ func (vs *videoStorage) Update(videoUpdateDTO *domain.UpdateVideoDTO) error {
 		videoUpdateDTO.UUID,
 	)
 	if err != nil {
+		tx.Rollback()
 		vs.logger.Errorf("error occurred while updating video. err: %v", err)
 		return err
 	}
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
+		tx.Rollback()
 		vs.logger.Errorf("error occurred while updating video (getting affected rows). err: %v", err)
 		return err
 	}
 	if rowsAffected < 1 {
+		tx.Rollback()
 		vs.logger.Errorf("error occurred while updating video. err: %v.", ErrNoRowsAffected)
 		return ErrNoRowsAffected
 	}
 
 	vs.logger.Infof("Video with uuid %s was updated.", videoUpdateDTO.UUID)
 
-	return nil
+	return tx.Commit()
 }

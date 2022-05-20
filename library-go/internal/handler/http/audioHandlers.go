@@ -6,13 +6,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/julienschmidt/httprouter"
-	"io/ioutil"
 	"library-go/internal/domain"
 	"library-go/internal/handler"
 	"library-go/internal/service"
 	"library-go/pkg/JSON"
 	"library-go/pkg/logging"
-	"library-go/pkg/utils"
 	"net/http"
 	"os"
 	"strconv"
@@ -25,26 +23,28 @@ const (
 	createAudioURL        = "/audio"
 	deleteAudioURL        = "/audio/:uuid"
 	updateAudioURL        = "/audio"
-	loadAudioURL          = "/load/audio/:url"
-	audioLocalStoragePath = "../store/audios"
+	loadAudioURL          = "/load/audio"
+	audioLocalStoragePath = "../store/audios/"
 )
 
 type audioHandler struct {
-	Service service.AudioService
-	logger  *logging.Logger
+	Service    service.AudioService
+	logger     *logging.Logger
+	Middleware *Middleware
 }
 
-func NewAudioHandler(service service.AudioService, logger *logging.Logger) handler.Handler {
+func NewAudioHandler(service service.AudioService, logger *logging.Logger, middleware *Middleware) handler.Handler {
 	return &audioHandler{
-		Service: service,
-		logger:  logger,
+		Service:    service,
+		logger:     logger,
+		Middleware: middleware,
 	}
 }
 
 func (ah *audioHandler) Register(router *httprouter.Router) {
 	router.GET(getAllAudiosURL, ah.GetAll)
 	router.GET(getAudioByUUIDURL, ah.GetByUUID)
-	router.POST(createAudioURL, ah.Create)
+	router.POST(createAudioURL, ah.Middleware.createAudio(ah.Create()))
 	router.DELETE(deleteAudioURL, ah.Delete)
 	router.PUT(updateAudioURL, ah.Update)
 	router.GET(loadAudioURL, ah.Load)
@@ -104,55 +104,43 @@ func (ah *audioHandler) GetByUUID(w http.ResponseWriter, r *http.Request, ps htt
 	json.NewEncoder(w).Encode(audio)
 }
 
-func (ah *audioHandler) Create(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	w.Header().Set("Content-Type", "application/json")
+func (ah *audioHandler) Create() http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
 
-	createAudioDTO := domain.CreateAudioDTO{}
+		data := r.Context().Value(CtxKeyCreateAudio).(map[string]interface{})
 
-	data := map[string]interface{}{
-		"file":           "file",
-		"title":          "text",
-		"direction_uuid": "text",
-		"difficulty":     "text",
-		"language":       "text",
-		"tags_uuids":     "text",
-	}
+		createAudioDTO := domain.CreateAudioDTO{}
 
-	err := utils.ParseMultiPartFormData(r, data)
-	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		ah.logger.Errorf("error occurred while parsing multiform data. err msg: %v.", err)
-		json.NewEncoder(w).Encode(JSON.Error{Msg: fmt.Sprintf("error occurred while parsing multiform data. err msg: %v.", err)})
-		return
-	}
+		file := data["file"].(*bytes.Buffer)
 
-	file := data["file"].(*bytes.Buffer)
-	createAudioDTO.Title = data["title"].(string)
-	createAudioDTO.DirectionUUID = data["direction_uuid"].(string)
-	createAudioDTO.Difficulty = data["difficulty"].(string)
-	createAudioDTO.Language = data["language"].(string)
-	createAudioDTO.TagsUUIDs = strings.Split(data["tags_uuids"].(string), ",")
-	createAudioDTO.URL = fmt.Sprintf("%s%s-%s-%s", "load/audio/", createAudioDTO.DirectionUUID, createAudioDTO.Difficulty, data["fileName"].(string))
+		createAudioDTO.Title = strings.Replace(data["title"].(string), " ", "_", -1)
+		createAudioDTO.DirectionUUID = data["direction_uuid"].(string)
+		createAudioDTO.Difficulty = data["difficulty"].(string)
+		createAudioDTO.Language = data["language"].(string)
+		createAudioDTO.TagsUUIDs = strings.Split(data["tags_uuids"].(string), ",")
 
-	path := fmt.Sprintf("%s/%s/%s", audioLocalStoragePath, createAudioDTO.DirectionUUID, createAudioDTO.Difficulty)
+		fileName := data["fileName"].(string)
+		createAudioDTO.URL = fmt.Sprintf("%s?url=%s", loadBookURL, fileName)
 
-	err = utils.SaveFile(path, data["fileName"].(string), file)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		ah.logger.Errorf("error occurred while saving audio into local database. err: %v.", err)
-		json.NewEncoder(w).Encode(JSON.Error{Msg: fmt.Sprintf("error occurred while saving audio into local database. err: %v", err)})
-		return
-	}
+		err := ah.Service.Save(context.Background(), audioLocalStoragePath, fileName, file)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			ah.logger.Errorf("error occurred while saving audio into local database. err: %v.", err)
+			json.NewEncoder(w).Encode(JSON.Error{Msg: fmt.Sprintf("error occurred while saving audio into local database. err: %v", err)})
+			return
+		}
 
-	UUID, err := ah.Service.Create(context.Background(), &createAudioDTO)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(JSON.Error{Msg: fmt.Sprintf("error occurred while creating audio into DB. err: %v", err)})
-		return
-	}
+		UUID, err := ah.Service.Create(context.Background(), &createAudioDTO)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			json.NewEncoder(w).Encode(JSON.Error{Msg: fmt.Sprintf("error occurred while creating audio into DB. err: %v", err)})
+			return
+		}
 
-	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(JSON.Info{Msg: fmt.Sprintf("Audio created successfully. UUID: %s", UUID)})
+		w.WriteHeader(http.StatusCreated)
+		json.NewEncoder(w).Encode(JSON.Info{Msg: fmt.Sprintf("Audio created successfully. UUID: %s", UUID)})
+	})
 }
 
 func (ah *audioHandler) Delete(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
@@ -212,31 +200,29 @@ func (ah *audioHandler) Update(w http.ResponseWriter, r *http.Request, ps httpro
 }
 
 func (ah *audioHandler) Load(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-
-	url := ps.ByName("url")
+	url := r.URL.Query().Get("url")
 	if url == "" {
 		w.WriteHeader(http.StatusBadRequest)
 		ah.logger.Errorf("url can't be empty")
 		return
 	}
-	urlArray := strings.Split(url, "-")
 
-	w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=%s", urlArray[len(urlArray)-1]))
+	w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=%s", url))
 	w.Header().Set("Content-Type", "application/octet-stream")
 
-	path := strings.Replace(url, "-", "/", -1)
+	path := fmt.Sprintf("%s%s", audioLocalStoragePath, url)
 
-	file, err := os.Open(fmt.Sprintf("%s/%s", audioLocalStoragePath, path))
-	if err != nil {
+	fileBytes, err := ah.Service.Load(context.Background(), path)
+	_, pathError := err.(*os.PathError)
+	if pathError {
+		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusInternalServerError)
-		ah.logger.Errorf("error occurred while reading file. err: %v", err)
-		json.NewEncoder(w).Encode(JSON.Error{Msg: fmt.Sprintf("error occurred while reading file. err: %v", err)})
+		ah.logger.Errorf("error occurred while searching file: invalid path. err: %v", err)
+		json.NewEncoder(w).Encode(JSON.Error{Msg: fmt.Sprintf("error occurred while searching file: invalid path. err: %v", err)})
 		return
 	}
-	defer file.Close()
-
-	fileBytes, err := ioutil.ReadAll(file)
 	if err != nil {
+		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusInternalServerError)
 		ah.logger.Errorf("error occurred while reading file. err: %v", err)
 		json.NewEncoder(w).Encode(JSON.Error{Msg: fmt.Sprintf("error occurred while reading file. err: %v", err)})

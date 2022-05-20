@@ -6,7 +6,7 @@ import (
 
 type ArticleStorage interface {
 	GetOne(UUID string) (*domain.Article, error)
-	GetAll(limit, offset int) ([]*domain.Article, error)
+	GetAll(sortOptions *domain.SortFilterPagination) ([]*domain.Article, error)
 	Create(article *domain.CreateArticleDTO) (string, error)
 	Delete(UUID string) error
 	Update(article *domain.UpdateArticleDTO) error

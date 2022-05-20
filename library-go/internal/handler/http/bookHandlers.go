@@ -6,13 +6,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/julienschmidt/httprouter"
-	"io/ioutil"
 	"library-go/internal/domain"
 	"library-go/internal/handler"
 	"library-go/internal/service"
 	"library-go/pkg/JSON"
 	"library-go/pkg/logging"
-	"library-go/pkg/utils"
 	"net/http"
 	"os"
 	"strconv"
@@ -26,26 +24,28 @@ const (
 	createBookURL        = "/book"
 	deleteBookURL        = "/book/:uuid"
 	updateBookURL        = "/book"
-	loadBookURL          = "/load/book/:url"
-	bookLocalStoragePath = "../store/books"
+	loadBookURL          = "/load/book"
+	bookLocalStoragePath = "../store/books/"
 )
 
 type bookHandler struct {
-	Service service.BookService
-	logger  *logging.Logger
+	Service    service.BookService
+	logger     *logging.Logger
+	Middleware *Middleware
 }
 
-func NewBookHandler(service service.BookService, logger *logging.Logger) handler.Handler {
+func NewBookHandler(service service.BookService, logger *logging.Logger, middleware *Middleware) handler.Handler {
 	return &bookHandler{
-		Service: service,
-		logger:  logger,
+		Service:    service,
+		logger:     logger,
+		Middleware: middleware,
 	}
 }
 
 func (bh *bookHandler) Register(router *httprouter.Router) {
 	router.GET(getAllBooksURL, bh.GetAll)
 	router.GET(getBookByUUIDURL, bh.GetByUUID)
-	router.POST(createBookURL, bh.Create)
+	router.POST(createBookURL, bh.Middleware.createBook(bh.Create()))
 	router.DELETE(deleteBookURL, bh.Delete)
 	router.PUT(updateBookURL, bh.Update)
 	router.GET(loadBookURL, bh.Load)
@@ -106,63 +106,48 @@ func (bh *bookHandler) GetByUUID(w http.ResponseWriter, r *http.Request, ps http
 	json.NewEncoder(w).Encode(book)
 }
 
-func (bh *bookHandler) Create(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	w.Header().Set("Content-Type", "application/json")
+func (bh *bookHandler) Create() http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
 
-	createBookDTO := domain.CreateBookDTO{}
+		data := r.Context().Value(CtxKeyCreateBook).(map[string]interface{})
 
-	data := map[string]interface{}{
-		"file":           "file",
-		"title":          "text",
-		"direction_uuid": "text",
-		"author_uuid":    "text",
-		"difficulty":     "text",
-		"edition_date":   "text",
-		"description":    "text",
-		"language":       "text",
-		"tags_uuids":     "text",
-	}
+		createBookDTO := domain.CreateBookDTO{}
 
-	err := utils.ParseMultiPartFormData(r, data)
-	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		bh.logger.Errorf("error occurred while parsing multiform data. err msg: %v.", err)
-		json.NewEncoder(w).Encode(JSON.Error{Msg: fmt.Sprintf("error occurred while parsing multiform data. err msg: %v.", err)})
-		return
-	}
+		t, _ := time.Parse("2006-01-02", data["edition_date"].(string))
 
-	t, _ := time.Parse("2006-01-02", data["edition_date"].(string))
+		file := data["file"].(*bytes.Buffer)
 
-	file := data["file"].(*bytes.Buffer)
-	createBookDTO.Title = data["title"].(string)
-	createBookDTO.DirectionUUID = data["direction_uuid"].(string)
-	createBookDTO.AuthorUUID = data["author_uuid"].(string)
-	createBookDTO.Difficulty = data["difficulty"].(string)
-	createBookDTO.EditionDate = t
-	createBookDTO.Description = data["description"].(string)
-	createBookDTO.Language = data["language"].(string)
-	createBookDTO.TagsUUIDs = strings.Split(data["tags_uuids"].(string), ",")
-	createBookDTO.URL = fmt.Sprintf("%s%s-%s-%s", "load/book/", createBookDTO.DirectionUUID, createBookDTO.Difficulty, data["fileName"].(string))
+		createBookDTO.Title = data["title"].(string)
+		createBookDTO.DirectionUUID = data["direction_uuid"].(string)
+		createBookDTO.AuthorUUID = data["author_uuid"].(string)
+		createBookDTO.Difficulty = data["difficulty"].(string)
+		createBookDTO.EditionDate = t
+		createBookDTO.Description = data["description"].(string)
+		createBookDTO.Language = data["language"].(string)
+		createBookDTO.TagsUUIDs = strings.Split(data["tags_uuids"].(string), ",")
 
-	path := fmt.Sprintf("%s/%s/%s", bookLocalStoragePath, createBookDTO.DirectionUUID, createBookDTO.Difficulty)
+		fileName := data["fileName"].(string)
+		createBookDTO.URL = fmt.Sprintf("%s?url=%s", loadBookURL, fileName)
 
-	err = utils.SaveFile(path, data["fileName"].(string), file)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		bh.logger.Errorf("error occurred while saving book into local database. err: %v.", err)
-		json.NewEncoder(w).Encode(JSON.Error{Msg: fmt.Sprintf("error occurred while saving book into local database. err: %v", err)})
-		return
-	}
+		err := bh.Service.Save(context.Background(), bookLocalStoragePath, fileName, file)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			bh.logger.Errorf("error occurred while saving book into local database. err: %v.", err)
+			json.NewEncoder(w).Encode(JSON.Error{Msg: fmt.Sprintf("error occurred while saving book into local database. err: %v", err)})
+			return
+		}
 
-	UUID, err := bh.Service.Create(context.Background(), &createBookDTO)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(JSON.Error{Msg: fmt.Sprintf("error occurred while creating book into DB. err: %v", err)})
-		return
-	}
+		UUID, err := bh.Service.Create(context.Background(), &createBookDTO)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			json.NewEncoder(w).Encode(JSON.Error{Msg: fmt.Sprintf("error occurred while creating book into DB. err: %v", err)})
+			return
+		}
 
-	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(JSON.Info{Msg: fmt.Sprintf("Book created successfully. UUID: %s", UUID)})
+		w.WriteHeader(http.StatusCreated)
+		json.NewEncoder(w).Encode(JSON.Info{Msg: fmt.Sprintf("Book created successfully. UUID: %s", UUID)})
+	})
 }
 
 func (bh *bookHandler) Delete(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
@@ -222,31 +207,29 @@ func (bh *bookHandler) Update(w http.ResponseWriter, r *http.Request, ps httprou
 }
 
 func (bh *bookHandler) Load(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-
-	url := ps.ByName("url")
+	url := r.URL.Query().Get("url")
 	if url == "" {
 		w.WriteHeader(http.StatusBadRequest)
 		bh.logger.Errorf("url can't be empty")
 		return
 	}
-	urlArray := strings.Split(url, "-")
 
-	w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=%s", urlArray[len(urlArray)-1]))
+	w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=%s", url))
 	w.Header().Set("Content-Type", "application/octet-stream")
 
-	path := strings.Replace(url, "-", "/", -1)
+	path := fmt.Sprintf("%s%s", bookLocalStoragePath, url)
 
-	file, err := os.Open(fmt.Sprintf("%s/%s", bookLocalStoragePath, path))
-	if err != nil {
+	fileBytes, err := bh.Service.Load(context.Background(), path)
+	_, pathError := err.(*os.PathError)
+	if pathError {
+		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusInternalServerError)
-		bh.logger.Errorf("error occurred while reading file. err: %v", err)
-		json.NewEncoder(w).Encode(JSON.Error{Msg: fmt.Sprintf("error occurred while reading file. err: %v", err)})
+		bh.logger.Errorf("error occurred while searching file: invalid path. err: %v", err)
+		json.NewEncoder(w).Encode(JSON.Error{Msg: fmt.Sprintf("error occurred while searching file: invalid path. err: %v", err)})
 		return
 	}
-	defer file.Close()
-
-	fileBytes, err := ioutil.ReadAll(file)
 	if err != nil {
+		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusInternalServerError)
 		bh.logger.Errorf("error occurred while reading file. err: %v", err)
 		json.NewEncoder(w).Encode(JSON.Error{Msg: fmt.Sprintf("error occurred while reading file. err: %v", err)})

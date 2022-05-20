@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"io"
 	"library-go/internal/domain"
 )
 
@@ -9,10 +10,12 @@ import (
 
 type ArticleService interface {
 	GetByUUID(ctx context.Context, UUID string) (*domain.Article, error)
-	GetAll(ctx context.Context, limit, offset int) ([]*domain.Article, error)
+	GetAll(sortingOptions *domain.SortFilterPagination) ([]*domain.Article, error)
 	Delete(ctx context.Context, UUID string) error
 	Create(ctx context.Context, article *domain.CreateArticleDTO) (string, error)
 	Update(ctx context.Context, article *domain.UpdateArticleDTO) error
+	Load(ctx context.Context, path string) ([]byte, error)
+	Save(ctx context.Context, path, fileName string, file io.Reader) error
 }
 
 type AudioService interface {
@@ -21,6 +24,8 @@ type AudioService interface {
 	Delete(ctx context.Context, UUID string) error
 	Create(ctx context.Context, audio *domain.CreateAudioDTO) (string, error)
 	Update(ctx context.Context, audio *domain.UpdateAudioDTO) error
+	Load(ctx context.Context, path string) ([]byte, error)
+	Save(ctx context.Context, path, fileName string, file io.Reader) error
 }
 
 type AuthorService interface {
@@ -37,6 +42,8 @@ type BookService interface {
 	Delete(ctx context.Context, UUID string) error
 	Create(ctx context.Context, book *domain.CreateBookDTO) (string, error)
 	Update(ctx context.Context, book *domain.UpdateBookDTO) error
+	Load(ctx context.Context, path string) ([]byte, error)
+	Save(ctx context.Context, path, fileName string, file io.Reader) error
 }
 
 type DirectionService interface {
@@ -70,4 +77,6 @@ type VideoService interface {
 	Delete(ctx context.Context, UUID string) error
 	Create(ctx context.Context, video *domain.CreateVideoDTO) (string, error)
 	Update(ctx context.Context, video *domain.UpdateVideoDTO) error
+	Load(ctx context.Context, path string) ([]byte, error)
+	Save(ctx context.Context, path, fileName string, file io.Reader) error
 }

@@ -15,9 +15,9 @@ type AudioComposite struct {
 	Handler handler.Handler
 }
 
-func (ac *AudioComposite) New(storage store.AudioStorage, logger *logging.Logger) {
+func (ac *AudioComposite) New(storage store.AudioStorage, logger *logging.Logger, middleware *http.Middleware) {
 	ac.logger = logger
 	ac.Storage = storage
 	ac.Service = service.NewAudioService(ac.Storage, ac.logger)
-	ac.Handler = http.NewAudioHandler(ac.Service, ac.logger)
+	ac.Handler = http.NewAudioHandler(ac.Service, ac.logger, middleware)
 }

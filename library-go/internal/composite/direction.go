@@ -15,9 +15,9 @@ type DirectionComposite struct {
 	Handler handler.Handler
 }
 
-func (dc *DirectionComposite) New(storage store.DirectionStorage, logger *logging.Logger) {
+func (dc *DirectionComposite) New(storage store.DirectionStorage, logger *logging.Logger, middleware *http.Middleware) {
 	dc.logger = logger
 	dc.Storage = storage
 	dc.Service = service.NewDirectionService(dc.Storage, dc.logger)
-	dc.Handler = http.NewDirectionHandler(dc.Service, dc.logger)
+	dc.Handler = http.NewDirectionHandler(dc.Service, dc.logger, middleware)
 }

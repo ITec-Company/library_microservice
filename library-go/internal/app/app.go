@@ -3,6 +3,7 @@ package app
 import (
 	"github.com/julienschmidt/httprouter"
 	"library-go/internal/composite"
+	"library-go/internal/handler/http"
 	"library-go/internal/store/postgres"
 	"library-go/pkg/db"
 	"library-go/pkg/logging"
@@ -25,9 +26,11 @@ func Run() {
 	var store postgres.Store
 	store.NewDB(postgresDB.DB, logger)
 
+	middlewares := http.NewMiddlewares(logger)
+
 	logger.Info("Initializing postgres composites...")
 	var postgresComposites composite.Composites
-	postgresComposites.NewPostgres(store)
+	postgresComposites.NewPostgres(store, &middlewares)
 
 	logger.Info("Initializing httprouter...")
 	router := httprouter.New()

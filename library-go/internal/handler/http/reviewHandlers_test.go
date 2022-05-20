@@ -37,7 +37,7 @@ func TestReviewHandler_GetAll(t *testing.T) {
 				s.EXPECT().GetAll(ctx, limit, offset).Return([]*domain.Review{domain.TestReview(), domain.TestReview()}, nil)
 			},
 			expectedStatusCode:  200,
-			expectedRequestBody: "[{\"uuid\":\"1\",\"full_name\":\"test Review\",\"text\":\"test Text\",\"rating\":5.5,\"date\":\"2000-01-01T00:00:00Z\",\"source\":\"test Source\",\"literature_uuid\":\"1\"},{\"uuid\":\"1\",\"full_name\":\"test Review\",\"text\":\"test Text\",\"rating\":5.5,\"date\":\"2000-01-01T00:00:00Z\",\"source\":\"test Source\",\"literature_uuid\":\"1\"}]\n",
+			expectedRequestBody: "[{\"uuid\":\"1\",\"full_name\":\"Test Review\",\"text\":\"Test Text\",\"rating\":5.5,\"date\":\"2000-01-01T00:00:00Z\",\"source\":\"Test Source\",\"literature_uuid\":\"1\"},{\"uuid\":\"1\",\"full_name\":\"Test Review\",\"text\":\"Test Text\",\"rating\":5.5,\"date\":\"2000-01-01T00:00:00Z\",\"source\":\"Test Source\",\"literature_uuid\":\"1\"}]\n",
 		},
 		{
 			name:   "OK empty input",
@@ -49,7 +49,7 @@ func TestReviewHandler_GetAll(t *testing.T) {
 				s.EXPECT().GetAll(ctx, limit, offset).Return([]*domain.Review{domain.TestReview(), domain.TestReview()}, nil)
 			},
 			expectedStatusCode:  200,
-			expectedRequestBody: "[{\"uuid\":\"1\",\"full_name\":\"test Review\",\"text\":\"test Text\",\"rating\":5.5,\"date\":\"2000-01-01T00:00:00Z\",\"source\":\"test Source\",\"literature_uuid\":\"1\"},{\"uuid\":\"1\",\"full_name\":\"test Review\",\"text\":\"test Text\",\"rating\":5.5,\"date\":\"2000-01-01T00:00:00Z\",\"source\":\"test Source\",\"literature_uuid\":\"1\"}]\n",
+			expectedRequestBody: "[{\"uuid\":\"1\",\"full_name\":\"Test Review\",\"text\":\"Test Text\",\"rating\":5.5,\"date\":\"2000-01-01T00:00:00Z\",\"source\":\"Test Source\",\"literature_uuid\":\"1\"},{\"uuid\":\"1\",\"full_name\":\"Test Review\",\"text\":\"Test Text\",\"rating\":5.5,\"date\":\"2000-01-01T00:00:00Z\",\"source\":\"Test Source\",\"literature_uuid\":\"1\"}]\n",
 		},
 		{
 			name:   "OK invalid input",
@@ -61,7 +61,7 @@ func TestReviewHandler_GetAll(t *testing.T) {
 				s.EXPECT().GetAll(ctx, limit, offset).Return([]*domain.Review{domain.TestReview(), domain.TestReview()}, nil)
 			},
 			expectedStatusCode:  200,
-			expectedRequestBody: "[{\"uuid\":\"1\",\"full_name\":\"test Review\",\"text\":\"test Text\",\"rating\":5.5,\"date\":\"2000-01-01T00:00:00Z\",\"source\":\"test Source\",\"literature_uuid\":\"1\"},{\"uuid\":\"1\",\"full_name\":\"test Review\",\"text\":\"test Text\",\"rating\":5.5,\"date\":\"2000-01-01T00:00:00Z\",\"source\":\"test Source\",\"literature_uuid\":\"1\"}]\n",
+			expectedRequestBody: "[{\"uuid\":\"1\",\"full_name\":\"Test Review\",\"text\":\"Test Text\",\"rating\":5.5,\"date\":\"2000-01-01T00:00:00Z\",\"source\":\"Test Source\",\"literature_uuid\":\"1\"},{\"uuid\":\"1\",\"full_name\":\"Test Review\",\"text\":\"Test Text\",\"rating\":5.5,\"date\":\"2000-01-01T00:00:00Z\",\"source\":\"Test Source\",\"literature_uuid\":\"1\"}]\n",
 		},
 		{
 			name:   "No rows in result",
@@ -84,7 +84,9 @@ func TestReviewHandler_GetAll(t *testing.T) {
 			service := mock_service.NewMockReviewService(c)
 			testCase.mockBehavior(service, testCase.ctx, testCase.limit, testCase.offset)
 
-			ReviewHandler := NewReviewHandler(service, logging.GetLogger())
+			logger := logging.GetLogger()
+			middleware := NewMiddlewares(logger)
+			ReviewHandler := NewReviewHandler(service, logger, &middleware)
 
 			router := httprouter.New()
 			ReviewHandler.Register(router)
@@ -120,7 +122,7 @@ func TestReviewHandler_GetByUUID(t *testing.T) {
 				s.EXPECT().GetByUUID(ctx, uuid).Return(domain.TestReview(), nil)
 			},
 			expectedStatusCode:  200,
-			expectedRequestBody: "{\"uuid\":\"1\",\"full_name\":\"test Review\",\"text\":\"test Text\",\"rating\":5.5,\"date\":\"2000-01-01T00:00:00Z\",\"source\":\"test Source\",\"literature_uuid\":\"1\"}\n",
+			expectedRequestBody: "{\"uuid\":\"1\",\"full_name\":\"Test Review\",\"text\":\"Test Text\",\"rating\":5.5,\"date\":\"2000-01-01T00:00:00Z\",\"source\":\"Test Source\",\"literature_uuid\":\"1\"}\n",
 		},
 		{
 			name:                "invalid uuid",
@@ -170,7 +172,9 @@ func TestReviewHandler_GetByUUID(t *testing.T) {
 			service := mock_service.NewMockReviewService(c)
 			testCase.mockBehavior(service, testCase.ctx, testCase.uuid)
 
-			ReviewHandler := NewReviewHandler(service, logging.GetLogger())
+			logger := logging.GetLogger()
+			middleware := NewMiddlewares(logger)
+			ReviewHandler := NewReviewHandler(service, logger, &middleware)
 
 			router := httprouter.New()
 			ReviewHandler.Register(router)
@@ -202,10 +206,10 @@ func TestReviewHandler_Create(t *testing.T) {
 		{
 			name: "OK",
 			inputBodyJSON: map[string]interface{}{
-				"text":            "test Text",
-				"full_name":       "test Review",
+				"text":            "Test Text",
+				"full_name":       "Test Review",
 				"literature_uuid": "1",
-				"source":          "test Source",
+				"source":          "Test Source",
 			},
 			ctx: context.Background(),
 			dto: *domain.TestReviewCreateDTO(),
@@ -218,10 +222,10 @@ func TestReviewHandler_Create(t *testing.T) {
 		{
 			name: "service error",
 			inputBodyJSON: map[string]interface{}{
-				"text":            "test Text",
-				"full_name":       "test Review",
+				"text":            "Test Text",
+				"full_name":       "Test Review",
 				"literature_uuid": "1",
-				"source":          "test Source",
+				"source":          "Test Source",
 			},
 			ctx: context.Background(),
 			dto: *domain.TestReviewCreateDTO(),
@@ -240,7 +244,9 @@ func TestReviewHandler_Create(t *testing.T) {
 			service := mock_service.NewMockReviewService(c)
 			testCase.mockBehavior(service, testCase.ctx, testCase.dto)
 
-			ReviewHandler := NewReviewHandler(service, logging.GetLogger())
+			logger := logging.GetLogger()
+			middleware := NewMiddlewares(logger)
+			ReviewHandler := NewReviewHandler(service, logger, &middleware)
 
 			router := httprouter.New()
 			ReviewHandler.Register(router)
@@ -327,7 +333,9 @@ func TestReviewHandler_Delete(t *testing.T) {
 			service := mock_service.NewMockReviewService(c)
 			testCase.mockBehavior(service, testCase.ctx, testCase.uuid)
 
-			ReviewHandler := NewReviewHandler(service, logging.GetLogger())
+			logger := logging.GetLogger()
+			middleware := NewMiddlewares(logger)
+			ReviewHandler := NewReviewHandler(service, logger, &middleware)
 
 			router := httprouter.New()
 			ReviewHandler.Register(router)
@@ -360,8 +368,8 @@ func TestReviewHandler_Update(t *testing.T) {
 			name: "OK",
 			inputBodyJSON: map[string]interface{}{
 				"uuid":      "1",
-				"full_name": "test Review",
-				"text":      "test Text",
+				"full_name": "Test Review",
+				"text":      "Test Text",
 				"rating":    5.5,
 			},
 			ctx: context.Background(),
@@ -376,8 +384,8 @@ func TestReviewHandler_Update(t *testing.T) {
 			name: "no rows in result",
 			inputBodyJSON: map[string]interface{}{
 				"uuid":      "1",
-				"full_name": "test Review",
-				"text":      "test Text",
+				"full_name": "Test Review",
+				"text":      "Test Text",
 				"rating":    5.5,
 			},
 			ctx: context.Background(),
@@ -406,7 +414,9 @@ func TestReviewHandler_Update(t *testing.T) {
 			service := mock_service.NewMockReviewService(c)
 			testCase.mockBehavior(service, testCase.ctx, &testCase.dto)
 
-			ReviewHandler := NewReviewHandler(service, logging.GetLogger())
+			logger := logging.GetLogger()
+			middleware := NewMiddlewares(logger)
+			ReviewHandler := NewReviewHandler(service, logger, &middleware)
 
 			router := httprouter.New()
 			ReviewHandler.Register(router)

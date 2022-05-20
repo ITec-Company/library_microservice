@@ -37,7 +37,7 @@ func TestBookHandler_GetAll(t *testing.T) {
 				s.EXPECT().GetAll(ctx, limit, offset).Return([]*domain.Book{domain.TestBook(), domain.TestBook()}, nil)
 			},
 			expectedStatusCode:  200,
-			expectedRequestBody: "[{\"uuid\":\"1\",\"title\":\"Test Title\",\"direction\":{\"uuid\":\"1\",\"name\":\"test direction\"},\"author\":{\"uuid\":\"1\",\"full_name\":\"test Author\"},\"difficulty\":\"Test Difficulty\",\"edition_date\":\"2000-01-01T00:00:00Z\",\"rating\":5,\"description\":\"Test Description\",\"url\":\"Test URL\",\"language\":\"Test Language\",\"tags\":[{\"uuid\":\"1\",\"name\":\"test Tag\"}],\"download_count\":10},{\"uuid\":\"1\",\"title\":\"Test Title\",\"direction\":{\"uuid\":\"1\",\"name\":\"test direction\"},\"author\":{\"uuid\":\"1\",\"full_name\":\"test Author\"},\"difficulty\":\"Test Difficulty\",\"edition_date\":\"2000-01-01T00:00:00Z\",\"rating\":5,\"description\":\"Test Description\",\"url\":\"Test URL\",\"language\":\"Test Language\",\"tags\":[{\"uuid\":\"1\",\"name\":\"test Tag\"}],\"download_count\":10}]\n",
+			expectedRequestBody: "[{\"uuid\":\"1\",\"title\":\"Test Title\",\"direction\":{\"uuid\":\"1\",\"name\":\"Test Direction\"},\"author\":{\"uuid\":\"1\",\"full_name\":\"Test Author\"},\"difficulty\":\"Test Difficulty\",\"edition_date\":\"2000-01-01T00:00:00Z\",\"rating\":5,\"description\":\"Test Description\",\"url\":\"Test URL\",\"language\":\"Test Language\",\"tags\":[{\"uuid\":\"1\",\"name\":\"Test Tag\"}],\"download_count\":10},{\"uuid\":\"1\",\"title\":\"Test Title\",\"direction\":{\"uuid\":\"1\",\"name\":\"Test Direction\"},\"author\":{\"uuid\":\"1\",\"full_name\":\"Test Author\"},\"difficulty\":\"Test Difficulty\",\"edition_date\":\"2000-01-01T00:00:00Z\",\"rating\":5,\"description\":\"Test Description\",\"url\":\"Test URL\",\"language\":\"Test Language\",\"tags\":[{\"uuid\":\"1\",\"name\":\"Test Tag\"}],\"download_count\":10}]\n",
 		},
 		{
 			name:   "OK empty input",
@@ -49,7 +49,7 @@ func TestBookHandler_GetAll(t *testing.T) {
 				s.EXPECT().GetAll(ctx, limit, offset).Return([]*domain.Book{domain.TestBook(), domain.TestBook()}, nil)
 			},
 			expectedStatusCode:  200,
-			expectedRequestBody: "[{\"uuid\":\"1\",\"title\":\"Test Title\",\"direction\":{\"uuid\":\"1\",\"name\":\"test direction\"},\"author\":{\"uuid\":\"1\",\"full_name\":\"test Author\"},\"difficulty\":\"Test Difficulty\",\"edition_date\":\"2000-01-01T00:00:00Z\",\"rating\":5,\"description\":\"Test Description\",\"url\":\"Test URL\",\"language\":\"Test Language\",\"tags\":[{\"uuid\":\"1\",\"name\":\"test Tag\"}],\"download_count\":10},{\"uuid\":\"1\",\"title\":\"Test Title\",\"direction\":{\"uuid\":\"1\",\"name\":\"test direction\"},\"author\":{\"uuid\":\"1\",\"full_name\":\"test Author\"},\"difficulty\":\"Test Difficulty\",\"edition_date\":\"2000-01-01T00:00:00Z\",\"rating\":5,\"description\":\"Test Description\",\"url\":\"Test URL\",\"language\":\"Test Language\",\"tags\":[{\"uuid\":\"1\",\"name\":\"test Tag\"}],\"download_count\":10}]\n",
+			expectedRequestBody: "[{\"uuid\":\"1\",\"title\":\"Test Title\",\"direction\":{\"uuid\":\"1\",\"name\":\"Test Direction\"},\"author\":{\"uuid\":\"1\",\"full_name\":\"Test Author\"},\"difficulty\":\"Test Difficulty\",\"edition_date\":\"2000-01-01T00:00:00Z\",\"rating\":5,\"description\":\"Test Description\",\"url\":\"Test URL\",\"language\":\"Test Language\",\"tags\":[{\"uuid\":\"1\",\"name\":\"Test Tag\"}],\"download_count\":10},{\"uuid\":\"1\",\"title\":\"Test Title\",\"direction\":{\"uuid\":\"1\",\"name\":\"Test Direction\"},\"author\":{\"uuid\":\"1\",\"full_name\":\"Test Author\"},\"difficulty\":\"Test Difficulty\",\"edition_date\":\"2000-01-01T00:00:00Z\",\"rating\":5,\"description\":\"Test Description\",\"url\":\"Test URL\",\"language\":\"Test Language\",\"tags\":[{\"uuid\":\"1\",\"name\":\"Test Tag\"}],\"download_count\":10}]\n",
 		},
 		{
 			name:   "OK invalid input",
@@ -61,7 +61,7 @@ func TestBookHandler_GetAll(t *testing.T) {
 				s.EXPECT().GetAll(ctx, limit, offset).Return([]*domain.Book{domain.TestBook(), domain.TestBook()}, nil)
 			},
 			expectedStatusCode:  200,
-			expectedRequestBody: "[{\"uuid\":\"1\",\"title\":\"Test Title\",\"direction\":{\"uuid\":\"1\",\"name\":\"test direction\"},\"author\":{\"uuid\":\"1\",\"full_name\":\"test Author\"},\"difficulty\":\"Test Difficulty\",\"edition_date\":\"2000-01-01T00:00:00Z\",\"rating\":5,\"description\":\"Test Description\",\"url\":\"Test URL\",\"language\":\"Test Language\",\"tags\":[{\"uuid\":\"1\",\"name\":\"test Tag\"}],\"download_count\":10},{\"uuid\":\"1\",\"title\":\"Test Title\",\"direction\":{\"uuid\":\"1\",\"name\":\"test direction\"},\"author\":{\"uuid\":\"1\",\"full_name\":\"test Author\"},\"difficulty\":\"Test Difficulty\",\"edition_date\":\"2000-01-01T00:00:00Z\",\"rating\":5,\"description\":\"Test Description\",\"url\":\"Test URL\",\"language\":\"Test Language\",\"tags\":[{\"uuid\":\"1\",\"name\":\"test Tag\"}],\"download_count\":10}]\n",
+			expectedRequestBody: "[{\"uuid\":\"1\",\"title\":\"Test Title\",\"direction\":{\"uuid\":\"1\",\"name\":\"Test Direction\"},\"author\":{\"uuid\":\"1\",\"full_name\":\"Test Author\"},\"difficulty\":\"Test Difficulty\",\"edition_date\":\"2000-01-01T00:00:00Z\",\"rating\":5,\"description\":\"Test Description\",\"url\":\"Test URL\",\"language\":\"Test Language\",\"tags\":[{\"uuid\":\"1\",\"name\":\"Test Tag\"}],\"download_count\":10},{\"uuid\":\"1\",\"title\":\"Test Title\",\"direction\":{\"uuid\":\"1\",\"name\":\"Test Direction\"},\"author\":{\"uuid\":\"1\",\"full_name\":\"Test Author\"},\"difficulty\":\"Test Difficulty\",\"edition_date\":\"2000-01-01T00:00:00Z\",\"rating\":5,\"description\":\"Test Description\",\"url\":\"Test URL\",\"language\":\"Test Language\",\"tags\":[{\"uuid\":\"1\",\"name\":\"Test Tag\"}],\"download_count\":10}]\n",
 		},
 		{
 			name:   "No rows in result",
@@ -84,7 +84,9 @@ func TestBookHandler_GetAll(t *testing.T) {
 			service := mock_service.NewMockBookService(c)
 			testCase.mockBehavior(service, testCase.ctx, testCase.limit, testCase.offset)
 
-			BookHandler := NewBookHandler(service, logging.GetLogger())
+			logger := logging.GetLogger()
+			middleware := NewMiddlewares(logger)
+			BookHandler := NewBookHandler(service, logger, &middleware)
 
 			router := httprouter.New()
 			BookHandler.Register(router)
@@ -120,7 +122,7 @@ func TestBookHandler_GetByUUID(t *testing.T) {
 				s.EXPECT().GetByUUID(ctx, uuid).Return(domain.TestBook(), nil)
 			},
 			expectedStatusCode:  200,
-			expectedRequestBody: "{\"uuid\":\"1\",\"title\":\"Test Title\",\"direction\":{\"uuid\":\"1\",\"name\":\"test direction\"},\"author\":{\"uuid\":\"1\",\"full_name\":\"test Author\"},\"difficulty\":\"Test Difficulty\",\"edition_date\":\"2000-01-01T00:00:00Z\",\"rating\":5,\"description\":\"Test Description\",\"url\":\"Test URL\",\"language\":\"Test Language\",\"tags\":[{\"uuid\":\"1\",\"name\":\"test Tag\"}],\"download_count\":10}\n",
+			expectedRequestBody: "{\"uuid\":\"1\",\"title\":\"Test Title\",\"direction\":{\"uuid\":\"1\",\"name\":\"Test Direction\"},\"author\":{\"uuid\":\"1\",\"full_name\":\"Test Author\"},\"difficulty\":\"Test Difficulty\",\"edition_date\":\"2000-01-01T00:00:00Z\",\"rating\":5,\"description\":\"Test Description\",\"url\":\"Test URL\",\"language\":\"Test Language\",\"tags\":[{\"uuid\":\"1\",\"name\":\"Test Tag\"}],\"download_count\":10}\n",
 		},
 		{
 			name:                "invalid uuid",
@@ -170,7 +172,9 @@ func TestBookHandler_GetByUUID(t *testing.T) {
 			service := mock_service.NewMockBookService(c)
 			testCase.mockBehavior(service, testCase.ctx, testCase.uuid)
 
-			BookHandler := NewBookHandler(service, logging.GetLogger())
+			logger := logging.GetLogger()
+			middleware := NewMiddlewares(logger)
+			BookHandler := NewBookHandler(service, logger, &middleware)
 
 			router := httprouter.New()
 			BookHandler.Register(router)
@@ -210,14 +214,14 @@ func TestBookHandler_GetByUUID(t *testing.T) {
 //				writer := multipart.NewWriter(pw)
 //				part, _ := writer.CreateFormFile("file", "book.pdf")
 //				part.Write(fileBytes)
-//				writer.WriteField("file", "test file")
-//				writer.WriteField("title", "test title")
+//				writer.WriteField("file", "Testfile")
+//				writer.WriteField("title", "Test Title")
 //				writer.WriteField("direction_uuid", "1")
 //				writer.WriteField("author_uuid", "1")
-//				writer.WriteField("difficulty", "test difficulty")
-//				writer.WriteField("edition_date", "test edition_date")
-//				writer.WriteField("description", "test description")
-//				writer.WriteField("language", "test language")
+//				writer.WriteField("difficulty", "Test Difficulty")
+//				writer.WriteField("edition_date", "Testedition_date")
+//				writer.WriteField("description", "Test Description")
+//				writer.WriteField("language", "Test Language")
 //				writer.WriteField("tags_uuids", `{"1"}`)
 //				return pr
 //			},
@@ -236,7 +240,9 @@ func TestBookHandler_GetByUUID(t *testing.T) {
 //			service := mock_service.NewMockBookService(c)
 //			testCase.mockBehavior(service, testCase.ctx, testCase.createBookDTO)
 //
-//			BookHandler := NewBookHandler(service, logging.GetLogger())
+//			logger := logging.GetLogger()
+//			middleware := NewMiddlewares(logger)
+//			BookHandler := NewBookHandler(service, logger, &middleware)
 //
 //			router := httprouter.New()
 //			BookHandler.Register(router)
@@ -322,7 +328,9 @@ func TestBookHandler_Delete(t *testing.T) {
 			service := mock_service.NewMockBookService(c)
 			testCase.mockBehavior(service, testCase.ctx, testCase.uuid)
 
-			BookHandler := NewBookHandler(service, logging.GetLogger())
+			logger := logging.GetLogger()
+			middleware := NewMiddlewares(logger)
+			BookHandler := NewBookHandler(service, logger, &middleware)
 
 			router := httprouter.New()
 			BookHandler.Register(router)
@@ -417,7 +425,9 @@ func TestBookHandler_Update(t *testing.T) {
 			service := mock_service.NewMockBookService(c)
 			testCase.mockBehavior(service, testCase.ctx, &testCase.dto)
 
-			BookHandler := NewBookHandler(service, logging.GetLogger())
+			logger := logging.GetLogger()
+			middleware := NewMiddlewares(logger)
+			BookHandler := NewBookHandler(service, logger, &middleware)
 
 			router := httprouter.New()
 			BookHandler.Register(router)
@@ -453,7 +463,7 @@ func TestBookHandler_Update(t *testing.T) {
 //				s.EXPECT().GetByUUID(ctx, uuid).Return(domain.TestBook(), nil)
 //			},
 //			expectedStatusCode:  200,
-//			expectedRequestBody: fmt.Sprintln(`{"uuid":"1","title":"Test Title","direction":{"uuid":"1","name":"test direction"},"difficulty":"Test Difficulty","author":{"uuid":"1","full_name":"test Author"},"edition_date":"2000-01-01T00:00:00Z","rating":5,"description":"Test Description","url":"Test URL","language":"Test Language","tags":[{"uuid":"1","name":"test Tag"}],"download_count":10}`),
+//			expectedRequestBody: fmt.Sprintln(`{"uuid":"1","title":"Test Title","direction":{"uuid":"1","name":"Testdirection"},"difficulty":"Test Difficulty","author":{"uuid":"1","full_name":"Test Author"},"edition_date":"2000-01-01T00:00:00Z","rating":5,"description":"Test Description","url":"Test URL","language":"Test Language","tags":[{"uuid":"1","name":"Test Tag"}],"download_count":10}`),
 //		},
 //	}
 //	for _, testCase := range testTable {
@@ -464,7 +474,9 @@ func TestBookHandler_Update(t *testing.T) {
 //			service := mock_service.NewMockBookService(c)
 //			testCase.mockBehavior(service, testCase.ctx, testCase.uuid)
 //
-//			BookHandler := NewBookHandler(service, logging.GetLogger())
+//			logger := logging.GetLogger()
+//			middleware := NewMiddlewares(logger)
+//			BookHandler := NewBookHandler(service, logger, &middleware)
 //
 //			router := httprouter.New()
 //			BookHandler.Register(router)

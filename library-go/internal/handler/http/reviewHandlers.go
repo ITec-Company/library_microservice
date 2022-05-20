@@ -23,14 +23,16 @@ const (
 )
 
 type reviewHandler struct {
-	Service service.ReviewService
-	logger  *logging.Logger
+	Service    service.ReviewService
+	logger     *logging.Logger
+	Middleware *Middleware
 }
 
-func NewReviewHandler(service service.ReviewService, logger *logging.Logger) handler.Handler {
+func NewReviewHandler(service service.ReviewService, logger *logging.Logger, middleware *Middleware) handler.Handler {
 	return &reviewHandler{
-		Service: service,
-		logger:  logger,
+		Service:    service,
+		logger:     logger,
+		Middleware: middleware,
 	}
 }
 

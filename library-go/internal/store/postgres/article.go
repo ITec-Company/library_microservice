@@ -2,6 +2,8 @@ package postgres
 
 import (
 	"database/sql"
+	"fmt"
+	"github.com/Masterminds/squirrel"
 	"github.com/lib/pq"
 	"library-go/internal/domain"
 	"library-go/internal/store"
@@ -9,22 +11,8 @@ import (
 	"strings"
 )
 
-type articleStorage struct {
-	logger *logging.Logger
-	db     *sql.DB
-}
-
-func NewArticleStorage(db *sql.DB, logger *logging.Logger) store.ArticleStorage {
-	return &articleStorage{
-		logger: logger,
-		db:     db,
-	}
-}
-
-func (as *articleStorage) GetOne(UUID string) (*domain.Article, error) {
-	var article domain.Article
-	var tagsStr []string
-	if err := as.db.QueryRow(`SELECT 
+const (
+	getOneArticleQuery = `SELECT 
 		A.uuid,
 		A.title,
 		A.difficulty,
@@ -44,7 +32,75 @@ func (as *articleStorage) GetOne(UUID string) (*domain.Article, error) {
 	LEFT JOIN direction AS D ON D.uuid = A.direction_uuid
 	LEFT JOIN tag AS T ON  T.uuid = any (A.tags_uuids)
 	WHERE  A.uuid = $1
-	GROUP BY A.uuid, A.title, A.difficulty, A.edition_date, A.rating, A.description, A.url, A.language, A.download_count, Au.uuid, Au.full_name, D.uuid, D.name`,
+	GROUP BY A.uuid, A.title, A.difficulty, A.edition_date, A.rating, A.description, A.url, A.language, A.download_count, Au.uuid, Au.full_name, D.uuid, D.name`
+	getAllArticlesQuery = `SELECT 
+		A.uuid,
+		A.title,
+		A.difficulty,
+		A.edition_date,
+		A.rating,
+		A.description,
+		A.url,
+		A.language,
+		A.download_count,
+		Au.uuid,
+		Au.full_name,
+		D.uuid as direction_uuid,
+		D.name as direction_name,
+		array_agg(DISTINCT T) as tags
+	FROM article AS A
+	lEFT JOIN author AS Au ON Au.uuid = A.author_uuid
+	LEFT JOIN direction AS D ON D.uuid = A.direction_uuid
+	LEFT JOIN tag AS T ON  T.uuid = any (A.tags_uuids)
+	GROUP BY A.uuid, A.title, A.difficulty, A.edition_date, A.rating, A.description, A.url, A.language, A.download_count, Au.uuid, Au.full_name, D.uuid, D.name`
+	createArticleQuery = `INSERT INTO article (
+                     title, 
+                     direction_uuid, 
+                     author_uuid,
+                     difficulty,
+                     edition_date,
+                     rating, 
+                     description,
+                     url, 
+                     language, 
+                     tags_uuids, 
+                     download_count
+				) SELECT $1, $2 , $3, $4, $5, $6, $7, $8, $9, $10, $11
+				WHERE EXISTS(SELECT uuid FROM author where $3 = author.uuid) AND
+				EXISTS(SELECT uuid FROM direction where $2 = direction.uuid) AND
+			    EXISTS(SELECT uuid FROM tag where tag.uuid = any($10)) RETURNING article.uuid`
+	deleteArticleQuery = `DELETE FROM article WHERE uuid = $1`
+	updateArticleQuery = `UPDATE article SET 
+			title = COALESCE(NULLIF($1, ''), title),  
+			direction_uuid = (CASE WHEN (EXISTS(SELECT uuid FROM direction where direction.uuid = $2)) THEN $2 ELSE COALESCE(NULLIF($2, 0), direction_uuid) END), 
+			author_uuid = (CASE WHEN (EXISTS(SELECT uuid FROM author where author.uuid = $3)) THEN $3 ELSE COALESCE(NULLIF($3, 0), author_uuid) END), 
+			difficulty = COALESCE($4, difficulty), 
+			edition_date = COALESCE($5, edition_date), 
+			rating = COALESCE(NULLIF($6, 0), rating), 
+			description = COALESCE(NULLIF($7, ''), description), 
+			url = COALESCE(NULLIF($8, ''), url), 
+			language = COALESCE(NULLIF($9, ''), language), 
+			tags_uuids = (CASE WHEN (EXISTS(SELECT uuid FROM tag where tag.uuid = any($10))) THEN $10 ELSE COALESCE($10, tags_uuids) END),
+			download_count = COALESCE(NULLIF($11, 0), download_count)
+		WHERE uuid = $12`
+)
+
+type articleStorage struct {
+	logger *logging.Logger
+	db     *sql.DB
+}
+
+func NewArticleStorage(db *sql.DB, logger *logging.Logger) store.ArticleStorage {
+	return &articleStorage{
+		logger: logger,
+		db:     db,
+	}
+}
+
+func (as *articleStorage) GetOne(UUID string) (*domain.Article, error) {
+	var article domain.Article
+	var tagsStr []string
+	if err := as.db.QueryRow(getOneArticleQuery,
 		UUID).Scan(
 		&article.UUID,
 		&article.Title,
@@ -76,27 +132,34 @@ func (as *articleStorage) GetOne(UUID string) (*domain.Article, error) {
 	return &article, nil
 }
 
-func (as *articleStorage) GetAll(limit, offset int) ([]*domain.Article, error) {
-	rows, err := as.db.Query(`SELECT 
-		A.uuid,
-		A.title,
-		A.difficulty,
-		A.edition_date,
-		A.rating,
-		A.description,
-		A.url,
-		A.language,
-		A.download_count,
-		Au.uuid,
-		Au.full_name,
-		D.uuid as direction_uuid,
-		D.name as direction_name,
-		array_agg(DISTINCT T) as tags
-	FROM article AS A
-	lEFT JOIN author AS Au ON Au.uuid = A.author_uuid
-	LEFT JOIN direction AS D ON D.uuid = A.direction_uuid
-	LEFT JOIN tag AS T ON  T.uuid = any (A.tags_uuids)
-	GROUP BY A.uuid, A.title, A.difficulty, A.edition_date, A.rating, A.description, A.url, A.language, A.download_count, Au.uuid, Au.full_name, D.uuid, D.name`)
+func (as *articleStorage) GetAll(sortOptions *domain.SortFilterPagination) ([]*domain.Article, error) {
+
+	s := squirrel.Select("A.uuid,\n\t\tA.title,\n\t\tA.difficulty,\n\t\tA.edition_date,\n\t\tA.rating,\n\t\tA.description,\n\t\tA.url,\n\t\tA.language,\n\t\tA.download_count,\n\t\tAu.uuid,\n\t\tAu.full_name,\n\t\tD.uuid as direction_uuid,\n\t\tD.name as direction_name,\n\t\tarray_agg(DISTINCT T) as tags").
+		From("article AS A").
+		LeftJoin("author AS Au ON Au.uuid = A.author_uuid").
+		LeftJoin("direction AS D ON D.uuid = A.direction_uuid").
+		LeftJoin("tag AS T ON  T.uuid = any (A.tags_uuids)").
+		GroupBy("A.uuid, A.title, A.difficulty, A.edition_date, A.rating, A.description, A.url, A.language, A.download_count, Au.uuid, Au.full_name, D.uuid, D.name")
+
+	if sortOptions.Limit != 0 {
+		s = s.Limit(sortOptions.Limit)
+		if sortOptions.Page != 0 {
+			offset := (sortOptions.Page - 1) * sortOptions.Limit
+			s = s.Offset(offset)
+		}
+	}
+
+	if sortOptions.FiltersAndArgs != nil {
+		s = s.Where(sortOptions.FiltersAndArgs).PlaceholderFormat(squirrel.Dollar)
+	}
+
+	if sortOptions.SortBy != "" {
+		s = s.OrderBy(fmt.Sprintf("%s %s", sortOptions.SortBy, sortOptions.Order))
+	}
+
+	query, args, _ := s.ToSql()
+
+	rows, err := as.db.Query(query, args...)
 	if err != nil {
 		as.logger.Errorf("error occurred while selecting all articles. err: %v", err)
 		return nil, err
@@ -143,24 +206,15 @@ func (as *articleStorage) GetAll(limit, offset int) ([]*domain.Article, error) {
 }
 
 func (as *articleStorage) Create(articleCreateDTO *domain.CreateArticleDTO) (string, error) {
+	tx, err := as.db.Begin()
+	if err != nil {
+		as.logger.Errorf("error occurred while creating transaction. err: %v", err)
+		return "", err
+	}
+
 	var UUID string
-	if err := as.db.QueryRow(
-		`INSERT INTO article (
-                     title, 
-                     direction_uuid, 
-                     author_uuid,
-                     difficulty,
-                     edition_date,
-                     rating, 
-                     description,
-                     url, 
-                     language, 
-                     tags_uuids, 
-                     download_count
-				) SELECT $1, $2 , $3, $4, $5, $6, $7, $8, $9, $10, $11
-				WHERE EXISTS(SELECT uuid FROM author where $3 = author.uuid) AND
-				EXISTS(SELECT uuid FROM direction where $2 = direction.uuid) AND
-			    EXISTS(SELECT uuid FROM tag where tag.uuid = any($10)) RETURNING article.uuid`,
+
+	row := tx.QueryRow(createArticleQuery,
 		articleCreateDTO.Title,
 		articleCreateDTO.DirectionUUID,
 		articleCreateDTO.AuthorUUID,
@@ -172,50 +226,55 @@ func (as *articleStorage) Create(articleCreateDTO *domain.CreateArticleDTO) (str
 		articleCreateDTO.Language,
 		pq.Array(articleCreateDTO.TagsUUIDs),
 		0,
-	).Scan(&UUID); err != nil {
+	)
+
+	if err := row.Scan(&UUID); err != nil {
+		tx.Rollback()
 		as.logger.Errorf("error occurred while creating article. err: %v", err)
 		return UUID, err
 	}
 
-	return UUID, nil
+	return UUID, tx.Commit()
 }
 
 func (as *articleStorage) Delete(UUID string) error {
-	result, err := as.db.Exec("DELETE FROM article WHERE uuid = $1", UUID)
+	tx, err := as.db.Begin()
 	if err != nil {
+		as.logger.Errorf("error occurred while creating transaction. err: %v", err)
+		return err
+	}
+
+	result, err := tx.Exec(deleteArticleQuery, UUID)
+	if err != nil {
+		tx.Rollback()
 		as.logger.Errorf("error occurred while deleting article. err: %v.", err)
 		return err
 	}
 
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
+		tx.Rollback()
 		as.logger.Errorf("error occurred while deleting article (getting affected rows). err: %v", err)
 		return err
 	}
 
 	if rowsAffected < 1 {
-		as.logger.Errorf("error occurred while deleting article. err: %v.", ErrNoRowsAffected)
+		tx.Rollback()
+		as.logger.Errorf("No article with UUID %s was found", UUID)
 		return ErrNoRowsAffected
 	}
 	as.logger.Infof("Article with uuid %s was deleted.", UUID)
-	return nil
+	return tx.Commit()
 }
 
 func (as *articleStorage) Update(articleUpdateDTO *domain.UpdateArticleDTO) error {
-	result, err := as.db.Exec(
-		`UPDATE article SET 
-			title = COALESCE(NULLIF($1, ''), title),  
-			direction_uuid = (CASE WHEN (EXISTS(SELECT uuid FROM direction where direction.uuid = $2)) THEN $2 ELSE COALESCE(NULLIF($2, 0), direction_uuid) END), 
-			author_uuid = (CASE WHEN (EXISTS(SELECT uuid FROM author where author.uuid = $3)) THEN $3 ELSE COALESCE(NULLIF($3, 0), author_uuid) END), 
-			difficulty = COALESCE($4, difficulty), 
-			edition_date = COALESCE($5, edition_date), 
-			rating = COALESCE(NULLIF($6, 0), rating), 
-			description = COALESCE(NULLIF($7, ''), description), 
-			url = COALESCE(NULLIF($8, ''), url), 
-			language = COALESCE(NULLIF($9, ''), language), 
-			tags_uuids = (CASE WHEN (EXISTS(SELECT uuid FROM tag where tag.uuid = any($10))) THEN $10 ELSE COALESCE($10, tags_uuids) END),
-			download_count = COALESCE(NULLIF($11, 0), download_count)
-		WHERE uuid = $12`,
+	tx, err := as.db.Begin()
+	if err != nil {
+		as.logger.Errorf("error occurred while creating transaction. err: %v", err)
+		return err
+	}
+
+	result, err := tx.Exec(updateArticleQuery,
 		articleUpdateDTO.Title,
 		articleUpdateDTO.DirectionUUID,
 		articleUpdateDTO.AuthorUUID,
@@ -230,20 +289,23 @@ func (as *articleStorage) Update(articleUpdateDTO *domain.UpdateArticleDTO) erro
 		articleUpdateDTO.UUID,
 	)
 	if err != nil {
+		tx.Rollback()
 		as.logger.Errorf("error occurred while updating article. err: %v", err)
 		return err
 	}
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
+		tx.Rollback()
 		as.logger.Errorf("error occurred while updating article (getting affected rows). err: %v", err)
 		return err
 	}
 	if rowsAffected < 1 {
+		tx.Rollback()
 		as.logger.Errorf("error occurred while updating article. err: %v.", ErrNoRowsAffected)
 		return ErrNoRowsAffected
 	}
 
 	as.logger.Infof("article with uuid %s was updated.", articleUpdateDTO.UUID)
 
-	return nil
+	return tx.Commit()
 }

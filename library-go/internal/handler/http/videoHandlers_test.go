@@ -37,7 +37,7 @@ func TestVideoHandler_GetAll(t *testing.T) {
 				s.EXPECT().GetAll(ctx, limit, offset).Return([]*domain.Video{domain.TestVideo(), domain.TestVideo()}, nil)
 			},
 			expectedStatusCode:  200,
-			expectedRequestBody: "[{\"uuid\":\"1\",\"title\":\"Test Title\",\"direction\":{\"uuid\":\"1\",\"name\":\"test direction\"},\"rating\":5,\"difficulty\":\"Test Difficulty\",\"url\":\"Test URL\",\"language\":\"Test Language\",\"tags\":[{\"uuid\":\"1\",\"name\":\"test Tag\"}],\"download_count\":10},{\"uuid\":\"1\",\"title\":\"Test Title\",\"direction\":{\"uuid\":\"1\",\"name\":\"test direction\"},\"rating\":5,\"difficulty\":\"Test Difficulty\",\"url\":\"Test URL\",\"language\":\"Test Language\",\"tags\":[{\"uuid\":\"1\",\"name\":\"test Tag\"}],\"download_count\":10}]\n",
+			expectedRequestBody: "[{\"uuid\":\"1\",\"title\":\"Test Title\",\"direction\":{\"uuid\":\"1\",\"name\":\"Test Direction\"},\"rating\":5,\"difficulty\":\"Test Difficulty\",\"url\":\"Test URL\",\"language\":\"Test Language\",\"tags\":[{\"uuid\":\"1\",\"name\":\"Test Tag\"}],\"download_count\":10},{\"uuid\":\"1\",\"title\":\"Test Title\",\"direction\":{\"uuid\":\"1\",\"name\":\"Test Direction\"},\"rating\":5,\"difficulty\":\"Test Difficulty\",\"url\":\"Test URL\",\"language\":\"Test Language\",\"tags\":[{\"uuid\":\"1\",\"name\":\"Test Tag\"}],\"download_count\":10}]\n",
 		},
 		{
 			name:   "OK empty input",
@@ -49,7 +49,7 @@ func TestVideoHandler_GetAll(t *testing.T) {
 				s.EXPECT().GetAll(ctx, limit, offset).Return([]*domain.Video{domain.TestVideo(), domain.TestVideo()}, nil)
 			},
 			expectedStatusCode:  200,
-			expectedRequestBody: "[{\"uuid\":\"1\",\"title\":\"Test Title\",\"direction\":{\"uuid\":\"1\",\"name\":\"test direction\"},\"rating\":5,\"difficulty\":\"Test Difficulty\",\"url\":\"Test URL\",\"language\":\"Test Language\",\"tags\":[{\"uuid\":\"1\",\"name\":\"test Tag\"}],\"download_count\":10},{\"uuid\":\"1\",\"title\":\"Test Title\",\"direction\":{\"uuid\":\"1\",\"name\":\"test direction\"},\"rating\":5,\"difficulty\":\"Test Difficulty\",\"url\":\"Test URL\",\"language\":\"Test Language\",\"tags\":[{\"uuid\":\"1\",\"name\":\"test Tag\"}],\"download_count\":10}]\n",
+			expectedRequestBody: "[{\"uuid\":\"1\",\"title\":\"Test Title\",\"direction\":{\"uuid\":\"1\",\"name\":\"Test Direction\"},\"rating\":5,\"difficulty\":\"Test Difficulty\",\"url\":\"Test URL\",\"language\":\"Test Language\",\"tags\":[{\"uuid\":\"1\",\"name\":\"Test Tag\"}],\"download_count\":10},{\"uuid\":\"1\",\"title\":\"Test Title\",\"direction\":{\"uuid\":\"1\",\"name\":\"Test Direction\"},\"rating\":5,\"difficulty\":\"Test Difficulty\",\"url\":\"Test URL\",\"language\":\"Test Language\",\"tags\":[{\"uuid\":\"1\",\"name\":\"Test Tag\"}],\"download_count\":10}]\n",
 		},
 		{
 			name:   "OK invalid input",
@@ -61,7 +61,7 @@ func TestVideoHandler_GetAll(t *testing.T) {
 				s.EXPECT().GetAll(ctx, limit, offset).Return([]*domain.Video{domain.TestVideo(), domain.TestVideo()}, nil)
 			},
 			expectedStatusCode:  200,
-			expectedRequestBody: "[{\"uuid\":\"1\",\"title\":\"Test Title\",\"direction\":{\"uuid\":\"1\",\"name\":\"test direction\"},\"rating\":5,\"difficulty\":\"Test Difficulty\",\"url\":\"Test URL\",\"language\":\"Test Language\",\"tags\":[{\"uuid\":\"1\",\"name\":\"test Tag\"}],\"download_count\":10},{\"uuid\":\"1\",\"title\":\"Test Title\",\"direction\":{\"uuid\":\"1\",\"name\":\"test direction\"},\"rating\":5,\"difficulty\":\"Test Difficulty\",\"url\":\"Test URL\",\"language\":\"Test Language\",\"tags\":[{\"uuid\":\"1\",\"name\":\"test Tag\"}],\"download_count\":10}]\n",
+			expectedRequestBody: "[{\"uuid\":\"1\",\"title\":\"Test Title\",\"direction\":{\"uuid\":\"1\",\"name\":\"Test Direction\"},\"rating\":5,\"difficulty\":\"Test Difficulty\",\"url\":\"Test URL\",\"language\":\"Test Language\",\"tags\":[{\"uuid\":\"1\",\"name\":\"Test Tag\"}],\"download_count\":10},{\"uuid\":\"1\",\"title\":\"Test Title\",\"direction\":{\"uuid\":\"1\",\"name\":\"Test Direction\"},\"rating\":5,\"difficulty\":\"Test Difficulty\",\"url\":\"Test URL\",\"language\":\"Test Language\",\"tags\":[{\"uuid\":\"1\",\"name\":\"Test Tag\"}],\"download_count\":10}]\n",
 		},
 		{
 			name:   "No rows in result",
@@ -84,7 +84,9 @@ func TestVideoHandler_GetAll(t *testing.T) {
 			service := mock_service.NewMockVideoService(c)
 			testCase.mockBehavior(service, testCase.ctx, testCase.limit, testCase.offset)
 
-			VideoHandler := NewVideoHandler(service, logging.GetLogger())
+			logger := logging.GetLogger()
+			middleware := NewMiddlewares(logger)
+			VideoHandler := NewVideoHandler(service, logger, &middleware)
 
 			router := httprouter.New()
 			VideoHandler.Register(router)
@@ -120,7 +122,7 @@ func TestVideoHandler_GetByUUID(t *testing.T) {
 				s.EXPECT().GetByUUID(ctx, uuid).Return(domain.TestVideo(), nil)
 			},
 			expectedStatusCode:  200,
-			expectedRequestBody: "{\"uuid\":\"1\",\"title\":\"Test Title\",\"direction\":{\"uuid\":\"1\",\"name\":\"test direction\"},\"rating\":5,\"difficulty\":\"Test Difficulty\",\"url\":\"Test URL\",\"language\":\"Test Language\",\"tags\":[{\"uuid\":\"1\",\"name\":\"test Tag\"}],\"download_count\":10}\n",
+			expectedRequestBody: "{\"uuid\":\"1\",\"title\":\"Test Title\",\"direction\":{\"uuid\":\"1\",\"name\":\"Test Direction\"},\"rating\":5,\"difficulty\":\"Test Difficulty\",\"url\":\"Test URL\",\"language\":\"Test Language\",\"tags\":[{\"uuid\":\"1\",\"name\":\"Test Tag\"}],\"download_count\":10}\n",
 		},
 		{
 			name:                "invalid uuid",
@@ -170,7 +172,9 @@ func TestVideoHandler_GetByUUID(t *testing.T) {
 			service := mock_service.NewMockVideoService(c)
 			testCase.mockBehavior(service, testCase.ctx, testCase.uuid)
 
-			VideoHandler := NewVideoHandler(service, logging.GetLogger())
+			logger := logging.GetLogger()
+			middleware := NewMiddlewares(logger)
+			VideoHandler := NewVideoHandler(service, logger, &middleware)
 
 			router := httprouter.New()
 			VideoHandler.Register(router)
@@ -210,14 +214,14 @@ func TestVideoHandler_GetByUUID(t *testing.T) {
 //				writer := multipart.NewWriter(pw)
 //				part, _ := writer.CreateFormFile("file", "video.pdf")
 //				part.Write(fileBytes)
-//				writer.WriteField("file", "test file")
-//				writer.WriteField("title", "test title")
+//				writer.WriteField("file", "Testfile")
+//				writer.WriteField("title", "Test Title")
 //				writer.WriteField("direction_uuid", "1")
 //				writer.WriteField("author_uuid", "1")
-//				writer.WriteField("difficulty", "test difficulty")
-//				writer.WriteField("edition_date", "test edition_date")
-//				writer.WriteField("description", "test description")
-//				writer.WriteField("language", "test language")
+//				writer.WriteField("difficulty", "Test Difficulty")
+//				writer.WriteField("edition_date", "Testedition_date")
+//				writer.WriteField("description", "Test Description")
+//				writer.WriteField("language", "Test Language")
 //				writer.WriteField("tags_uuids", `{"1"}`)
 //				return pr
 //			},
@@ -236,7 +240,9 @@ func TestVideoHandler_GetByUUID(t *testing.T) {
 //			service := mock_service.NewMockVideoService(c)
 //			testCase.mockBehavior(service, testCase.ctx, testCase.createVideoDTO)
 //
-//			VideoHandler := NewVideoHandler(service, logging.GetLogger())
+//			logger := logging.GetLogger()
+//			middleware := NewMiddlewares(logger)
+//			VideoHandler := NewVideoHandler(service, logger, &middleware)
 //
 //			router := httprouter.New()
 //			VideoHandler.Register(router)
@@ -322,7 +328,9 @@ func TestVideoHandler_Delete(t *testing.T) {
 			service := mock_service.NewMockVideoService(c)
 			testCase.mockBehavior(service, testCase.ctx, testCase.uuid)
 
-			VideoHandler := NewVideoHandler(service, logging.GetLogger())
+			logger := logging.GetLogger()
+			middleware := NewMiddlewares(logger)
+			VideoHandler := NewVideoHandler(service, logger, &middleware)
 
 			router := httprouter.New()
 			VideoHandler.Register(router)
@@ -411,7 +419,9 @@ func TestVideoHandler_Update(t *testing.T) {
 			service := mock_service.NewMockVideoService(c)
 			testCase.mockBehavior(service, testCase.ctx, &testCase.dto)
 
-			VideoHandler := NewVideoHandler(service, logging.GetLogger())
+			logger := logging.GetLogger()
+			middleware := NewMiddlewares(logger)
+			VideoHandler := NewVideoHandler(service, logger, &middleware)
 
 			router := httprouter.New()
 			VideoHandler.Register(router)
@@ -447,7 +457,7 @@ func TestVideoHandler_Update(t *testing.T) {
 //				s.EXPECT().GetByUUID(ctx, uuid).Return(domain.TestVideo(), nil)
 //			},
 //			expectedStatusCode:  200,
-//			expectedRequestBody: fmt.Sprintln(`{"uuid":"1","title":"Test Title","direction":{"uuid":"1","name":"test direction"},"difficulty":"Test Difficulty","author":{"uuid":"1","full_name":"test Author"},"edition_date":"2000-01-01T00:00:00Z","rating":5,"description":"Test Description","url":"Test URL","language":"Test Language","tags":[{"uuid":"1","name":"test Tag"}],"download_count":10}`),
+//			expectedRequestBody: fmt.Sprintln(`{"uuid":"1","title":"Test Title","direction":{"uuid":"1","name":"Testdirection"},"difficulty":"Test Difficulty","author":{"uuid":"1","full_name":"Test Author"},"edition_date":"2000-01-01T00:00:00Z","rating":5,"description":"Test Description","url":"Test URL","language":"Test Language","tags":[{"uuid":"1","name":"Test Tag"}],"download_count":10}`),
 //		},
 //	}
 //	for _, testCase := range testTable {
@@ -458,7 +468,9 @@ func TestVideoHandler_Update(t *testing.T) {
 //			service := mock_service.NewMockVideoService(c)
 //			testCase.mockBehavior(service, testCase.ctx, testCase.uuid)
 //
-//			VideoHandler := NewVideoHandler(service, logging.GetLogger())
+//			logger := logging.GetLogger()
+//			middleware := NewMiddlewares(logger)
+//			VideoHandler := NewVideoHandler(service, logger, &middleware)
 //
 //			router := httprouter.New()
 //			VideoHandler.Register(router)

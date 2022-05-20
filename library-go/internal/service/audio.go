@@ -2,9 +2,11 @@ package service
 
 import (
 	"context"
+	"io"
 	"library-go/internal/domain"
 	"library-go/internal/store"
 	"library-go/pkg/logging"
+	"library-go/pkg/utils"
 )
 
 type audioService struct {
@@ -37,4 +39,12 @@ func (s *audioService) Create(ctx context.Context, audio *domain.CreateAudioDTO)
 
 func (s *audioService) Update(ctx context.Context, audio *domain.UpdateAudioDTO) error {
 	return s.storage.Update(audio)
+}
+
+func (s *audioService) Load(ctx context.Context, path string) ([]byte, error) {
+	return utils.LoadFile(path)
+}
+
+func (s *audioService) Save(ctx context.Context, path, fileName string, file io.Reader) error {
+	return utils.SaveFile(path, fileName, file)
 }

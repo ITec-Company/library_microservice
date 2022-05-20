@@ -2,9 +2,11 @@ package service
 
 import (
 	"context"
+	"io"
 	"library-go/internal/domain"
 	"library-go/internal/store"
 	"library-go/pkg/logging"
+	"library-go/pkg/utils"
 )
 
 type videoService struct {
@@ -37,4 +39,12 @@ func (s *videoService) Create(ctx context.Context, video *domain.CreateVideoDTO)
 
 func (s *videoService) Update(ctx context.Context, video *domain.UpdateVideoDTO) error {
 	return s.storage.Update(video)
+}
+
+func (s *videoService) Load(ctx context.Context, path string) ([]byte, error) {
+	return utils.LoadFile(path)
+}
+
+func (s *videoService) Save(ctx context.Context, path, fileName string, file io.Reader) error {
+	return utils.SaveFile(path, fileName, file)
 }

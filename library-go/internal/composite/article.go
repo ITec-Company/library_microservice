@@ -15,9 +15,9 @@ type ArticleComposite struct {
 	Handler handler.Handler
 }
 
-func (ac *ArticleComposite) New(storage store.ArticleStorage, logger *logging.Logger) {
+func (ac *ArticleComposite) New(storage store.ArticleStorage, logger *logging.Logger, middleware *http.Middleware) {
 	ac.logger = logger
 	ac.Storage = storage
 	ac.Service = service.NewArticleService(ac.Storage, ac.logger)
-	ac.Handler = http.NewArticleHandler(ac.Service, ac.logger)
+	ac.Handler = http.NewArticleHandler(ac.Service, ac.logger, middleware)
 }

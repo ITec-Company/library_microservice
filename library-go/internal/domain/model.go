@@ -6,6 +6,7 @@ import (
 
 type Difficulty string
 type Source string
+type Order string
 
 const (
 	Junior Difficulty = "junior"
@@ -16,6 +17,9 @@ const (
 	ArticleSrc Source = "article"
 	VideoSrc   Source = "video"
 	AudioSrc   Source = "audio"
+
+	OrderASC  Order = "asc"
+	OrderDESC Order = "desc"
 )
 
 type Article struct {
@@ -95,4 +99,12 @@ type Video struct {
 	Language      string     `json:"language,omitempty"`
 	Tags          []Tag      `json:"tags,omitempty"`
 	DownloadCount uint32     `json:"download_count,omitempty"`
+}
+
+type SortFilterPagination struct {
+	SortBy         string                 `json:"sort_by,omitempty"`
+	Order          Order                  `json:"order,omitempty"`
+	FiltersAndArgs map[string]interface{} `json:"filters_and_args,omitempty"`
+	Limit          uint64                 `json:"limit"`
+	Page           uint64                 `json:"page"`
 }

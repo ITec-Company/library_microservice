@@ -7,6 +7,7 @@ package mock_service
 import (
 	context "context"
 	gomock "github.com/golang/mock/gomock"
+	io "io"
 	domain "library-go/internal/domain"
 	reflect "reflect"
 )
@@ -107,6 +108,35 @@ func (mr *MockArticleServiceMockRecorder) Update(ctx, article interface{}) *gomo
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*MockArticleService)(nil).Update), ctx, article)
 }
 
+// Load mocks base method
+func (m *MockArticleService) Load(ctx context.Context, path string) ([]byte, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Load", ctx, path)
+	ret0, _ := ret[0].([]byte)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Load indicates an expected call of Load
+func (mr *MockArticleServiceMockRecorder) Load(ctx, path interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Load", reflect.TypeOf((*MockArticleService)(nil).Load), ctx, path)
+}
+
+// Save mocks base method
+func (m *MockArticleService) Save(ctx context.Context, path, fileName string, file io.Reader) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Save", ctx, path, fileName, file)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Save indicates an expected call of Save
+func (mr *MockArticleServiceMockRecorder) Save(ctx, path, fileName, file interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Save", reflect.TypeOf((*MockArticleService)(nil).Save), ctx, path, fileName, file)
+}
+
 // MockAudioService is a mock of AudioService interface
 type MockAudioService struct {
 	ctrl     *gomock.Controller
@@ -201,6 +231,35 @@ func (m *MockAudioService) Update(ctx context.Context, audio *domain.UpdateAudio
 func (mr *MockAudioServiceMockRecorder) Update(ctx, audio interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*MockAudioService)(nil).Update), ctx, audio)
+}
+
+// Load mocks base method
+func (m *MockAudioService) Load(ctx context.Context, path string) ([]byte, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Load", ctx, path)
+	ret0, _ := ret[0].([]byte)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Load indicates an expected call of Load
+func (mr *MockAudioServiceMockRecorder) Load(ctx, path interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Load", reflect.TypeOf((*MockAudioService)(nil).Load), ctx, path)
+}
+
+// Save mocks base method
+func (m *MockAudioService) Save(ctx context.Context, path, fileName string, file io.Reader) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Save", ctx, path, fileName, file)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Save indicates an expected call of Save
+func (mr *MockAudioServiceMockRecorder) Save(ctx, path, fileName, file interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Save", reflect.TypeOf((*MockAudioService)(nil).Save), ctx, path, fileName, file)
 }
 
 // MockAuthorService is a mock of AuthorService interface
@@ -393,6 +452,35 @@ func (m *MockBookService) Update(ctx context.Context, book *domain.UpdateBookDTO
 func (mr *MockBookServiceMockRecorder) Update(ctx, book interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*MockBookService)(nil).Update), ctx, book)
+}
+
+// Load mocks base method
+func (m *MockBookService) Load(ctx context.Context, path string) ([]byte, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Load", ctx, path)
+	ret0, _ := ret[0].([]byte)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Load indicates an expected call of Load
+func (mr *MockBookServiceMockRecorder) Load(ctx, path interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Load", reflect.TypeOf((*MockBookService)(nil).Load), ctx, path)
+}
+
+// Save mocks base method
+func (m *MockBookService) Save(ctx context.Context, path, fileName string, file io.Reader) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Save", ctx, path, fileName, file)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Save indicates an expected call of Save
+func (mr *MockBookServiceMockRecorder) Save(ctx, path, fileName, file interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Save", reflect.TypeOf((*MockBookService)(nil).Save), ctx, path, fileName, file)
 }
 
 // MockDirectionService is a mock of DirectionService interface
@@ -792,4 +880,33 @@ func (m *MockVideoService) Update(ctx context.Context, video *domain.UpdateVideo
 func (mr *MockVideoServiceMockRecorder) Update(ctx, video interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*MockVideoService)(nil).Update), ctx, video)
+}
+
+// Load mocks base method
+func (m *MockVideoService) Load(ctx context.Context, path string) ([]byte, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Load", ctx, path)
+	ret0, _ := ret[0].([]byte)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Load indicates an expected call of Load
+func (mr *MockVideoServiceMockRecorder) Load(ctx, path interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Load", reflect.TypeOf((*MockVideoService)(nil).Load), ctx, path)
+}
+
+// Save mocks base method
+func (m *MockVideoService) Save(ctx context.Context, path, fileName string, file io.Reader) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Save", ctx, path, fileName, file)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Save indicates an expected call of Save
+func (mr *MockVideoServiceMockRecorder) Save(ctx, path, fileName, file interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Save", reflect.TypeOf((*MockVideoService)(nil).Save), ctx, path, fileName, file)
 }

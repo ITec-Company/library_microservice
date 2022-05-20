@@ -2,9 +2,11 @@ package service
 
 import (
 	"context"
+	"io"
 	"library-go/internal/domain"
 	"library-go/internal/store"
 	"library-go/pkg/logging"
+	"library-go/pkg/utils"
 )
 
 type articleService struct {
@@ -23,8 +25,8 @@ func (s *articleService) GetByUUID(ctx context.Context, UUID string) (*domain.Ar
 	return s.storage.GetOne(UUID)
 }
 
-func (s *articleService) GetAll(ctx context.Context, limit, offset int) ([]*domain.Article, error) {
-	return s.storage.GetAll(limit, offset)
+func (s *articleService) GetAll(sortingOptions *domain.SortFilterPagination) ([]*domain.Article, error) {
+	return s.storage.GetAll(sortingOptions)
 }
 
 func (s *articleService) Delete(ctx context.Context, UUID string) error {
@@ -37,4 +39,12 @@ func (s *articleService) Create(ctx context.Context, article *domain.CreateArtic
 
 func (s *articleService) Update(ctx context.Context, article *domain.UpdateArticleDTO) error {
 	return s.storage.Update(article)
+}
+
+func (s *articleService) Load(ctx context.Context, path string) ([]byte, error) {
+	return utils.LoadFile(path)
+}
+
+func (s *articleService) Save(ctx context.Context, path, fileName string, file io.Reader) error {
+	return utils.SaveFile(path, fileName, file)
 }

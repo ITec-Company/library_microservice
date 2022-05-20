@@ -23,14 +23,16 @@ const (
 )
 
 type authorHandler struct {
-	Service service.AuthorService
-	logger  *logging.Logger
+	Service    service.AuthorService
+	logger     *logging.Logger
+	Middleware *Middleware
 }
 
-func NewAuthorHandler(service service.AuthorService, logger *logging.Logger) handler.Handler {
+func NewAuthorHandler(service service.AuthorService, logger *logging.Logger, middleware *Middleware) handler.Handler {
 	return &authorHandler{
-		Service: service,
-		logger:  logger,
+		Service:    service,
+		logger:     logger,
+		Middleware: middleware,
 	}
 }
 

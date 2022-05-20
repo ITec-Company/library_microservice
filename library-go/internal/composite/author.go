@@ -15,9 +15,9 @@ type AuthorComposite struct {
 	Handler handler.Handler
 }
 
-func (ac *AuthorComposite) New(storage store.AuthorStorage, logger *logging.Logger) {
+func (ac *AuthorComposite) New(storage store.AuthorStorage, logger *logging.Logger, middleware *http.Middleware) {
 	ac.logger = logger
 	ac.Storage = storage
 	ac.Service = service.NewAuthorService(ac.Storage, ac.logger)
-	ac.Handler = http.NewAuthorHandler(ac.Service, ac.logger)
+	ac.Handler = http.NewAuthorHandler(ac.Service, ac.logger, middleware)
 }

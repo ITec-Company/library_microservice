@@ -9,6 +9,63 @@ import (
 	"strings"
 )
 
+const (
+	getOneAudioQuery = `SELECT 
+		A.uuid,
+		A.title,
+		A.difficulty,
+		A.rating,
+		A.url,
+		A.language,
+		A.download_count,
+		D.uuid as direction_uuid,
+		D.name as direction_name,
+		array_agg(DISTINCT T) as tags
+	FROM audio AS A
+	LEFT JOIN direction AS D ON D.uuid = A.direction_uuid
+	LEFT JOIN tag AS T ON  T.uuid = any (A.tags_uuids)
+	WHERE  A.uuid = $1
+	GROUP BY A.uuid, A.title, A.difficulty, A.rating, A.url, A.language, A.download_count, D.uuid, D.name`
+	getAllAudiosQuery = `SELECT 
+		A.uuid,
+		A.title,
+		A.difficulty,
+		A.rating,
+		A.url,
+		A.language,
+		A.download_count,
+		D.uuid as direction_uuid,
+		D.name as direction_name,
+		array_agg(DISTINCT T) as tags
+	FROM audio AS A
+	LEFT JOIN direction AS D ON D.uuid = A.direction_uuid
+	LEFT JOIN tag AS T ON  T.uuid = any (A.tags_uuids)
+	GROUP BY A.uuid, A.title, A.difficulty, A.rating, A.url, A.language, A.download_count, D.uuid, D.name`
+	createAudioQuery = `INSERT INTO audio (
+                     title, 
+                     difficulty,
+                     direction_uuid, 
+                     rating, 
+                     url, 
+                     language, 
+                     tags_uuids, 
+                     download_count
+				) SELECT $1, $2 , $3, $4, $5, $6, $7, $8 
+				WHERE EXISTS(SELECT uuid FROM direction where $3 = direction.uuid) AND
+			    EXISTS(SELECT uuid FROM tag where tag.uuid = any($7)) RETURNING audio.uuid`
+	deleteAudioQuery = `DELETE FROM audio WHERE uuid = $1`
+	updateAudioQuery = `UPDATE audio SET 
+			title = COALESCE(NULLIF($1, ''), title),
+			difficulty = COALESCE($2, difficulty), 
+			direction_uuid = (CASE WHEN (EXISTS(SELECT uuid FROM direction where direction.uuid = $3)) THEN $3 ELSE COALESCE(NULLIF($3, 0), direction_uuid) END), 
+			rating = COALESCE(NULLIF($4, 0), rating), 
+			url = COALESCE(NULLIF($5, ''), url), 
+			language = COALESCE(NULLIF($6, ''), language), 
+			tags_uuids = (CASE WHEN (EXISTS(SELECT uuid FROM tag where tag.uuid = any($7))) THEN $7 ELSE COALESCE($7, tags_uuids) END),
+			download_count = COALESCE(NULLIF($8, 0), download_count)
+		WHERE uuid = $9`
+)
+
 type audioStorage struct {
 	logger *logging.Logger
 	db     *sql.DB
@@ -24,22 +81,8 @@ func NewAudioStorage(db *sql.DB, logger *logging.Logger) store.AudioStorage {
 func (as *audioStorage) GetOne(UUID string) (*domain.Audio, error) {
 	var audio domain.Audio
 	var tagsStr []string
-	if err := as.db.QueryRow(`SELECT 
-		A.uuid,
-		A.title,
-		A.difficulty,
-		A.rating,
-		A.url,
-		A.language,
-		A.download_count,
-		D.uuid as direction_uuid,
-		D.name as direction_name,
-		array_agg(DISTINCT T) as tags
-	FROM audio AS A
-	LEFT JOIN direction AS D ON D.uuid = A.direction_uuid
-	LEFT JOIN tag AS T ON  T.uuid = any (A.tags_uuids)
-	WHERE  A.uuid = $1
-	GROUP BY A.uuid, A.title, A.difficulty, A.rating, A.url, A.language, A.download_count, D.uuid, D.name`,
+
+	if err := as.db.QueryRow(getOneAudioQuery,
 		UUID).Scan(
 		&audio.UUID,
 		&audio.Title,
@@ -68,21 +111,7 @@ func (as *audioStorage) GetOne(UUID string) (*domain.Audio, error) {
 }
 
 func (as *audioStorage) GetAll(limit, offset int) ([]*domain.Audio, error) {
-	rows, err := as.db.Query(`SELECT 
-		A.uuid,
-		A.title,
-		A.difficulty,
-		A.rating,
-		A.url,
-		A.language,
-		A.download_count,
-		D.uuid as direction_uuid,
-		D.name as direction_name,
-		array_agg(DISTINCT T) as tags
-	FROM audio AS A
-	LEFT JOIN direction AS D ON D.uuid = A.direction_uuid
-	LEFT JOIN tag AS T ON  T.uuid = any (A.tags_uuids)
-	GROUP BY A.uuid, A.title, A.difficulty, A.rating, A.url, A.language, A.download_count, D.uuid, D.name`)
+	rows, err := as.db.Query(getAllAudiosQuery)
 	if err != nil {
 		as.logger.Errorf("error occurred while selecting all audios. err: %v", err)
 		return nil, err
@@ -125,20 +154,15 @@ func (as *audioStorage) GetAll(limit, offset int) ([]*domain.Audio, error) {
 }
 
 func (as *audioStorage) Create(audioCreateDTO *domain.CreateAudioDTO) (string, error) {
+	tx, err := as.db.Begin()
+	if err != nil {
+		as.logger.Errorf("error occurred while creating transaction. err: %v", err)
+		return "", err
+	}
+
 	var UUID string
-	if err := as.db.QueryRow(
-		`INSERT INTO audio (
-                     title, 
-                     difficulty,
-                     direction_uuid, 
-                     rating, 
-                     url, 
-                     language, 
-                     tags_uuids, 
-                     download_count
-				) SELECT $1, $2 , $3, $4, $5, $6, $7, $8 
-				WHERE EXISTS(SELECT uuid FROM direction where $3 = direction.uuid) AND
-			    EXISTS(SELECT uuid FROM tag where tag.uuid = any($7)) RETURNING audio.uuid`,
+
+	row := tx.QueryRow(createAudioQuery,
 		audioCreateDTO.Title,
 		audioCreateDTO.Difficulty,
 		audioCreateDTO.DirectionUUID,
@@ -147,47 +171,54 @@ func (as *audioStorage) Create(audioCreateDTO *domain.CreateAudioDTO) (string, e
 		audioCreateDTO.Language,
 		pq.Array(audioCreateDTO.TagsUUIDs),
 		0,
-	).Scan(&UUID); err != nil {
+	)
+	if err := row.Scan(&UUID); err != nil {
+		tx.Rollback()
 		as.logger.Errorf("error occurred while creating audio. (is direction_uuid or tag_uuid are valid?. err: %v", err)
 		return UUID, err
 	}
 
-	return UUID, nil
+	return UUID, tx.Commit()
 }
 
 func (as *audioStorage) Delete(UUID string) error {
-	result, err := as.db.Exec("DELETE FROM audio WHERE uuid = $1", UUID)
+	tx, err := as.db.Begin()
 	if err != nil {
+		as.logger.Errorf("error occurred while creating transaction. err: %v", err)
+		return err
+	}
+
+	result, err := tx.Exec(deleteAudioQuery, UUID)
+	if err != nil {
+		tx.Rollback()
 		as.logger.Errorf("error occurred while deleting audio. err: %v.", err)
 		return err
 	}
 
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
+		tx.Rollback()
 		as.logger.Errorf("error occurred while deleting audio (getting affected rows). err: %v", err)
 		return err
 	}
 
 	if rowsAffected < 1 {
-		as.logger.Errorf("error occurred while deleting audio. err: %v.", ErrNoRowsAffected)
+		tx.Rollback()
+		as.logger.Errorf("No audio with UUID %s was found", UUID)
 		return ErrNoRowsAffected
 	}
 	as.logger.Infof("Audio with uuid %s was deleted.", UUID)
-	return nil
+	return tx.Commit()
 }
 
 func (as *audioStorage) Update(audioUpdateDTO *domain.UpdateAudioDTO) error {
-	result, err := as.db.Exec(
-		`UPDATE audio SET 
-			title = COALESCE(NULLIF($1, ''), title),
-			difficulty = COALESCE($2, difficulty), 
-			direction_uuid = (CASE WHEN (EXISTS(SELECT uuid FROM direction where direction.uuid = $3)) THEN $3 ELSE COALESCE(NULLIF($3, 0), direction_uuid) END), 
-			rating = COALESCE(NULLIF($4, 0), rating), 
-			url = COALESCE(NULLIF($5, ''), url), 
-			language = COALESCE(NULLIF($6, ''), language), 
-			tags_uuids = (CASE WHEN (EXISTS(SELECT uuid FROM tag where tag.uuid = any($7))) THEN $7 ELSE COALESCE($7, tags_uuids) END),
-			download_count = COALESCE(NULLIF($8, 0), download_count)
-		WHERE uuid = $9`,
+	tx, err := as.db.Begin()
+	if err != nil {
+		as.logger.Errorf("error occurred while creating transaction. err: %v", err)
+		return err
+	}
+
+	result, err := tx.Exec(updateAudioQuery,
 		audioUpdateDTO.Title,
 		audioUpdateDTO.Difficulty,
 		audioUpdateDTO.DirectionUUID,
@@ -199,20 +230,23 @@ func (as *audioStorage) Update(audioUpdateDTO *domain.UpdateAudioDTO) error {
 		audioUpdateDTO.UUID,
 	)
 	if err != nil {
+		tx.Rollback()
 		as.logger.Errorf("error occurred while updating audio. err: %v", err)
 		return err
 	}
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
+		tx.Rollback()
 		as.logger.Errorf("error occurred while updating audio (getting affected rows). err: %v", err)
 		return err
 	}
 	if rowsAffected < 1 {
+		tx.Rollback()
 		as.logger.Errorf("error occurred while updating audio. err: %v.", ErrNoRowsAffected)
 		return ErrNoRowsAffected
 	}
 
 	as.logger.Infof("Audio with uuid %s was updated.", audioUpdateDTO.UUID)
 
-	return nil
+	return tx.Commit()
 }

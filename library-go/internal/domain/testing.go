@@ -5,60 +5,60 @@ import "time"
 func TestAuthor() *Author {
 	return &Author{
 		UUID:     "1",
-		FullName: "test Author",
+		FullName: "Test Author",
 	}
 }
 
 func TestAuthorCreateDTO() *CreateAuthorDTO {
 	return &CreateAuthorDTO{
-		FullName: "test Author",
+		FullName: "Test Author",
 	}
 }
 
 func TestAuthorUpdateDTO() *UpdateAuthorDTO {
 	return &UpdateAuthorDTO{
 		UUID:     "1",
-		FullName: "test Author",
+		FullName: "Test Author",
 	}
 }
 
 func TestDirection() *Direction {
 	return &Direction{
 		UUID: "1",
-		Name: "test Direction",
+		Name: "Test Direction",
 	}
 }
 
 func TestDirectionCreateDTO() *CreateDirectionDTO {
 	return &CreateDirectionDTO{
-		Name: "test Direction",
+		Name: "Test Direction",
 	}
 }
 
 func TestDirectionUpdateDTO() *UpdateDirectionDTO {
 	return &UpdateDirectionDTO{
 		UUID: "1",
-		Name: "test Direction",
+		Name: "Test Direction",
 	}
 }
 
 func TestTag() *Tag {
 	return &Tag{
 		UUID: "1",
-		Name: "test Tag",
+		Name: "Test Tag",
 	}
 }
 
 func TestTagCreateDTO() *CreateTagDTO {
 	return &CreateTagDTO{
-		Name: "test Tag",
+		Name: "Test Tag",
 	}
 }
 
 func TestTagUpdateDTO() *UpdateTagDTO {
 	return &UpdateTagDTO{
 		UUID: "1",
-		Name: "test Tag",
+		Name: "Test Tag",
 	}
 }
 
@@ -239,29 +239,29 @@ func TestVideoUpdateDTO() *UpdateVideoDTO {
 func TestReview() *Review {
 	return &Review{
 		UUID:           "1",
-		FullName:       "test Review",
-		Text:           "test Text",
+		FullName:       "Test Review",
+		Text:           "Test Text",
 		Rating:         5.5,
 		Date:           time.Date(2000, 01, 01, 0, 0, 0, 0, time.UTC),
-		Source:         "test Source",
+		Source:         "Test Source",
 		LiteratureUUID: "1",
 	}
 }
 
 func TestReviewCreateDTO() *CreateReviewDTO {
 	return &CreateReviewDTO{
-		Text:           "test Text",
-		FullName:       "test Review",
+		Text:           "Test Text",
+		FullName:       "Test Review",
 		LiteratureUUID: "1",
-		Source:         "test Source",
+		Source:         "Test Source",
 	}
 }
 
 func TestReviewUpdateDTO() *UpdateReviewDTO {
 	return &UpdateReviewDTO{
 		UUID:     "1",
-		FullName: "test Review",
-		Text:     "test Text",
+		FullName: "Test Review",
+		Text:     "Test Text",
 		Rating:   5.5,
 	}
 }

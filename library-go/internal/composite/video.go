@@ -15,9 +15,9 @@ type VideoComposite struct {
 	Handler handler.Handler
 }
 
-func (vc *VideoComposite) New(storage store.VideoStorage, logger *logging.Logger) {
+func (vc *VideoComposite) New(storage store.VideoStorage, logger *logging.Logger, middleware *http.Middleware) {
 	vc.logger = logger
 	vc.Storage = storage
 	vc.Service = service.NewService(vc.Storage, vc.logger)
-	vc.Handler = http.NewVideoHandler(vc.Service, vc.logger)
+	vc.Handler = http.NewVideoHandler(vc.Service, vc.logger, middleware)
 }

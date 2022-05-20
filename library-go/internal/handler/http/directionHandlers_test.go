@@ -37,7 +37,7 @@ func TestDirectionHandler_GetAll(t *testing.T) {
 				s.EXPECT().GetAll(ctx, limit, offset).Return([]*domain.Direction{domain.TestDirection(), domain.TestDirection()}, nil)
 			},
 			expectedStatusCode:  200,
-			expectedRequestBody: "[{\"uuid\":\"1\",\"name\":\"test Direction\"},{\"uuid\":\"1\",\"name\":\"test Direction\"}]\n",
+			expectedRequestBody: "[{\"uuid\":\"1\",\"name\":\"Test Direction\"},{\"uuid\":\"1\",\"name\":\"Test Direction\"}]\n",
 		},
 		{
 			name:   "OK empty input",
@@ -49,7 +49,7 @@ func TestDirectionHandler_GetAll(t *testing.T) {
 				s.EXPECT().GetAll(ctx, limit, offset).Return([]*domain.Direction{domain.TestDirection(), domain.TestDirection()}, nil)
 			},
 			expectedStatusCode:  200,
-			expectedRequestBody: "[{\"uuid\":\"1\",\"name\":\"test Direction\"},{\"uuid\":\"1\",\"name\":\"test Direction\"}]\n",
+			expectedRequestBody: "[{\"uuid\":\"1\",\"name\":\"Test Direction\"},{\"uuid\":\"1\",\"name\":\"Test Direction\"}]\n",
 		},
 		{
 			name:   "OK invalid input",
@@ -61,7 +61,7 @@ func TestDirectionHandler_GetAll(t *testing.T) {
 				s.EXPECT().GetAll(ctx, limit, offset).Return([]*domain.Direction{domain.TestDirection(), domain.TestDirection()}, nil)
 			},
 			expectedStatusCode:  200,
-			expectedRequestBody: "[{\"uuid\":\"1\",\"name\":\"test Direction\"},{\"uuid\":\"1\",\"name\":\"test Direction\"}]\n",
+			expectedRequestBody: "[{\"uuid\":\"1\",\"name\":\"Test Direction\"},{\"uuid\":\"1\",\"name\":\"Test Direction\"}]\n",
 		},
 		{
 			name:   "No rows in result",
@@ -84,7 +84,9 @@ func TestDirectionHandler_GetAll(t *testing.T) {
 			service := mock_service.NewMockDirectionService(c)
 			testCase.mockBehavior(service, testCase.ctx, testCase.limit, testCase.offset)
 
-			DirectionHandler := NewDirectionHandler(service, logging.GetLogger())
+			logger := logging.GetLogger()
+			middleware := NewMiddlewares(logger)
+			DirectionHandler := NewDirectionHandler(service, logger, &middleware)
 
 			router := httprouter.New()
 			DirectionHandler.Register(router)
@@ -120,7 +122,7 @@ func TestDirectionHandler_GetByUUID(t *testing.T) {
 				s.EXPECT().GetByUUID(ctx, uuid).Return(domain.TestDirection(), nil)
 			},
 			expectedStatusCode:  200,
-			expectedRequestBody: "{\"uuid\":\"1\",\"name\":\"test Direction\"}\n",
+			expectedRequestBody: "{\"uuid\":\"1\",\"name\":\"Test Direction\"}\n",
 		},
 		{
 			name:                "invalid uuid",
@@ -170,7 +172,9 @@ func TestDirectionHandler_GetByUUID(t *testing.T) {
 			service := mock_service.NewMockDirectionService(c)
 			testCase.mockBehavior(service, testCase.ctx, testCase.uuid)
 
-			DirectionHandler := NewDirectionHandler(service, logging.GetLogger())
+			logger := logging.GetLogger()
+			middleware := NewMiddlewares(logger)
+			DirectionHandler := NewDirectionHandler(service, logger, &middleware)
 
 			router := httprouter.New()
 			DirectionHandler.Register(router)
@@ -202,7 +206,7 @@ func TestDirectionHandler_Create(t *testing.T) {
 		{
 			name: "OK",
 			inputBodyJSON: map[string]interface{}{
-				"name": "test Direction",
+				"name": "Test Direction",
 			},
 			ctx: context.Background(),
 			dto: *domain.TestDirectionCreateDTO(),
@@ -215,7 +219,7 @@ func TestDirectionHandler_Create(t *testing.T) {
 		{
 			name: "service error",
 			inputBodyJSON: map[string]interface{}{
-				"name": "test Direction",
+				"name": "Test Direction",
 			},
 			ctx: context.Background(),
 			dto: *domain.TestDirectionCreateDTO(),
@@ -234,7 +238,9 @@ func TestDirectionHandler_Create(t *testing.T) {
 			service := mock_service.NewMockDirectionService(c)
 			testCase.mockBehavior(service, testCase.ctx, testCase.dto)
 
-			DirectionHandler := NewDirectionHandler(service, logging.GetLogger())
+			logger := logging.GetLogger()
+			middleware := NewMiddlewares(logger)
+			DirectionHandler := NewDirectionHandler(service, logger, &middleware)
 
 			router := httprouter.New()
 			DirectionHandler.Register(router)
@@ -321,7 +327,9 @@ func TestDirectionHandler_Delete(t *testing.T) {
 			service := mock_service.NewMockDirectionService(c)
 			testCase.mockBehavior(service, testCase.ctx, testCase.uuid)
 
-			DirectionHandler := NewDirectionHandler(service, logging.GetLogger())
+			logger := logging.GetLogger()
+			middleware := NewMiddlewares(logger)
+			DirectionHandler := NewDirectionHandler(service, logger, &middleware)
 
 			router := httprouter.New()
 			DirectionHandler.Register(router)
@@ -354,7 +362,7 @@ func TestDirectionHandler_Update(t *testing.T) {
 			name: "OK",
 			inputBodyJSON: map[string]interface{}{
 				"uuid": "1",
-				"name": "test Direction",
+				"name": "Test Direction",
 			},
 			ctx: context.Background(),
 			dto: *domain.TestDirectionUpdateDTO(),
@@ -368,7 +376,7 @@ func TestDirectionHandler_Update(t *testing.T) {
 			name: "no rows in result",
 			inputBodyJSON: map[string]interface{}{
 				"uuid": "1",
-				"name": "test Direction",
+				"name": "Test Direction",
 			},
 			ctx: context.Background(),
 			dto: *domain.TestDirectionUpdateDTO(),
@@ -396,7 +404,9 @@ func TestDirectionHandler_Update(t *testing.T) {
 			service := mock_service.NewMockDirectionService(c)
 			testCase.mockBehavior(service, testCase.ctx, &testCase.dto)
 
-			DirectionHandler := NewDirectionHandler(service, logging.GetLogger())
+			logger := logging.GetLogger()
+			middleware := NewMiddlewares(logger)
+			DirectionHandler := NewDirectionHandler(service, logger, &middleware)
 
 			router := httprouter.New()
 			DirectionHandler.Register(router)

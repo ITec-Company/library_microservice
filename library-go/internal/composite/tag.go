@@ -15,9 +15,9 @@ type TagComposite struct {
 	Handler handler.Handler
 }
 
-func (tc *TagComposite) New(storage store.TagStorage, logger *logging.Logger) {
+func (tc *TagComposite) New(storage store.TagStorage, logger *logging.Logger, middleware *http.Middleware) {
 	tc.logger = logger
 	tc.Storage = storage
 	tc.Service = service.NewTagService(tc.Storage, tc.logger)
-	tc.Handler = http.NewTagHandler(tc.Service, tc.logger)
+	tc.Handler = http.NewTagHandler(tc.Service, tc.logger, middleware)
 }

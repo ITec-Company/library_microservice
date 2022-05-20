@@ -25,14 +25,16 @@ const (
 )
 
 type tagHandler struct {
-	Service service.TagService
-	logger  *logging.Logger
+	Service    service.TagService
+	logger     *logging.Logger
+	Middleware *Middleware
 }
 
-func NewTagHandler(service service.TagService, logger *logging.Logger) handler.Handler {
+func NewTagHandler(service service.TagService, logger *logging.Logger, middleware *Middleware) handler.Handler {
 	return &tagHandler{
-		Service: service,
-		logger:  logger,
+		Service:    service,
+		logger:     logger,
+		Middleware: middleware,
 	}
 }
 

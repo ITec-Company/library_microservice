@@ -15,9 +15,9 @@ type ReviewComposite struct {
 	Handler handler.Handler
 }
 
-func (rc *ReviewComposite) New(storage store.ReviewStorage, logger *logging.Logger) {
+func (rc *ReviewComposite) New(storage store.ReviewStorage, logger *logging.Logger, middleware *http.Middleware) {
 	rc.logger = logger
 	rc.Storage = storage
 	rc.Service = service.NewReviewService(rc.Storage, rc.logger)
-	rc.Handler = http.NewReviewHandler(rc.Service, rc.logger)
+	rc.Handler = http.NewReviewHandler(rc.Service, rc.logger, middleware)
 }

@@ -3,6 +3,7 @@ package utils
 import (
 	"fmt"
 	"io"
+	"io/ioutil"
 	"os"
 )
 
@@ -26,4 +27,18 @@ func SaveFile(path string, fileName string, fileSrc io.Reader) error {
 	}
 
 	return nil
+}
+
+func LoadFile(path string) ([]byte, error) {
+	file, err := os.Open(path)
+	if err != nil {
+		return nil, err
+	}
+	defer file.Close()
+
+	fileBytes, err := ioutil.ReadAll(file)
+	if err != nil {
+		return nil, err
+	}
+	return fileBytes, nil
 }

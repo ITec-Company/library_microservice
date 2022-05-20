@@ -37,7 +37,7 @@ func TestAuthorHandler_GetAll(t *testing.T) {
 				s.EXPECT().GetAll(ctx, limit, offset).Return([]*domain.Author{domain.TestAuthor(), domain.TestAuthor()}, nil)
 			},
 			expectedStatusCode:  200,
-			expectedRequestBody: "[{\"uuid\":\"1\",\"full_name\":\"test Author\"},{\"uuid\":\"1\",\"full_name\":\"test Author\"}]\n",
+			expectedRequestBody: "[{\"uuid\":\"1\",\"full_name\":\"Test Author\"},{\"uuid\":\"1\",\"full_name\":\"Test Author\"}]\n",
 		},
 		{
 			name:   "OK empty input",
@@ -49,7 +49,7 @@ func TestAuthorHandler_GetAll(t *testing.T) {
 				s.EXPECT().GetAll(ctx, limit, offset).Return([]*domain.Author{domain.TestAuthor(), domain.TestAuthor()}, nil)
 			},
 			expectedStatusCode:  200,
-			expectedRequestBody: "[{\"uuid\":\"1\",\"full_name\":\"test Author\"},{\"uuid\":\"1\",\"full_name\":\"test Author\"}]\n",
+			expectedRequestBody: "[{\"uuid\":\"1\",\"full_name\":\"Test Author\"},{\"uuid\":\"1\",\"full_name\":\"Test Author\"}]\n",
 		},
 		{
 			name:   "OK invalid input",
@@ -61,7 +61,7 @@ func TestAuthorHandler_GetAll(t *testing.T) {
 				s.EXPECT().GetAll(ctx, limit, offset).Return([]*domain.Author{domain.TestAuthor(), domain.TestAuthor()}, nil)
 			},
 			expectedStatusCode:  200,
-			expectedRequestBody: "[{\"uuid\":\"1\",\"full_name\":\"test Author\"},{\"uuid\":\"1\",\"full_name\":\"test Author\"}]\n",
+			expectedRequestBody: "[{\"uuid\":\"1\",\"full_name\":\"Test Author\"},{\"uuid\":\"1\",\"full_name\":\"Test Author\"}]\n",
 		},
 		{
 			name:   "No rows in result",
@@ -84,7 +84,9 @@ func TestAuthorHandler_GetAll(t *testing.T) {
 			service := mock_service.NewMockAuthorService(c)
 			testCase.mockBehavior(service, testCase.ctx, testCase.limit, testCase.offset)
 
-			AuthorHandler := NewAuthorHandler(service, logging.GetLogger())
+			logger := logging.GetLogger()
+			middleware := NewMiddlewares(logger)
+			AuthorHandler := NewAuthorHandler(service, logger, &middleware)
 
 			router := httprouter.New()
 			AuthorHandler.Register(router)
@@ -120,7 +122,7 @@ func TestAuthorHandler_GetByUUID(t *testing.T) {
 				s.EXPECT().GetByUUID(ctx, uuid).Return(domain.TestAuthor(), nil)
 			},
 			expectedStatusCode:  200,
-			expectedRequestBody: "{\"uuid\":\"1\",\"full_name\":\"test Author\"}\n",
+			expectedRequestBody: "{\"uuid\":\"1\",\"full_name\":\"Test Author\"}\n",
 		},
 		{
 			name:                "invalid uuid",
@@ -170,7 +172,9 @@ func TestAuthorHandler_GetByUUID(t *testing.T) {
 			service := mock_service.NewMockAuthorService(c)
 			testCase.mockBehavior(service, testCase.ctx, testCase.uuid)
 
-			AuthorHandler := NewAuthorHandler(service, logging.GetLogger())
+			logger := logging.GetLogger()
+			middleware := NewMiddlewares(logger)
+			AuthorHandler := NewAuthorHandler(service, logger, &middleware)
 
 			router := httprouter.New()
 			AuthorHandler.Register(router)
@@ -202,7 +206,7 @@ func TestAuthorHandler_Create(t *testing.T) {
 		{
 			name: "OK",
 			inputBodyJSON: map[string]interface{}{
-				"full_name": "test Author",
+				"full_name": "Test Author",
 			},
 			ctx: context.Background(),
 			dto: *domain.TestAuthorCreateDTO(),
@@ -215,7 +219,7 @@ func TestAuthorHandler_Create(t *testing.T) {
 		{
 			name: "service error",
 			inputBodyJSON: map[string]interface{}{
-				"full_name": "test Author",
+				"full_name": "Test Author",
 			},
 			ctx: context.Background(),
 			dto: *domain.TestAuthorCreateDTO(),
@@ -234,7 +238,9 @@ func TestAuthorHandler_Create(t *testing.T) {
 			service := mock_service.NewMockAuthorService(c)
 			testCase.mockBehavior(service, testCase.ctx, testCase.dto)
 
-			AuthorHandler := NewAuthorHandler(service, logging.GetLogger())
+			logger := logging.GetLogger()
+			middleware := NewMiddlewares(logger)
+			AuthorHandler := NewAuthorHandler(service, logger, &middleware)
 
 			router := httprouter.New()
 			AuthorHandler.Register(router)
@@ -321,7 +327,9 @@ func TestAuthorHandler_Delete(t *testing.T) {
 			service := mock_service.NewMockAuthorService(c)
 			testCase.mockBehavior(service, testCase.ctx, testCase.uuid)
 
-			AuthorHandler := NewAuthorHandler(service, logging.GetLogger())
+			logger := logging.GetLogger()
+			middleware := NewMiddlewares(logger)
+			AuthorHandler := NewAuthorHandler(service, logger, &middleware)
 
 			router := httprouter.New()
 			AuthorHandler.Register(router)
@@ -354,7 +362,7 @@ func TestAuthorHandler_Update(t *testing.T) {
 			name: "OK",
 			inputBodyJSON: map[string]interface{}{
 				"uuid":      "1",
-				"full_name": "test Author",
+				"full_name": "Test Author",
 			},
 			ctx: context.Background(),
 			dto: *domain.TestAuthorUpdateDTO(),
@@ -368,7 +376,7 @@ func TestAuthorHandler_Update(t *testing.T) {
 			name: "no rows in result",
 			inputBodyJSON: map[string]interface{}{
 				"uuid":      "1",
-				"full_name": "test Author",
+				"full_name": "Test Author",
 			},
 			ctx: context.Background(),
 			dto: *domain.TestAuthorUpdateDTO(),
@@ -396,7 +404,9 @@ func TestAuthorHandler_Update(t *testing.T) {
 			service := mock_service.NewMockAuthorService(c)
 			testCase.mockBehavior(service, testCase.ctx, &testCase.dto)
 
-			AuthorHandler := NewAuthorHandler(service, logging.GetLogger())
+			logger := logging.GetLogger()
+			middleware := NewMiddlewares(logger)
+			AuthorHandler := NewAuthorHandler(service, logger, &middleware)
 
 			router := httprouter.New()
 			AuthorHandler.Register(router)

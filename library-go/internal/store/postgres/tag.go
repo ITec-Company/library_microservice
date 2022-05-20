@@ -8,6 +8,19 @@ import (
 	"library-go/pkg/logging"
 )
 
+const (
+	getOneTagQuery   = `SELECT * FROM tag WHERE uuid = $1`
+	getManyTagsQuery = `SELECT * FROM tag WHERE uuid = any($1)`
+	getAllTagsQuery  = `SELECT * FROM tag`
+	createTagQuery   = `INSERT INTO tag (
+                     name
+	) VALUES ($1) RETURNING uuid`
+	deleteTagQuery = `DELETE FROM tag WHERE uuid = $1`
+	updateTagQuery = `UPDATE tag SET 
+                   name = $1 
+		WHERE uuid = $2 RETURNING *`
+)
+
 type tagStorage struct {
 	logger *logging.Logger
 	db     *sql.DB
@@ -22,7 +35,7 @@ func NewTagStorage(db *sql.DB, logger *logging.Logger) store.TagStorage {
 
 func (ts *tagStorage) GetOne(UUID string) (*domain.Tag, error) {
 	var tag domain.Tag
-	if err := ts.db.QueryRow("SELECT * FROM tag WHERE uuid = $1",
+	if err := ts.db.QueryRow(getOneTagQuery,
 		UUID).Scan(
 		&tag.UUID,
 		&tag.Name,
@@ -35,7 +48,7 @@ func (ts *tagStorage) GetOne(UUID string) (*domain.Tag, error) {
 }
 
 func (ts *tagStorage) GetMany(UUIDs []string) ([]*domain.Tag, error) {
-	rows, err := ts.db.Query("SELECT * FROM tag WHERE uuid = any($1)", pq.Array(UUIDs))
+	rows, err := ts.db.Query(getManyTagsQuery, pq.Array(UUIDs))
 	if err != nil {
 		ts.logger.Errorf("error occurred while selecting all tags. err: %v", err)
 		return nil, err
@@ -58,7 +71,7 @@ func (ts *tagStorage) GetMany(UUIDs []string) ([]*domain.Tag, error) {
 }
 
 func (ts *tagStorage) GetAll(limit, offset int) ([]*domain.Tag, error) {
-	rows, err := ts.db.Query("SELECT * FROM tag")
+	rows, err := ts.db.Query(getAllTagsQuery)
 	if err != nil {
 		ts.logger.Errorf("error occurred while selecting all tags. err: %v", err)
 		return nil, err
@@ -81,56 +94,83 @@ func (ts *tagStorage) GetAll(limit, offset int) ([]*domain.Tag, error) {
 }
 
 func (ts *tagStorage) Create(tagCreateDTO *domain.CreateTagDTO) (string, error) {
+	tx, err := ts.db.Begin()
+	if err != nil {
+		ts.logger.Errorf("error occurred while creating transaction. err: %v", err)
+		return "", err
+	}
+
 	var UUID string
-	if err := ts.db.QueryRow(
-		`INSERT INTO tag (
-                     name
-	) VALUES ($1) RETURNING uuid`,
+	row := tx.QueryRow(createTagQuery,
 		tagCreateDTO.Name,
-	).Scan(&UUID); err != nil {
+	)
+	if err := row.Scan(&UUID); err != nil {
+		tx.Rollback()
 		ts.logger.Errorf("error occurred while creating tag. err: %v", err)
 		return UUID, err
 	}
 
-	return UUID, nil
+	return UUID, tx.Commit()
 }
 
 func (ts *tagStorage) Delete(UUID string) error {
-	result, err := ts.db.Exec("DELETE FROM tag WHERE uuid = $1", UUID)
+	tx, err := ts.db.Begin()
 	if err != nil {
+		ts.logger.Errorf("error occurred while creating transaction. err: %v", err)
+		return err
+	}
+
+	result, err := tx.Exec(deleteTagQuery, UUID)
+	if err != nil {
+		tx.Rollback()
 		ts.logger.Errorf("error occurred while deleting tag. err: %v.", err)
 		return err
 	}
 
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
+		tx.Rollback()
 		ts.logger.Errorf("error occurred while deleting tag (getting affected rows). err: %v", err)
 		return err
 	}
 
 	if rowsAffected < 1 {
-		ts.logger.Errorf("error occurred while deleting tag. err: %v.", ErrNoRowsAffected)
+		tx.Rollback()
+		ts.logger.Errorf("Tag with uuid %s wds deleted.", UUID)
 		return ErrNoRowsAffected
 	}
 	ts.logger.Infof("Tag with uuid %s wts deleted.", UUID)
-	return nil
+	return tx.Commit()
 }
 
 func (ts *tagStorage) Update(tagUpdateDTO *domain.UpdateTagDTO) error {
-	var tag domain.Tag
-	if err := ts.db.QueryRow(
-		`UPDATE tag SET 
-                   name = $1 
-		WHERE uuid = $2 RETURNING *`,
-		tagUpdateDTO.Name,
-		tagUpdateDTO.UUID,
-	).Scan(
-		&tag.UUID,
-		&tag.Name,
-	); err != nil {
-		ts.logger.Errorf("error occurred while updating tag. err: %v", err)
+	tx, err := ts.db.Begin()
+	if err != nil {
+		ts.logger.Errorf("error occurred while creating transaction. err: %v", err)
 		return err
 	}
 
-	return nil
+	result, err := tx.Exec(updateTagQuery,
+		tagUpdateDTO.Name,
+		tagUpdateDTO.UUID)
+
+	if err != nil {
+		tx.Rollback()
+		ts.logger.Errorf("error occurred while updating tag. err: %v", err)
+		return err
+	}
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		tx.Rollback()
+		ts.logger.Errorf("Error occurred while updating tag. Err msg: %v.", err)
+		return err
+	}
+
+	if rowsAffected < 1 {
+		tx.Rollback()
+		ts.logger.Errorf("Error occurred while updating tag. Err msg: %v.", ErrNoRowsAffected)
+		return ErrNoRowsAffected
+	}
+
+	return tx.Commit()
 }
