@@ -25,7 +25,7 @@ func (s *videoService) GetByUUID(ctx context.Context, UUID string) (*domain.Vide
 	return s.storage.GetOne(UUID)
 }
 
-func (s *videoService) GetAll(sortingOptions *domain.SortFilterPagination) ([]*domain.Video, error) {
+func (s *videoService) GetAll(sortingOptions *domain.SortFilterPagination) ([]*domain.Video, int, error) {
 	return s.storage.GetAll(sortingOptions)
 }
 

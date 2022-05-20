@@ -8,6 +8,7 @@ import (
 	"library-go/internal/domain"
 	"library-go/internal/store"
 	"library-go/pkg/logging"
+	"math"
 	"strings"
 )
 
@@ -112,8 +113,8 @@ func (as *audioStorage) GetOne(UUID string) (*domain.Audio, error) {
 	return &audio, nil
 }
 
-func (as *audioStorage) GetAll(sortOptions *domain.SortFilterPagination) ([]*domain.Audio, error) {
-	s := squirrel.Select("A.uuid, A.title, A.difficulty, A.rating, A.url, A.language, A.download_count, D.uuid as direction_uuid, D.name as direction_name, array_agg(DISTINCT T) as tags").
+func (as *audioStorage) GetAll(sortOptions *domain.SortFilterPagination) ([]*domain.Audio, int, error) {
+	s := squirrel.Select("A.uuid, A.title, A.difficulty, A.rating, A.url, A.language, A.download_count, D.uuid as direction_uuid, D.name as direction_name, array_agg(DISTINCT T) as tags, count(*) OVER() AS full_count").
 		From("audio AS A").
 		LeftJoin("direction AS D ON D.uuid = A.direction_uuid").
 		LeftJoin("tag AS T ON  T.uuid = any (A.tags_uuids)").
@@ -140,9 +141,11 @@ func (as *audioStorage) GetAll(sortOptions *domain.SortFilterPagination) ([]*dom
 	rows, err := as.db.Query(query, args...)
 	if err != nil {
 		as.logger.Errorf("error occurred while selecting all audios. err: %v", err)
-		return nil, err
+		return nil, 0, err
 	}
+
 	var audios []*domain.Audio
+	var fullCount int
 
 	for rows.Next() {
 		audio := domain.Audio{}
@@ -158,6 +161,7 @@ func (as *audioStorage) GetAll(sortOptions *domain.SortFilterPagination) ([]*dom
 			&audio.Direction.UUID,
 			&audio.Direction.Name,
 			pq.Array(&tagsStr),
+			&fullCount,
 		)
 		if err != nil {
 			as.logger.Errorf("error occurred while selecting audio. err: %v", err)
@@ -176,7 +180,14 @@ func (as *audioStorage) GetAll(sortOptions *domain.SortFilterPagination) ([]*dom
 
 		audios = append(audios, &audio)
 	}
-	return audios, nil
+
+	var pagesCount int
+
+	if sortOptions.Limit != 0 {
+		pagesCount = int(math.Ceil(float64(fullCount) / float64(sortOptions.Limit)))
+	}
+
+	return audios, pagesCount, nil
 }
 
 func (as *audioStorage) Create(audioCreateDTO *domain.CreateAudioDTO) (string, error) {

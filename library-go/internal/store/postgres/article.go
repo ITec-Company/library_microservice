@@ -8,6 +8,7 @@ import (
 	"library-go/internal/domain"
 	"library-go/internal/store"
 	"library-go/pkg/logging"
+	"math"
 	"strings"
 )
 
@@ -132,9 +133,9 @@ func (as *articleStorage) GetOne(UUID string) (*domain.Article, error) {
 	return &article, nil
 }
 
-func (as *articleStorage) GetAll(sortOptions *domain.SortFilterPagination) ([]*domain.Article, error) {
+func (as *articleStorage) GetAll(sortOptions *domain.SortFilterPagination) ([]*domain.Article, int, error) {
 
-	s := squirrel.Select("A.uuid, A.title, A.difficulty, A.edition_date, A.rating, A.description, A.url, A.language, A.download_count, Au.uuid, Au.full_name, D.uuid as direction_uuid, D.name as direction_name, array_agg(DISTINCT T) as tags").
+	s := squirrel.Select("A.uuid, A.title, A.difficulty, A.edition_date, A.rating, A.description, A.url, A.language, A.download_count, Au.uuid, Au.full_name, D.uuid as direction_uuid, D.name as direction_name, array_agg(DISTINCT T) as tags, count(*) OVER() AS full_count").
 		From("article AS A").
 		LeftJoin("author AS Au ON Au.uuid = A.author_uuid").
 		LeftJoin("direction AS D ON D.uuid = A.direction_uuid").
@@ -158,13 +159,14 @@ func (as *articleStorage) GetAll(sortOptions *domain.SortFilterPagination) ([]*d
 	}
 
 	query, args, _ := s.ToSql()
-
 	rows, err := as.db.Query(query, args...)
 	if err != nil {
 		as.logger.Errorf("error occurred while selecting all articles. err: %v", err)
-		return nil, err
+		return nil, 0, err
 	}
+
 	var articles []*domain.Article
+	var fullCount int
 
 	for rows.Next() {
 		article := domain.Article{}
@@ -184,6 +186,7 @@ func (as *articleStorage) GetAll(sortOptions *domain.SortFilterPagination) ([]*d
 			&article.Direction.UUID,
 			&article.Direction.Name,
 			pq.Array(&tagsStr),
+			&fullCount,
 		)
 		if err != nil {
 			as.logger.Errorf("error occurred while selecting article. err: %v", err)
@@ -202,7 +205,13 @@ func (as *articleStorage) GetAll(sortOptions *domain.SortFilterPagination) ([]*d
 
 		articles = append(articles, &article)
 	}
-	return articles, nil
+	var pagesCount int
+
+	if sortOptions.Limit != 0 {
+		pagesCount = int(math.Ceil(float64(fullCount) / float64(sortOptions.Limit)))
+	}
+
+	return articles, pagesCount, nil
 }
 
 func (as *articleStorage) Create(articleCreateDTO *domain.CreateArticleDTO) (string, error) {

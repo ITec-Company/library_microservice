@@ -57,11 +57,15 @@ func (bh *bookHandler) GetAll() http.HandlerFunc {
 
 		sortingOptions := r.Context().Value(CtxKeySortAndFilters).(domain.SortFilterPagination)
 
-		books, err := bh.Service.GetAll(&sortingOptions)
+		books, pagesCount, err := bh.Service.GetAll(&sortingOptions)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			json.NewEncoder(w).Encode(JSON.Error{Msg: fmt.Sprintf("error occurred while getting all books. err: %v", err)})
 			return
+		}
+
+		if pagesCount > 0 {
+			w.Header().Set("pages", strconv.Itoa(pagesCount))
 		}
 
 		w.WriteHeader(http.StatusOK)

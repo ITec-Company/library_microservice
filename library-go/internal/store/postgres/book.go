@@ -8,6 +8,7 @@ import (
 	"library-go/internal/domain"
 	"library-go/internal/store"
 	"library-go/pkg/logging"
+	"math"
 	"strings"
 )
 
@@ -132,8 +133,8 @@ func (bs *bookStorage) GetOne(UUID string) (*domain.Book, error) {
 	return &book, nil
 }
 
-func (bs *bookStorage) GetAll(sortOptions *domain.SortFilterPagination) ([]*domain.Book, error) {
-	s := squirrel.Select("B.uuid, B.title, B.difficulty, B.edition_date, B.rating, B.description, B.url, B.language, B.download_count, Au.uuid, Au.full_name, D.uuid as direction_uuid, D.name as direction_name, array_agg(DISTINCT T) as tags").
+func (bs *bookStorage) GetAll(sortOptions *domain.SortFilterPagination) ([]*domain.Book, int, error) {
+	s := squirrel.Select("B.uuid, B.title, B.difficulty, B.edition_date, B.rating, B.description, B.url, B.language, B.download_count, Au.uuid, Au.full_name, D.uuid as direction_uuid, D.name as direction_name, array_agg(DISTINCT T) as tags, count(*) OVER() AS full_count").
 		From("book AS B").
 		LeftJoin("author AS Au ON Au.uuid = B.author_uuid").
 		LeftJoin("direction AS D ON D.uuid = B.direction_uuid").
@@ -161,9 +162,11 @@ func (bs *bookStorage) GetAll(sortOptions *domain.SortFilterPagination) ([]*doma
 	rows, err := bs.db.Query(query, args...)
 	if err != nil {
 		bs.logger.Errorf("error occurred while selecting all books. err: %v", err)
-		return nil, err
+		return nil, 0, err
 	}
+
 	var books []*domain.Book
+	var fullCount int
 
 	for rows.Next() {
 		book := domain.Book{}
@@ -183,6 +186,7 @@ func (bs *bookStorage) GetAll(sortOptions *domain.SortFilterPagination) ([]*doma
 			&book.Direction.UUID,
 			&book.Direction.Name,
 			pq.Array(&tagsStr),
+			&fullCount,
 		)
 		if err != nil {
 			bs.logger.Errorf("error occurred while selecting book. err: %v", err)
@@ -201,7 +205,14 @@ func (bs *bookStorage) GetAll(sortOptions *domain.SortFilterPagination) ([]*doma
 
 		books = append(books, &book)
 	}
-	return books, nil
+
+	var pagesCount int
+
+	if sortOptions.Limit != 0 {
+		pagesCount = int(math.Ceil(float64(fullCount) / float64(sortOptions.Limit)))
+	}
+
+	return books, pagesCount, nil
 }
 
 func (bs *bookStorage) Create(bookCreateDTO *domain.CreateBookDTO) (string, error) {

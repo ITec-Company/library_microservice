@@ -56,13 +56,16 @@ func (ah *audioHandler) GetAll() http.HandlerFunc {
 
 		sortingOptions := r.Context().Value(CtxKeySortAndFilters).(domain.SortFilterPagination)
 
-		audios, err := ah.Service.GetAll(&sortingOptions)
+		audios, pagesCount, err := ah.Service.GetAll(&sortingOptions)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			json.NewEncoder(w).Encode(JSON.Error{Msg: fmt.Sprintf("error occurred while getting all audios. err: %v", err)})
 			return
 		}
 
+		if pagesCount > 0 {
+			w.Header().Set("pages", strconv.Itoa(pagesCount))
+		}
 		w.WriteHeader(http.StatusOK)
 		json.NewEncoder(w).Encode(audios)
 	})

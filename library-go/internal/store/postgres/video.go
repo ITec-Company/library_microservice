@@ -8,6 +8,7 @@ import (
 	"library-go/internal/domain"
 	"library-go/internal/store"
 	"library-go/pkg/logging"
+	"math"
 	"strings"
 )
 
@@ -111,8 +112,8 @@ func (vs *videoStorage) GetOne(UUID string) (*domain.Video, error) {
 	return &video, nil
 }
 
-func (vs *videoStorage) GetAll(sortOptions *domain.SortFilterPagination) ([]*domain.Video, error) {
-	s := squirrel.Select("V.uuid, V.title, V.difficulty, V.rating, V.url, V.language, V.download_count, D.uuid as direction_uuid, D.name as direction_name, array_agg(DISTINCT T) as tags").
+func (vs *videoStorage) GetAll(sortOptions *domain.SortFilterPagination) ([]*domain.Video, int, error) {
+	s := squirrel.Select("V.uuid, V.title, V.difficulty, V.rating, V.url, V.language, V.download_count, D.uuid as direction_uuid, D.name as direction_name, array_agg(DISTINCT T) as tags, count(*) OVER() AS full_count").
 		From("video AS V").
 		LeftJoin("direction AS D ON D.uuid = V.direction_uuid").
 		LeftJoin("tag AS T ON  T.uuid = any (V.tags_uuids)").
@@ -139,9 +140,11 @@ func (vs *videoStorage) GetAll(sortOptions *domain.SortFilterPagination) ([]*dom
 	rows, err := vs.db.Query(query, args...)
 	if err != nil {
 		vs.logger.Errorf("error occurred while selecting all videos. err: %v", err)
-		return nil, err
+		return nil, 0, err
 	}
+
 	var videos []*domain.Video
+	var fullCount int
 
 	for rows.Next() {
 		video := domain.Video{}
@@ -157,6 +160,7 @@ func (vs *videoStorage) GetAll(sortOptions *domain.SortFilterPagination) ([]*dom
 			&video.Direction.UUID,
 			&video.Direction.Name,
 			pq.Array(&tagsStr),
+			&fullCount,
 		)
 		if err != nil {
 			vs.logger.Errorf("error occurred while selecting video. err: %v", err)
@@ -174,7 +178,14 @@ func (vs *videoStorage) GetAll(sortOptions *domain.SortFilterPagination) ([]*dom
 		}
 		videos = append(videos, &video)
 	}
-	return videos, nil
+
+	var pagesCount int
+
+	if sortOptions.Limit != 0 {
+		pagesCount = int(math.Ceil(float64(fullCount) / float64(sortOptions.Limit)))
+	}
+
+	return videos, pagesCount, nil
 }
 
 func (vs *videoStorage) Create(videoCreateDTO *domain.CreateVideoDTO) (string, error) {

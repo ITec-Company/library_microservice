@@ -6,7 +6,7 @@ import (
 
 type ArticleStorage interface {
 	GetOne(UUID string) (*domain.Article, error)
-	GetAll(sortOptions *domain.SortFilterPagination) ([]*domain.Article, error)
+	GetAll(sortOptions *domain.SortFilterPagination) ([]*domain.Article, int, error)
 	Create(article *domain.CreateArticleDTO) (string, error)
 	Delete(UUID string) error
 	Update(article *domain.UpdateArticleDTO) error
@@ -14,7 +14,7 @@ type ArticleStorage interface {
 
 type AudioStorage interface {
 	GetOne(UUID string) (*domain.Audio, error)
-	GetAll(sortOptions *domain.SortFilterPagination) ([]*domain.Audio, error)
+	GetAll(sortOptions *domain.SortFilterPagination) ([]*domain.Audio, int, error)
 	Create(audio *domain.CreateAudioDTO) (string, error)
 	Delete(UUID string) error
 	Update(audio *domain.UpdateAudioDTO) error
@@ -30,7 +30,7 @@ type AuthorStorage interface {
 
 type BookStorage interface {
 	GetOne(UUID string) (*domain.Book, error)
-	GetAll(sortOptions *domain.SortFilterPagination) ([]*domain.Book, error)
+	GetAll(sortOptions *domain.SortFilterPagination) ([]*domain.Book, int, error)
 	Create(book *domain.CreateBookDTO) (string, error)
 	Delete(UUID string) error
 	Update(book *domain.UpdateBookDTO) error
@@ -63,7 +63,7 @@ type TagStorage interface {
 
 type VideoStorage interface {
 	GetOne(UUID string) (*domain.Video, error)
-	GetAll(sortOptions *domain.SortFilterPagination) ([]*domain.Video, error)
+	GetAll(sortOptions *domain.SortFilterPagination) ([]*domain.Video, int, error)
 	Create(video *domain.CreateVideoDTO) (string, error)
 	Delete(UUID string) error
 	Update(video *domain.UpdateVideoDTO) error

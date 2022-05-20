@@ -25,7 +25,7 @@ func (s *audioService) GetByUUID(ctx context.Context, UUID string) (*domain.Audi
 	return s.storage.GetOne(UUID)
 }
 
-func (s *audioService) GetAll(sortingOptions *domain.SortFilterPagination) ([]*domain.Audio, error) {
+func (s *audioService) GetAll(sortingOptions *domain.SortFilterPagination) ([]*domain.Audio, int, error) {
 	return s.storage.GetAll(sortingOptions)
 }
 

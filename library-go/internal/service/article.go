@@ -25,7 +25,7 @@ func (s *articleService) GetByUUID(ctx context.Context, UUID string) (*domain.Ar
 	return s.storage.GetOne(UUID)
 }
 
-func (s *articleService) GetAll(sortingOptions *domain.SortFilterPagination) ([]*domain.Article, error) {
+func (s *articleService) GetAll(sortingOptions *domain.SortFilterPagination) ([]*domain.Article, int, error) {
 	return s.storage.GetAll(sortingOptions)
 }
 

@@ -1,7 +1,7 @@
 // ?sort_by?sort_order
 // ?filter=filterName1%3Aarg1%2Carg2%2Carg3%7CfilterName2%3Aarg1%2carg2
 // ?limit=15&page=1
-GET http://localhost:1000/articles?filter=difficulty%3Ajunior
+GET http://localhost:1000/articles?limit=10&page=1
 Content-Type: application/json
 
 ### Get audios

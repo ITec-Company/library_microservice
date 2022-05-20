@@ -51,18 +51,19 @@ func (mr *MockArticleServiceMockRecorder) GetByUUID(ctx, UUID interface{}) *gomo
 }
 
 // GetAll mocks base method
-func (m *MockArticleService) GetAll(ctx context.Context, limit, offset int) ([]*domain.Article, error) {
+func (m *MockArticleService) GetAll(sortingOptions *domain.SortFilterPagination) ([]*domain.Article, int, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetAll", ctx, limit, offset)
+	ret := m.ctrl.Call(m, "GetAll", sortingOptions)
 	ret0, _ := ret[0].([]*domain.Article)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
+	ret1, _ := ret[1].(int)
+	ret2, _ := ret[2].(error)
+	return ret0, ret1, ret2
 }
 
 // GetAll indicates an expected call of GetAll
-func (mr *MockArticleServiceMockRecorder) GetAll(ctx, limit, offset interface{}) *gomock.Call {
+func (mr *MockArticleServiceMockRecorder) GetAll(sortingOptions interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAll", reflect.TypeOf((*MockArticleService)(nil).GetAll), ctx, limit, offset)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAll", reflect.TypeOf((*MockArticleService)(nil).GetAll), sortingOptions)
 }
 
 // Delete mocks base method
@@ -176,18 +177,19 @@ func (mr *MockAudioServiceMockRecorder) GetByUUID(ctx, UUID interface{}) *gomock
 }
 
 // GetAll mocks base method
-func (m *MockAudioService) GetAll(sortingOptions *domain.SortFilterPagination) ([]*domain.Audio, error) {
+func (m *MockAudioService) GetAll(sortingOptions *domain.SortFilterPagination) ([]*domain.Audio, int, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetAll", ctx, limit, offset)
+	ret := m.ctrl.Call(m, "GetAll", sortingOptions)
 	ret0, _ := ret[0].([]*domain.Audio)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
+	ret1, _ := ret[1].(int)
+	ret2, _ := ret[2].(error)
+	return ret0, ret1, ret2
 }
 
 // GetAll indicates an expected call of GetAll
-func (mr *MockAudioServiceMockRecorder) GetAll(ctx, limit, offset interface{}) *gomock.Call {
+func (mr *MockAudioServiceMockRecorder) GetAll(sortingOptions interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAll", reflect.TypeOf((*MockAudioService)(nil).GetAll), ctx, limit, offset)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAll", reflect.TypeOf((*MockAudioService)(nil).GetAll), sortingOptions)
 }
 
 // Delete mocks base method
@@ -397,18 +399,19 @@ func (mr *MockBookServiceMockRecorder) GetByUUID(ctx, UUID interface{}) *gomock.
 }
 
 // GetAll mocks base method
-func (m *MockBookService) GetAll(ctx context.Context, limit, offset int) ([]*domain.Book, error) {
+func (m *MockBookService) GetAll(sortingOptions *domain.SortFilterPagination) ([]*domain.Book, int, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetAll", ctx, limit, offset)
+	ret := m.ctrl.Call(m, "GetAll", sortingOptions)
 	ret0, _ := ret[0].([]*domain.Book)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
+	ret1, _ := ret[1].(int)
+	ret2, _ := ret[2].(error)
+	return ret0, ret1, ret2
 }
 
 // GetAll indicates an expected call of GetAll
-func (mr *MockBookServiceMockRecorder) GetAll(ctx, limit, offset interface{}) *gomock.Call {
+func (mr *MockBookServiceMockRecorder) GetAll(sortingOptions interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAll", reflect.TypeOf((*MockBookService)(nil).GetAll), ctx, limit, offset)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAll", reflect.TypeOf((*MockBookService)(nil).GetAll), sortingOptions)
 }
 
 // Delete mocks base method
@@ -825,18 +828,19 @@ func (mr *MockVideoServiceMockRecorder) GetByUUID(ctx, UUID interface{}) *gomock
 }
 
 // GetAll mocks base method
-func (m *MockVideoService) GetAll(ctx context.Context, limit, offset int) ([]*domain.Video, error) {
+func (m *MockVideoService) GetAll(sortingOptions *domain.SortFilterPagination) ([]*domain.Video, int, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetAll", ctx, limit, offset)
+	ret := m.ctrl.Call(m, "GetAll", sortingOptions)
 	ret0, _ := ret[0].([]*domain.Video)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
+	ret1, _ := ret[1].(int)
+	ret2, _ := ret[2].(error)
+	return ret0, ret1, ret2
 }
 
 // GetAll indicates an expected call of GetAll
-func (mr *MockVideoServiceMockRecorder) GetAll(ctx, limit, offset interface{}) *gomock.Call {
+func (mr *MockVideoServiceMockRecorder) GetAll(sortingOptions interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAll", reflect.TypeOf((*MockVideoService)(nil).GetAll), ctx, limit, offset)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAll", reflect.TypeOf((*MockVideoService)(nil).GetAll), sortingOptions)
 }
 
 // Delete mocks base method

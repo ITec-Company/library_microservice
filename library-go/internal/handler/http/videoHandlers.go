@@ -56,11 +56,15 @@ func (vh *videoHandler) GetAll() http.HandlerFunc {
 
 		sortingOptions := r.Context().Value(CtxKeySortAndFilters).(domain.SortFilterPagination)
 
-		videos, err := vh.Service.GetAll(&sortingOptions)
+		videos, pagesCount, err := vh.Service.GetAll(&sortingOptions)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			json.NewEncoder(w).Encode(JSON.Error{Msg: fmt.Sprintf("error occurred while getting all videos. err: %v", err)})
 			return
+		}
+
+		if pagesCount > 0 {
+			w.Header().Set("pages", strconv.Itoa(pagesCount))
 		}
 
 		w.WriteHeader(http.StatusOK)

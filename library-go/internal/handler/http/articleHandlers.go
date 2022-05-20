@@ -57,13 +57,16 @@ func (ah *articleHandler) GetAll() http.HandlerFunc {
 
 		sortingOptions := r.Context().Value(CtxKeySortAndFilters).(domain.SortFilterPagination)
 
-		articles, err := ah.Service.GetAll(&sortingOptions)
+		articles, pagesCount, err := ah.Service.GetAll(&sortingOptions)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			json.NewEncoder(w).Encode(JSON.Error{Msg: fmt.Sprintf("error occurred while getting all articles. err: %v", err)})
 			return
 		}
 
+		if pagesCount > 0 {
+			w.Header().Set("pages", strconv.Itoa(pagesCount))
+		}
 		w.WriteHeader(http.StatusOK)
 		json.NewEncoder(w).Encode(articles)
 	})
