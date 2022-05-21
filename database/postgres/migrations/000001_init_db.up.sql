@@ -13,7 +13,9 @@ CREATE TABLE book
     url                     TEXT NOT NULL ,
     language                CHARACTER VARYING(15) ,
     tags_uuids              integer [],
-    download_count          INTEGER NOT NULL
+    download_count          INTEGER NOT NULL,
+    image_url               TEXT DEFAULT '',
+    created_at              TIMESTAMP NOT NULL
 );
 
 CREATE TABLE article
@@ -28,7 +30,9 @@ CREATE TABLE article
     url                     TEXT NOT NULL ,
     language                CHARACTER VARYING(15) ,
     tags_uuids              integer [],
-    download_count          INTEGER NOT NULL
+    download_count          INTEGER NOT NULL,
+    image_url               TEXT DEFAULT '',
+    created_at              TIMESTAMP NOT NULL
 );
 
 CREATE TABLE audio

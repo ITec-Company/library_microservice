@@ -23,6 +23,8 @@ const (
 		A.url,
 		A.language,
 		A.download_count,
+		A.image_url, 
+		A.created_at, 
 		Au.uuid,
 		Au.full_name,
 		D.uuid as direction_uuid,
@@ -33,7 +35,7 @@ const (
 	LEFT JOIN direction AS D ON D.uuid = A.direction_uuid
 	LEFT JOIN tag AS T ON  T.uuid = any (A.tags_uuids)
 	WHERE  A.uuid = $1
-	GROUP BY A.uuid, A.title, A.difficulty, A.edition_date, A.rating, A.description, A.url, A.language, A.download_count, Au.uuid, Au.full_name, D.uuid, D.name`
+	GROUP BY A.uuid, A.title, A.difficulty, A.edition_date, A.rating, A.description, A.url, A.language, A.download_count, A.image_url, A.created_at, Au.uuid, Au.full_name, D.uuid, D.name`
 	getAllArticlesQuery = `SELECT 
 		A.uuid,
 		A.title,
@@ -65,8 +67,10 @@ const (
                      url, 
                      language, 
                      tags_uuids, 
-                     download_count
-				) SELECT $1, $2 , $3, $4, $5, $6, $7, $8, $9, $10, $11
+                     download_count,
+                     image_url, 
+                     created_at
+				) SELECT $1, $2 , $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13
 				WHERE EXISTS(SELECT uuid FROM author where $3 = author.uuid) AND
 				EXISTS(SELECT uuid FROM direction where $2 = direction.uuid) AND
 			    EXISTS(SELECT uuid FROM tag where tag.uuid = any($10)) RETURNING article.uuid`
@@ -112,6 +116,8 @@ func (as *articleStorage) GetOne(UUID string) (*domain.Article, error) {
 		&article.URL,
 		&article.Language,
 		&article.DownloadCount,
+		&article.ImageURL,
+		&article.CreatedAt,
 		&article.Author.UUID,
 		&article.Author.FullName,
 		&article.Direction.UUID,
@@ -135,12 +141,12 @@ func (as *articleStorage) GetOne(UUID string) (*domain.Article, error) {
 
 func (as *articleStorage) GetAll(sortOptions *domain.SortFilterPagination) ([]*domain.Article, int, error) {
 
-	s := squirrel.Select("A.uuid, A.title, A.difficulty, A.edition_date, A.rating, A.description, A.url, A.language, A.download_count, Au.uuid, Au.full_name, D.uuid as direction_uuid, D.name as direction_name, array_agg(DISTINCT T) as tags, count(*) OVER() AS full_count").
+	s := squirrel.Select("A.uuid, A.title, A.difficulty, A.edition_date, A.rating, A.description, A.url, A.language, A.download_count, A.image_url, A.created_at, Au.uuid, Au.full_name, D.uuid as direction_uuid, D.name as direction_name, array_agg(DISTINCT T) as tags, count(*) OVER() AS full_count").
 		From("article AS A").
 		LeftJoin("author AS Au ON Au.uuid = A.author_uuid").
 		LeftJoin("direction AS D ON D.uuid = A.direction_uuid").
 		LeftJoin("tag AS T ON  T.uuid = any (A.tags_uuids)").
-		GroupBy("A.uuid, A.title, A.difficulty, A.edition_date, A.rating, A.description, A.url, A.language, A.download_count, Au.uuid, Au.full_name, D.uuid, D.name")
+		GroupBy("A.uuid, A.title, A.difficulty, A.edition_date, A.rating, A.description, A.url, A.language, A.download_count, A.image_url, A.created_at, Au.uuid, Au.full_name, D.uuid, D.name")
 
 	if sortOptions.Limit != 0 {
 		s = s.Limit(sortOptions.Limit)
@@ -181,6 +187,8 @@ func (as *articleStorage) GetAll(sortOptions *domain.SortFilterPagination) ([]*d
 			&article.URL,
 			&article.Language,
 			&article.DownloadCount,
+			&article.ImageURL,
+			&article.CreatedAt,
 			&article.Author.UUID,
 			&article.Author.FullName,
 			&article.Direction.UUID,
@@ -235,6 +243,8 @@ func (as *articleStorage) Create(articleCreateDTO *domain.CreateArticleDTO) (str
 		articleCreateDTO.Language,
 		pq.Array(articleCreateDTO.TagsUUIDs),
 		0,
+		articleCreateDTO.ImageURL,
+		articleCreateDTO.CreatedAt,
 	)
 
 	if err := row.Scan(&UUID); err != nil {

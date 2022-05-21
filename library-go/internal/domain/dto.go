@@ -14,6 +14,8 @@ type CreateArticleDTO struct {
 	URL           string    `json:"url"`
 	Language      string    `json:"language"`
 	TagsUUIDs     []string  `json:"tags_uuids"`
+	ImageURL      string    `json:"image_url,omitempty"`
+	CreatedAt     time.Time `json:"created_at"`
 }
 
 type UpdateArticleDTO struct {
@@ -29,6 +31,7 @@ type UpdateArticleDTO struct {
 	Language      string    `json:"language,omitempty"`
 	TagsUUIDs     []string  `json:"tags_uuids,omitempty"`
 	DownloadCount uint32    `json:"download_count,omitempty"`
+	ImageURL      string    `json:"image_url,omitempty"`
 }
 
 // Audio
@@ -77,6 +80,8 @@ type CreateBookDTO struct {
 	URL           string    `json:"url"`
 	Language      string    `json:"language"`
 	TagsUUIDs     []string  `json:"tags_uuids"`
+	ImageURL      string    `json:"image_url,omitempty"`
+	CreatedAt     time.Time `json:"created_at"`
 }
 
 type UpdateBookDTO struct {
@@ -92,6 +97,7 @@ type UpdateBookDTO struct {
 	Language      string    `json:"language,omitempty"`
 	TagsUUIDs     []string  `json:"tags_uuids,omitempty"`
 	DownloadCount uint32    `json:"download_count,omitempty"`
+	ImageURL      string    `json:"image_url,omitempty"`
 }
 
 // Direction

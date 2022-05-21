@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"image"
 	"io"
 	"library-go/internal/domain"
 	"library-go/internal/store"
@@ -47,4 +48,12 @@ func (s *bookService) Load(ctx context.Context, path string) ([]byte, error) {
 
 func (s *bookService) Save(ctx context.Context, path, fileName string, file io.Reader) error {
 	return utils.SaveFile(path, fileName, file)
+}
+
+func (s *bookService) LoadImage(ctx context.Context, path string) (*image.Image, error) {
+	return utils.GetImageFromLocalStore(path)
+}
+
+func (s *bookService) SaveImage(ctx context.Context, path string, image *image.Image) (string, error) {
+	return utils.SaveImage(image, path)
 }

@@ -6,11 +6,14 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/julienschmidt/httprouter"
+	"image"
+	"image/jpeg"
 	"library-go/internal/domain"
 	"library-go/internal/handler"
 	"library-go/internal/service"
 	"library-go/pkg/JSON"
 	"library-go/pkg/logging"
+	"library-go/pkg/utils"
 	"net/http"
 	"os"
 	"strconv"
@@ -25,7 +28,9 @@ const (
 	deleteArticleURL        = "/article/:uuid"
 	updateArticleURL        = "/article"
 	loadArticleURL          = "/load/article"
+	loadArticleImageURL     = "/load/image/article"
 	articleLocalStoragePath = "../store/articles/"
+	articleImageStoragePath = "../store/images/articles/"
 )
 
 type articleHandler struct {
@@ -49,6 +54,7 @@ func (ah *articleHandler) Register(router *httprouter.Router) {
 	router.DELETE(deleteArticleURL, ah.Delete)
 	router.PUT(updateArticleURL, ah.Update)
 	router.GET(loadArticleURL, ah.Load)
+	router.GET(loadArticleImageURL, ah.LoadImage)
 }
 
 func (ah *articleHandler) GetAll() http.HandlerFunc {
@@ -110,6 +116,7 @@ func (ah *articleHandler) Create() http.Handler {
 		createArticleDTO := domain.CreateArticleDTO{}
 
 		t, _ := time.Parse("2006-01-02", data["edition_date"].(string))
+		createAt := time.Now().UTC()
 
 		file := data["file"].(*bytes.Buffer)
 
@@ -122,10 +129,25 @@ func (ah *articleHandler) Create() http.Handler {
 		createArticleDTO.Language = data["language"].(string)
 		createArticleDTO.TagsUUIDs = strings.Split(data["tags_uuids"].(string), ",")
 
+		createArticleDTO.CreatedAt = createAt
+		createdStr := createAt.Format("2006-01-02-15-04-05")
+
+		img := data["image"].(image.Image)
+		imagePath := fmt.Sprintf("%s/%s", articleImageStoragePath, createdStr)
+		imageFileName, err := ah.Service.SaveImage(context.Background(), imagePath, &img)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			ah.logger.Errorf("error occurred while saving article image into local store. err: %v.", err)
+			json.NewEncoder(w).Encode(JSON.Error{Msg: fmt.Sprintf("error occurred while saving article image into local store. err: %v.", err)})
+			return
+		}
+
+		createArticleDTO.ImageURL = fmt.Sprintf("%s?url=%s%%2F%s", loadArticleImageURL, createdStr, imageFileName)
+
 		fileName := data["fileName"].(string)
 		createArticleDTO.URL = fmt.Sprintf("%s?url=%s", loadArticleURL, fileName)
 
-		err := ah.Service.Save(context.Background(), articleLocalStoragePath, fileName, file)
+		err = ah.Service.Save(context.Background(), articleLocalStoragePath, fileName, file)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			ah.logger.Errorf("error occurred while saving article into local database. err: %v.", err)
@@ -232,4 +254,29 @@ func (ah *articleHandler) Load(w http.ResponseWriter, r *http.Request, ps httpro
 	}
 
 	w.Write(fileBytes)
+}
+
+func (ah *articleHandler) LoadImage(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	w.Header().Set("Content-Type", "image/jpeg")
+
+	url := r.URL.Query().Get("url")
+	if url == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		ah.logger.Errorf("url can't be empty")
+		return
+	}
+
+	path := fmt.Sprintf("%s%s", articleImageStoragePath, url)
+
+	img, err := utils.GetImageFromLocalStore(path)
+	if err != nil {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusInternalServerError)
+		ah.logger.Errorf("error occurred while saving image to local store. err: %v", err)
+		json.NewEncoder(w).Encode(JSON.Error{Msg: fmt.Sprintf("error occurred while saving image to local store. err: %v", err)})
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	jpeg.Encode(w, *img, nil)
 }

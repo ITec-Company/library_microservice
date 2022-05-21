@@ -1,10 +1,25 @@
 package utils
 
 import (
+	"errors"
 	"fmt"
+	"github.com/nfnt/resize"
+	"image"
+	"image/jpeg"
 	"io"
 	"io/ioutil"
 	"os"
+)
+
+type Format string
+
+var (
+	FormatOriginal Format = "original"
+	FormatQVGA     Format = "QVGA"
+	FormatVGA      Format = "VGA"
+	FormatHD720p   Format = "HD720p"
+
+	ErrNilPointer = errors.New("nil pointer reference")
 )
 
 func SaveFile(path string, fileName string, fileSrc io.Reader) error {
@@ -41,4 +56,57 @@ func LoadFile(path string) ([]byte, error) {
 		return nil, err
 	}
 	return fileBytes, nil
+}
+
+// SaveImage original and resized copy. As default returns a name of original image saved
+func SaveImage(image *image.Image, path string) (string, error) {
+
+	if err := os.MkdirAll(path, os.ModePerm); err != nil {
+		return "", err
+	}
+
+	imagesMap, err := ResizeImage(image)
+	if err != nil {
+		return "", err
+	}
+
+	for format, img := range imagesMap {
+		file, err := os.Create(fmt.Sprintf("%s/%s.jpg", path, string(format)))
+		if err != nil {
+			return "", err
+		}
+
+		if err = jpeg.Encode(file, img, nil); err != nil {
+			return "", err
+		}
+		file.Close()
+	}
+	return fmt.Sprintf("%s.jpg", string(FormatOriginal)), nil
+}
+
+func ResizeImage(original *image.Image) (map[Format]image.Image, error) {
+	if original == nil {
+		return nil, ErrNilPointer
+	}
+	images := make(map[Format]image.Image)
+	images[FormatOriginal] = *original
+	images[FormatQVGA] = resize.Resize(320, 240, *original, resize.Lanczos3)
+	images[FormatVGA] = resize.Resize(640, 480, *original, resize.Lanczos3)
+	images[FormatHD720p] = resize.Resize(1280, 720, *original, resize.Lanczos3)
+
+	return images, nil
+}
+
+func GetImageFromLocalStore(path string) (*image.Image, error) {
+	file, err := os.Open(path)
+	if err != nil {
+		return nil, err
+	}
+
+	img, err := jpeg.Decode(file)
+	if err != nil {
+		return nil, err
+	}
+
+	return &img, nil
 }

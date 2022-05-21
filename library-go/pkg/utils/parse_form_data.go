@@ -2,6 +2,7 @@ package utils
 
 import (
 	"bytes"
+	"image/jpeg"
 	"io"
 	"net/http"
 )
@@ -28,6 +29,13 @@ func ParseMultiPartFormData(r *http.Request, data map[string]interface{}) error 
 			}
 			data["file"] = buf
 			data["fileName"] = part.FileName()
+			part.Close()
+		} else if part.FormName() == "image" {
+			image, err := jpeg.Decode(part)
+			if err != nil {
+				return err
+			}
+			data["image"] = image
 			part.Close()
 		} else {
 			for key, _ := range data {

@@ -76,6 +76,8 @@ func TestArticle() *Article {
 		Language:      "Test Language",
 		Tags:          []Tag{*TestTag()},
 		DownloadCount: 10,
+		ImageURL:      "imageURL",
+		CreatedAt:     time.Date(2000, 01, 01, 0, 0, 0, 0, time.UTC),
 	}
 }
 
@@ -90,6 +92,7 @@ func TestArticleCreateDTO() *CreateArticleDTO {
 		URL:           "Test URL",
 		Language:      "Test Language",
 		TagsUUIDs:     []string{"1"},
+		ImageURL:      "imageURL",
 	}
 }
 
@@ -107,6 +110,7 @@ func TestArticleUpdateDTO() *UpdateArticleDTO {
 		Language:      "Test Language",
 		TagsUUIDs:     []string{"1"},
 		DownloadCount: 10,
+		ImageURL:      "imageURL",
 	}
 }
 
@@ -124,6 +128,8 @@ func TestBook() *Book {
 		Language:      "Test Language",
 		Tags:          []Tag{*TestTag()},
 		DownloadCount: 10,
+		ImageURL:      "imageURL",
+		CreatedAt:     time.Date(2000, 01, 01, 0, 0, 0, 0, time.UTC),
 	}
 }
 
@@ -138,6 +144,7 @@ func TestBookCreateDTO() *CreateBookDTO {
 		URL:           "Test URL",
 		Language:      "Test Language",
 		TagsUUIDs:     []string{"1"},
+		ImageURL:      "imageURL",
 	}
 }
 
@@ -155,6 +162,7 @@ func TestBookUpdateDTO() *UpdateBookDTO {
 		Language:      "Test Language",
 		TagsUUIDs:     []string{"1"},
 		DownloadCount: 10,
+		ImageURL:      "imageURL",
 	}
 }
 

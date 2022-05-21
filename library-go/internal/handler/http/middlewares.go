@@ -42,6 +42,7 @@ func (m *Middleware) createArticle(next http.Handler) httprouter.Handle {
 	return func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		data := map[string]interface{}{
 			"file":           "file",
+			"image":          "image",
 			"title":          "text",
 			"direction_uuid": "text",
 			"author_uuid":    "text",
@@ -91,6 +92,7 @@ func (m *Middleware) createBook(next http.Handler) httprouter.Handle {
 	return func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		data := map[string]interface{}{
 			"file":           "file",
+			"image":          "image",
 			"title":          "text",
 			"direction_uuid": "text",
 			"author_uuid":    "text",

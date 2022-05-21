@@ -6,11 +6,14 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/julienschmidt/httprouter"
+	"image"
+	"image/jpeg"
 	"library-go/internal/domain"
 	"library-go/internal/handler"
 	"library-go/internal/service"
 	"library-go/pkg/JSON"
 	"library-go/pkg/logging"
+	"library-go/pkg/utils"
 	"net/http"
 	"os"
 	"strconv"
@@ -25,7 +28,9 @@ const (
 	deleteBookURL        = "/book/:uuid"
 	updateBookURL        = "/book"
 	loadBookURL          = "/load/book"
+	loadBookImageURL     = "/load/image/book"
 	bookLocalStoragePath = "../store/books/"
+	bookImageStoragePath = "../store/images/books/"
 )
 
 type bookHandler struct {
@@ -49,6 +54,7 @@ func (bh *bookHandler) Register(router *httprouter.Router) {
 	router.DELETE(deleteBookURL, bh.Delete)
 	router.PUT(updateBookURL, bh.Update)
 	router.GET(loadBookURL, bh.Load)
+	router.GET(loadBookImageURL, bh.LoadImage)
 }
 
 func (bh *bookHandler) GetAll() http.HandlerFunc {
@@ -111,6 +117,7 @@ func (bh *bookHandler) Create() http.Handler {
 		createBookDTO := domain.CreateBookDTO{}
 
 		t, _ := time.Parse("2006-01-02", data["edition_date"].(string))
+		createAt := time.Now().UTC()
 
 		file := data["file"].(*bytes.Buffer)
 
@@ -123,10 +130,26 @@ func (bh *bookHandler) Create() http.Handler {
 		createBookDTO.Language = data["language"].(string)
 		createBookDTO.TagsUUIDs = strings.Split(data["tags_uuids"].(string), ",")
 
+		createBookDTO.CreatedAt = createAt
+		createdStr := createAt.Format("2006-01-02-15-04-05")
+
+		img := data["image"].(image.Image)
+		imagePath := fmt.Sprintf("%s/%s", bookImageStoragePath, createdStr)
+		imageFileName, err := bh.Service.SaveImage(context.Background(), imagePath, &img)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			bh.logger.Errorf("error occurred while saving book image into local store. err: %v.", err)
+			json.NewEncoder(w).Encode(JSON.Error{Msg: fmt.Sprintf("error occurred while saving book image into local store. err: %v.", err)})
+			return
+		}
+		bh.logger.Errorf("%v", createAt)
+
+		createBookDTO.ImageURL = fmt.Sprintf("%s?url=%s%%2F%s", loadBookImageURL, createdStr, imageFileName)
+
 		fileName := data["fileName"].(string)
 		createBookDTO.URL = fmt.Sprintf("%s?url=%s", loadBookURL, fileName)
 
-		err := bh.Service.Save(context.Background(), bookLocalStoragePath, fileName, file)
+		err = bh.Service.Save(context.Background(), bookLocalStoragePath, fileName, file)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			bh.logger.Errorf("error occurred while saving book into local database. err: %v.", err)
@@ -233,5 +256,31 @@ func (bh *bookHandler) Load(w http.ResponseWriter, r *http.Request, ps httproute
 	}
 
 	w.Write(fileBytes)
+
+}
+
+func (bh *bookHandler) LoadImage(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	w.Header().Set("Content-Type", "image/jpeg")
+
+	url := r.URL.Query().Get("url")
+	if url == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		bh.logger.Errorf("url can't be empty")
+		return
+	}
+
+	path := fmt.Sprintf("%s%s", bookImageStoragePath, url)
+
+	img, err := utils.GetImageFromLocalStore(path)
+	if err != nil {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusInternalServerError)
+		bh.logger.Errorf("error occurred while saving image to local store: %v", err)
+		json.NewEncoder(w).Encode(JSON.Error{Msg: fmt.Sprintf("error occurred while saving image to local store. err: %v", err)})
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	jpeg.Encode(w, *img, nil)
 
 }

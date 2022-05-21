@@ -17,8 +17,8 @@ Content-Type: application/json
 GET http://localhost:1000/books?limit=5&page=2
 Content-Type: application/json
 
-//image to book and article
+//image to book and article -   URL & default format     UPDATE image
 //read article in browser
-//sql injections -
+//sql injections +
 //query refactor
 //tests

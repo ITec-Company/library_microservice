@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"image"
 	"io"
 	"library-go/internal/domain"
 )
@@ -16,6 +17,8 @@ type ArticleService interface {
 	Update(ctx context.Context, article *domain.UpdateArticleDTO) error
 	Load(ctx context.Context, path string) ([]byte, error)
 	Save(ctx context.Context, path, fileName string, file io.Reader) error
+	LoadImage(ctx context.Context, path string) (*image.Image, error)
+	SaveImage(ctx context.Context, path string, image *image.Image) (string, error)
 }
 
 type AudioService interface {
@@ -44,6 +47,8 @@ type BookService interface {
 	Update(ctx context.Context, book *domain.UpdateBookDTO) error
 	Load(ctx context.Context, path string) ([]byte, error)
 	Save(ctx context.Context, path, fileName string, file io.Reader) error
+	LoadImage(ctx context.Context, path string) (*image.Image, error)
+	SaveImage(ctx context.Context, path string, image *image.Image) (string, error)
 }
 
 type DirectionService interface {

@@ -23,6 +23,8 @@ const (
 		B.url,
 		B.language,
 		B.download_count,
+		B.image_url,
+		B.created_at,
 		Au.uuid,
 		Au.full_name,
 		D.uuid as direction_uuid,
@@ -33,7 +35,7 @@ const (
 	LEFT JOIN direction AS D ON D.uuid = B.direction_uuid
 	LEFT JOIN tag AS T ON  T.uuid = any (B.tags_uuids)
 	WHERE  B.uuid = $1
-	GROUP BY B.uuid, B.title, B.difficulty, B.edition_date, B.rating, B.description, B.url, B.language, B.download_count, Au.uuid, Au.full_name, D.uuid, D.name`
+	GROUP BY B.uuid, B.title, B.difficulty, B.edition_date, B.rating, B.description, B.url, B.language, B.download_count, B.image_url, B.created_at, Au.uuid, Au.full_name, D.uuid, D.name`
 	getAllBooksQuery = `SELECT 
 		B.uuid,
 		B.title,
@@ -65,8 +67,10 @@ const (
                      url, 
                      language, 
                      tags_uuids, 
-                     download_count
-				) SELECT $1, $2 , $3, $4, $5, $6, $7, $8, $9, $10, $11
+                     download_count,
+                 	 image_url,
+					 created_at
+				) SELECT $1, $2 , $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13
 				WHERE EXISTS(SELECT uuid FROM author where $3 = author.uuid) AND
 				EXISTS(SELECT uuid FROM direction where $2 = direction.uuid) AND
 			    EXISTS(SELECT uuid FROM tag where tag.uuid = any($10)) RETURNING book.uuid`
@@ -112,6 +116,8 @@ func (bs *bookStorage) GetOne(UUID string) (*domain.Book, error) {
 		&book.URL,
 		&book.Language,
 		&book.DownloadCount,
+		&book.ImageURL,
+		&book.CreatedAt,
 		&book.Author.UUID,
 		&book.Author.FullName,
 		&book.Direction.UUID,
@@ -134,12 +140,12 @@ func (bs *bookStorage) GetOne(UUID string) (*domain.Book, error) {
 }
 
 func (bs *bookStorage) GetAll(sortOptions *domain.SortFilterPagination) ([]*domain.Book, int, error) {
-	s := squirrel.Select("B.uuid, B.title, B.difficulty, B.edition_date, B.rating, B.description, B.url, B.language, B.download_count, Au.uuid, Au.full_name, D.uuid as direction_uuid, D.name as direction_name, array_agg(DISTINCT T) as tags, count(*) OVER() AS full_count").
+	s := squirrel.Select("B.uuid, B.title, B.difficulty, B.edition_date, B.rating, B.description, B.url, B.language, B.download_count, B.image_url, B.created_at, Au.uuid, Au.full_name, D.uuid as direction_uuid, D.name as direction_name, array_agg(DISTINCT T) as tags, count(*) OVER() AS full_count").
 		From("book AS B").
 		LeftJoin("author AS Au ON Au.uuid = B.author_uuid").
 		LeftJoin("direction AS D ON D.uuid = B.direction_uuid").
 		LeftJoin("tag AS T ON  T.uuid = any (B.tags_uuids)").
-		GroupBy("B.uuid, B.title, B.difficulty, B.edition_date, B.rating, B.description, B.url, B.language, B.download_count, Au.uuid, Au.full_name, D.uuid, D.name")
+		GroupBy("B.uuid, B.title, B.difficulty, B.edition_date, B.rating, B.description, B.url, B.language, B.download_count, B.image_url, B.created_at, Au.uuid, Au.full_name, D.uuid, D.name")
 
 	if sortOptions.Limit != 0 {
 		s = s.Limit(sortOptions.Limit)
@@ -181,6 +187,8 @@ func (bs *bookStorage) GetAll(sortOptions *domain.SortFilterPagination) ([]*doma
 			&book.URL,
 			&book.Language,
 			&book.DownloadCount,
+			&book.ImageURL,
+			&book.CreatedAt,
 			&book.Author.UUID,
 			&book.Author.FullName,
 			&book.Direction.UUID,
@@ -216,6 +224,17 @@ func (bs *bookStorage) GetAll(sortOptions *domain.SortFilterPagination) ([]*doma
 }
 
 func (bs *bookStorage) Create(bookCreateDTO *domain.CreateBookDTO) (string, error) {
+
+	//s, _, _ := squirrel.Insert("book").
+	//	Columns("title", "direction_uuid", "author_uuid", "difficulty", "edition_date", "rating", "description", "url", "language", "tags_uuids", "download_count", "image_url", "created_at").
+	//	Values(bookCreateDTO.Title, bookCreateDTO.DirectionUUID, bookCreateDTO.AuthorUUID, bookCreateDTO.Difficulty, bookCreateDTO.EditionDate, 0, bookCreateDTO.Description, bookCreateDTO.URL, bookCreateDTO.Language, pq.Array(bookCreateDTO.TagsUUIDs), 0, bookCreateDTO.ImageURL, bookCreateDTO.CreatedAt).
+	//	Suffix("WHERE EXISTS(SELECT uuid FROM author where author_uuid = author.uuid)", bookCreateDTO.AuthorUUID).
+	//	Suffix("AND EXISTS(SELECT uuid FROM direction where direction_uuid = direction.uuid)", bookCreateDTO.DirectionUUID).
+	//	Suffix("AND EXISTS(SELECT uuid FROM tag where tag.uuid = ?", pq.Array(bookCreateDTO.TagsUUIDs)).
+	//	Suffix("RETURNING uuid").
+	//	PlaceholderFormat(squirrel.Dollar).
+	//	ToSql()
+
 	tx, err := bs.db.Begin()
 	if err != nil {
 		bs.logger.Errorf("error occurred while creating transaction. err: %v", err)
@@ -236,6 +255,8 @@ func (bs *bookStorage) Create(bookCreateDTO *domain.CreateBookDTO) (string, erro
 		bookCreateDTO.Language,
 		pq.Array(bookCreateDTO.TagsUUIDs),
 		0,
+		bookCreateDTO.ImageURL,
+		bookCreateDTO.CreatedAt,
 	)
 
 	if err := row.Scan(&UUID); err != nil {
