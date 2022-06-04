@@ -77,7 +77,6 @@ func TestArticle() *Article {
 		Tags:          []Tag{*TestTag()},
 		DownloadCount: 10,
 		ImageURL:      "imageURL",
-		CreatedAt:     time.Date(2000, 01, 01, 0, 0, 0, 0, time.UTC),
 	}
 }
 
@@ -129,7 +128,6 @@ func TestBook() *Book {
 		Tags:          []Tag{*TestTag()},
 		DownloadCount: 10,
 		ImageURL:      "imageURL",
-		CreatedAt:     time.Date(2000, 01, 01, 0, 0, 0, 0, time.UTC),
 	}
 }
 

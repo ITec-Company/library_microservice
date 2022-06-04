@@ -42,7 +42,7 @@ func (as *authorStorage) GetOne(UUID string) (*domain.Author, error) {
 		ToSql()
 
 	var author domain.Author
-	if err := as.db.QueryRow(query, args).Scan(
+	if err := as.db.QueryRow(query, args...).Scan(
 		&author.UUID,
 		&author.FullName,
 	); err != nil {

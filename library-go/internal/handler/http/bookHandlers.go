@@ -181,7 +181,7 @@ func (bh *bookHandler) Delete(w http.ResponseWriter, r *http.Request, ps httprou
 		return
 	}
 
-	err = bh.Service.Delete(uuid, fmt.Sprintf("%s%s/", articleLocalStoragePath, uuid))
+	err = bh.Service.Delete(uuid, fmt.Sprintf("%s%s/", bookLocalStoragePath, uuid))
 	if err != nil {
 		w.WriteHeader(http.StatusNotFound)
 		json.NewEncoder(w).Encode(JSON.Error{Msg: fmt.Sprintf("error occurred while deleting book from DB. err: %v", err)})
@@ -208,6 +208,10 @@ func (bh *bookHandler) Update(w http.ResponseWriter, r *http.Request, ps httprou
 		json.NewEncoder(w).Encode(JSON.Error{Msg: fmt.Sprintf("error occurred while decoding JSON request. err: nil UUID")})
 		return
 	}
+
+	// block changing URL
+	updateBookDTO.LocalURL = ""
+	updateBookDTO.ImageURL = ""
 
 	err := bh.Service.Update(updateBookDTO)
 	if err != nil {
@@ -317,7 +321,7 @@ func (bh *bookHandler) LoadImage(w http.ResponseWriter, r *http.Request, ps http
 }
 
 func (bh *bookHandler) UpdateImage(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	w.Header().Set("Content-Type", "image/jpeg")
+	w.Header().Set("Content-Type", "application/json")
 
 	uuid := r.URL.Query().Get("uuid")
 	if uuid == "" {

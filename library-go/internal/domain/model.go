@@ -37,7 +37,6 @@ type Article struct {
 	Language      string     `json:"language,omitempty"`
 	Tags          []Tag      `json:"tags,omitempty"`
 	DownloadCount uint32     `json:"download_count,omitempty"`
-	CreatedAt     time.Time  `json:"created_at"`
 }
 
 type Audio struct {
@@ -71,7 +70,6 @@ type Book struct {
 	Tags          []Tag      `json:"tags,omitempty"`
 	DownloadCount uint32     `json:"download_count,omitempty"`
 	ImageURL      string     `json:"image_url,omitempty"`
-	CreatedAt     time.Time  `json:"created_at"`
 }
 
 type Direction struct {

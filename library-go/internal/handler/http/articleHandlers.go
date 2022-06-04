@@ -208,6 +208,10 @@ func (ah *articleHandler) Update(w http.ResponseWriter, r *http.Request, ps http
 		return
 	}
 
+	// block changing URL
+	updateArticleDTO.LocalURL = ""
+	updateArticleDTO.ImageURL = ""
+
 	err := ah.Service.Update(updateArticleDTO)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -314,7 +318,7 @@ func (ah *articleHandler) LoadImage(w http.ResponseWriter, r *http.Request, ps h
 }
 
 func (ah *articleHandler) UpdateImage(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	w.Header().Set("Content-Type", "image/jpeg")
+	w.Header().Set("Content-Type", "application/json")
 
 	uuid := r.URL.Query().Get("uuid")
 	if uuid == "" {

@@ -93,7 +93,7 @@ const (
 			author_uuid = (CASE WHEN (EXISTS(SELECT uuid FROM author where author.uuid = $3)) THEN $3 ELSE COALESCE(NULLIF($3, 0), author_uuid) END), 
 			difficulty = (CASE WHEN ($4 = any(enum_range(difficulty))) THEN $4 ELSE difficulty END), 
 			edition_date = (CASE WHEN ($5 != date('0001-01-01 00:00:00')) THEN $5 ELSE edition_date END),
-			rating = COALESCE(NULLIF($6, 0), rating), 
+			rating = COALESCE(NULLIF($6, 0.0), rating), 
 			description = COALESCE(NULLIF($7, ''), description), 
 			local_url = COALESCE(NULLIF($8, ''), local_url), 
 			language = COALESCE(NULLIF($9, ''), language), 
@@ -127,7 +127,6 @@ func (as *articleStorage) GetOne(UUID string) (*domain.Article, error) {
 		"A.web_url",
 		"A.language",
 		"A.download_count",
-		"A.created_at",
 		"Au.uuid",
 		"Au.full_name",
 		"D.uuid as direction_uuid",
@@ -139,7 +138,7 @@ func (as *articleStorage) GetOne(UUID string) (*domain.Article, error) {
 		LeftJoin("tag AS T ON  T.uuid = any (A.tags_uuids)").
 		Where("A.uuid = ?", UUID).
 		PlaceholderFormat(squirrel.Dollar).
-		GroupBy("A.uuid", "A.title", "A.difficulty", "A.edition_date", "A.rating", "A.description", "A.local_url", "A.image_url", "A.web_url", "A.language", "A.download_count", "A.created_at", "Au.uuid", "Au.full_name", "D.uuid", "D.name").
+		GroupBy("A.uuid", "A.title", "A.difficulty", "A.edition_date", "A.rating", "A.description", "A.local_url", "A.image_url", "A.web_url", "A.language", "A.download_count", "Au.uuid", "Au.full_name", "D.uuid", "D.name").
 		ToSql()
 
 	var article domain.Article
@@ -156,7 +155,6 @@ func (as *articleStorage) GetOne(UUID string) (*domain.Article, error) {
 		&article.WebURL,
 		&article.Language,
 		&article.DownloadCount,
-		&article.CreatedAt,
 		&article.Author.UUID,
 		&article.Author.FullName,
 		&article.Direction.UUID,
@@ -192,7 +190,6 @@ func (as *articleStorage) GetAll(sortOptions *domain.SortFilterPagination) ([]*d
 		"A.web_url",
 		"A.language",
 		"A.download_count",
-		"A.created_at",
 		"Au.uuid",
 		"Au.full_name",
 		"D.uuid as direction_uuid",
@@ -203,7 +200,7 @@ func (as *articleStorage) GetAll(sortOptions *domain.SortFilterPagination) ([]*d
 		LeftJoin("author AS Au ON Au.uuid = A.author_uuid").
 		LeftJoin("direction AS D ON D.uuid = A.direction_uuid").
 		LeftJoin("tag AS T ON  T.uuid = any (A.tags_uuids)").
-		GroupBy("A.uuid", "A.title", "A.difficulty", "A.edition_date", "A.rating", "A.description", "A.local_url", "A.image_url", "A.web_url", "A.language", "A.download_count", "A.created_at", "Au.uuid", "Au.full_name", "D.uuid", "D.name")
+		GroupBy("A.uuid", "A.title", "A.difficulty", "A.edition_date", "A.rating", "A.description", "A.local_url", "A.image_url", "A.web_url", "A.language", "A.download_count", "Au.uuid", "Au.full_name", "D.uuid", "D.name")
 	if sortOptions.Limit != 0 {
 		s = s.Limit(sortOptions.Limit)
 		if sortOptions.Page != 0 {
@@ -245,7 +242,6 @@ func (as *articleStorage) GetAll(sortOptions *domain.SortFilterPagination) ([]*d
 			&article.WebURL,
 			&article.Language,
 			&article.DownloadCount,
-			&article.CreatedAt,
 			&article.Author.UUID,
 			&article.Author.FullName,
 			&article.Direction.UUID,

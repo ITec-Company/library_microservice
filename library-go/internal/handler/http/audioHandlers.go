@@ -185,6 +185,9 @@ func (ah *audioHandler) Update(w http.ResponseWriter, r *http.Request, ps httpro
 		return
 	}
 
+	// block changing URL
+	updateAudioDTO.LocalURL = ""
+
 	err := ah.Service.Update(updateAudioDTO)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)

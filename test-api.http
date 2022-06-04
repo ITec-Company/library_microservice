@@ -1,6 +1,14 @@
-// ?sort_by?sort_order
-// ?filter=filterName1%3Aarg1%2Carg2%2Carg3%7CfilterName2%3Aarg1%2carg2
-// ?limit=15&page=1
+
+#Sort, filters and pagination:
+#use GetAll methods with Query Params:
+#?sort_by=fieldName
+#?sort_order=order (asc is default)
+#?filter=fieldName1%3Aargument1%2Cargument2%7CfieldName2%3Aargument1%2Crgument2
+#?limit=limitNum&page=PageNum
+
+#You can use all or only one and dont use any of query params. Example:
+#GET articles?sort_by=edition_date&oreder_by=desc&filter=difficulty%3Amiddle%2Ajunior&limit=5&page=1
+
 GET http://localhost:1000/articles?limit=10&page=1
 Content-Type: application/json
 
@@ -17,7 +25,6 @@ Content-Type: application/json
 GET http://localhost:1000/books?limit=5&page=2
 Content-Type: application/json
 
-// UPDATE image, file
 // read article in browser
 // query refactor    CREATE (look at book create Storage), UPDATE ?
 // tests

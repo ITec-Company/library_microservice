@@ -96,7 +96,7 @@ const (
 			author_uuid = (CASE WHEN (EXISTS(SELECT uuid FROM author where author.uuid = $3)) THEN $3 ELSE COALESCE(NULLIF($3, 0), author_uuid) END), 
 			difficulty = (CASE WHEN ($4 = any(enum_range(difficulty))) THEN $4 ELSE difficulty END), 
 			edition_date = (CASE WHEN ($5 != date('0001-01-01 00:00:00')) THEN $5 ELSE edition_date END),
-			rating = COALESCE(NULLIF($6, 0), rating), 
+			rating = COALESCE(NULLIF($6, 0.0), rating), 
 			description = COALESCE(NULLIF($7, ''), description), 
 			local_url = COALESCE(NULLIF($8, ''), local_url), 
 			language = COALESCE(NULLIF($9, ''), language), 
@@ -129,7 +129,6 @@ func (bs *bookStorage) GetOne(UUID string) (*domain.Book, error) {
 		"B.image_url",
 		"B.language",
 		"B.download_count",
-		"B.created_at",
 		"Au.uuid",
 		"Au.full_name",
 		"D.uuid as direction_uuid",
@@ -141,7 +140,7 @@ func (bs *bookStorage) GetOne(UUID string) (*domain.Book, error) {
 		LeftJoin("author AS Au ON Au.uuid = B.author_uuid").
 		LeftJoin("direction AS D ON D.uuid = B.direction_uuid").
 		LeftJoin("tag AS T ON  T.uuid = any (B.tags_uuids)").
-		GroupBy("B.uuid, B.title, B.difficulty, B.edition_date, B.rating, B.description, B.local_url, B.image_url, B.language, B.download_count, B.created_at, Au.uuid, Au.full_name, D.uuid, D.name").
+		GroupBy("B.uuid, B.title, B.difficulty, B.edition_date, B.rating, B.description, B.local_url, B.image_url, B.language, B.download_count, Au.uuid, Au.full_name, D.uuid, D.name").
 		ToSql()
 
 	var book domain.Book
@@ -157,7 +156,6 @@ func (bs *bookStorage) GetOne(UUID string) (*domain.Book, error) {
 		&book.ImageURL,
 		&book.Language,
 		&book.DownloadCount,
-		&book.CreatedAt,
 		&book.Author.UUID,
 		&book.Author.FullName,
 		&book.Direction.UUID,
@@ -191,7 +189,6 @@ func (bs *bookStorage) GetAll(sortOptions *domain.SortFilterPagination) ([]*doma
 		"B.image_url",
 		"B.language",
 		"B.download_count",
-		"B.created_at",
 		"Au.uuid",
 		"Au.full_name",
 		"D.uuid as direction_uuid",
@@ -202,7 +199,7 @@ func (bs *bookStorage) GetAll(sortOptions *domain.SortFilterPagination) ([]*doma
 		LeftJoin("author AS Au ON Au.uuid = B.author_uuid").
 		LeftJoin("direction AS D ON D.uuid = B.direction_uuid").
 		LeftJoin("tag AS T ON  T.uuid = any (B.tags_uuids)").
-		GroupBy("B.uuid, B.title, B.difficulty, B.edition_date, B.rating, B.description, B.local_url, B.image_url, B.language, B.download_count, B.created_at, Au.uuid, Au.full_name, D.uuid, D.name")
+		GroupBy("B.uuid, B.title, B.difficulty, B.edition_date, B.rating, B.description, B.local_url, B.image_url, B.language, B.download_count, Au.uuid, Au.full_name, D.uuid, D.name")
 
 	if sortOptions.Limit != 0 {
 		s = s.Limit(sortOptions.Limit)
@@ -245,7 +242,6 @@ func (bs *bookStorage) GetAll(sortOptions *domain.SortFilterPagination) ([]*doma
 			&book.ImageURL,
 			&book.Language,
 			&book.DownloadCount,
-			&book.CreatedAt,
 			&book.Author.UUID,
 			&book.Author.FullName,
 			&book.Direction.UUID,
