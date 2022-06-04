@@ -2,6 +2,7 @@ package postgres
 
 import (
 	"database/sql"
+	"github.com/Masterminds/squirrel"
 	"github.com/lib/pq"
 	"library-go/internal/domain"
 	"library-go/internal/store"
@@ -34,9 +35,16 @@ func NewTagStorage(db *sql.DB, logger *logging.Logger) store.TagStorage {
 }
 
 func (ts *tagStorage) GetOne(UUID string) (*domain.Tag, error) {
+	query, args, _ := squirrel.Select("uuid", "name").
+		From("tag").
+		Where(squirrel.Eq{
+			"uuid": UUID,
+		}).
+		PlaceholderFormat(squirrel.Dollar).
+		ToSql()
+
 	var tag domain.Tag
-	if err := ts.db.QueryRow(getOneTagQuery,
-		UUID).Scan(
+	if err := ts.db.QueryRow(query, args...).Scan(
 		&tag.UUID,
 		&tag.Name,
 	); err != nil {
@@ -48,7 +56,13 @@ func (ts *tagStorage) GetOne(UUID string) (*domain.Tag, error) {
 }
 
 func (ts *tagStorage) GetMany(UUIDs []string) ([]*domain.Tag, error) {
-	rows, err := ts.db.Query(getManyTagsQuery, pq.Array(UUIDs))
+	query, args, _ := squirrel.Select("uuid", "name").
+		From("tag").
+		Where("uuid = any(?)", pq.Array(UUIDs)).
+		PlaceholderFormat(squirrel.Dollar).
+		ToSql()
+
+	rows, err := ts.db.Query(query, args...)
 	if err != nil {
 		ts.logger.Errorf("error occurred while selecting all tags. err: %v", err)
 		return nil, err
@@ -71,7 +85,12 @@ func (ts *tagStorage) GetMany(UUIDs []string) ([]*domain.Tag, error) {
 }
 
 func (ts *tagStorage) GetAll(limit, offset int) ([]*domain.Tag, error) {
-	rows, err := ts.db.Query(getAllTagsQuery)
+	query, _, _ := squirrel.Select("uuid", "name").
+		From("tag").
+		PlaceholderFormat(squirrel.Dollar).
+		ToSql()
+
+	rows, err := ts.db.Query(query)
 	if err != nil {
 		ts.logger.Errorf("error occurred while selecting all tags. err: %v", err)
 		return nil, err

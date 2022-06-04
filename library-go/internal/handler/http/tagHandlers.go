@@ -1,7 +1,6 @@
 package http
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"github.com/julienschmidt/httprouter"
@@ -62,7 +61,7 @@ func (th *tagHandler) GetAll(w http.ResponseWriter, r *http.Request, ps httprout
 		th.logger.Debugf("error occurred while parsing offset. err: %v. Assigning '0' to offset", err)
 	}
 
-	tags, err := th.Service.GetAll(context.Background(), limit, offset)
+	tags, err := th.Service.GetAll(limit, offset)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(JSON.Error{Msg: fmt.Sprintf("error occurred while getting all tags. err: %v", err)})
@@ -90,7 +89,7 @@ func (th *tagHandler) GetByUUID(w http.ResponseWriter, r *http.Request, ps httpr
 		return
 	}
 
-	tag, err := th.Service.GetByUUID(context.Background(), uuid)
+	tag, err := th.Service.GetByUUID(uuid)
 	if err != nil {
 		w.WriteHeader(http.StatusNotFound)
 		json.NewEncoder(w).Encode(JSON.Error{Msg: fmt.Sprintf("error occurred while getting tag from DB by UUID. err: %v", err)})
@@ -121,7 +120,7 @@ func (th *tagHandler) GetManyByUUIDs(w http.ResponseWriter, r *http.Request, ps 
 		}
 	}
 
-	tag, err := th.Service.GetManyByUUIDs(context.Background(), UUIDs)
+	tag, err := th.Service.GetManyByUUIDs(UUIDs)
 	if err != nil {
 		w.WriteHeader(http.StatusNotFound)
 		json.NewEncoder(w).Encode(JSON.Error{Msg: fmt.Sprintf("error occurred while getting tags from DB by UUIDs. err: %v", err)})
@@ -143,7 +142,7 @@ func (th *tagHandler) Create(w http.ResponseWriter, r *http.Request, ps httprout
 		return
 	}
 
-	UUID, err := th.Service.Create(context.Background(), createTagDTO)
+	UUID, err := th.Service.Create(createTagDTO)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(JSON.Error{Msg: fmt.Sprintf("error occurred while creating tag into DB. err: %v", err)})
@@ -171,7 +170,7 @@ func (th *tagHandler) Delete(w http.ResponseWriter, r *http.Request, ps httprout
 		return
 	}
 
-	err = th.Service.Delete(context.Background(), uuid)
+	err = th.Service.Delete(uuid)
 	if err != nil {
 		w.WriteHeader(http.StatusNotFound)
 		json.NewEncoder(w).Encode(JSON.Error{Msg: fmt.Sprintf("error occurred while deleting tag from DB. err: %v", err)})
@@ -199,7 +198,7 @@ func (th *tagHandler) Update(w http.ResponseWriter, r *http.Request, ps httprout
 		return
 	}
 
-	err := th.Service.Update(context.Background(), updateTagDTO)
+	err := th.Service.Update(updateTagDTO)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(JSON.Error{Msg: fmt.Sprintf("error occurred while updating tag into DB. err: %v", err)})

@@ -1,13 +1,14 @@
 package service
 
 import (
-	"context"
+	"fmt"
 	"image"
 	"io"
 	"library-go/internal/domain"
 	"library-go/internal/store"
 	"library-go/pkg/logging"
 	"library-go/pkg/utils"
+	"os"
 )
 
 type articleService struct {
@@ -22,7 +23,7 @@ func NewArticleService(storage store.ArticleStorage, logger *logging.Logger) Art
 	}
 }
 
-func (s *articleService) GetByUUID(ctx context.Context, UUID string) (*domain.Article, error) {
+func (s *articleService) GetByUUID(UUID string) (*domain.Article, error) {
 	return s.storage.GetOne(UUID)
 }
 
@@ -30,30 +31,60 @@ func (s *articleService) GetAll(sortingOptions *domain.SortFilterPagination) ([]
 	return s.storage.GetAll(sortingOptions)
 }
 
-func (s *articleService) Delete(ctx context.Context, UUID string) error {
+func (s *articleService) Delete(UUID, path string) error {
+	err := os.RemoveAll(path)
+	if err != nil {
+		return err
+	}
 	return s.storage.Delete(UUID)
 }
 
-func (s *articleService) Create(ctx context.Context, article *domain.CreateArticleDTO) (string, error) {
+func (s *articleService) Create(article *domain.CreateArticleDTO) (string, error) {
 	return s.storage.Create(article)
 }
 
-func (s *articleService) Update(ctx context.Context, article *domain.UpdateArticleDTO) error {
+func (s *articleService) Update(article *domain.UpdateArticleDTO) error {
 	return s.storage.Update(article)
 }
 
-func (s *articleService) Load(ctx context.Context, path string) ([]byte, error) {
+func (s *articleService) LoadFile(path string) ([]byte, error) {
 	return utils.LoadFile(path)
 }
 
-func (s *articleService) Save(ctx context.Context, path, fileName string, file io.Reader) error {
+func (s *articleService) SaveFile(path, fileName string, file io.Reader) error {
 	return utils.SaveFile(path, fileName, file)
 }
 
-func (s *articleService) LoadImage(ctx context.Context, path string) (*image.Image, error) {
-	return utils.GetImageFromLocalStore(path)
+func (s *articleService) UpdateFile(dto *domain.UpdateArticleFileDTO) error {
+	if dto.OldFileName != dto.NewFileName {
+		err := os.Remove(fmt.Sprintf("%s%s", dto.LocalPath, dto.OldFileName))
+		if err != nil {
+			return err
+		}
+
+		err = utils.SaveFile(dto.LocalPath, dto.NewFileName, dto.File)
+		if err != nil {
+			return err
+		}
+
+		return s.storage.Update(&domain.UpdateArticleDTO{
+			UUID:     dto.UUID,
+			LocalURL: dto.LocalURL,
+		})
+
+	} else {
+		return utils.SaveFile(dto.LocalPath, dto.NewFileName, dto.File)
+	}
 }
 
-func (s *articleService) SaveImage(ctx context.Context, path string, image *image.Image) (string, error) {
+func (s *articleService) LoadImage(path string, format utils.Format, extension utils.Extension) (*image.Image, error) {
+	return utils.GetImageFromLocalStore(path, format, extension)
+}
+
+func (s *articleService) SaveImage(path string, image *image.Image) error {
+	return utils.SaveImage(image, path)
+}
+
+func (s *articleService) UpdateImage(path string, image *image.Image) error {
 	return utils.SaveImage(image, path)
 }

@@ -2,6 +2,7 @@ package postgres
 
 import (
 	"database/sql"
+	"github.com/Masterminds/squirrel"
 	"library-go/internal/domain"
 	"library-go/internal/store"
 	"library-go/pkg/logging"
@@ -32,9 +33,16 @@ func NewAuthorStorage(db *sql.DB, logger *logging.Logger) store.AuthorStorage {
 }
 
 func (as *authorStorage) GetOne(UUID string) (*domain.Author, error) {
+	query, args, _ := squirrel.Select("uuid", "full_name").
+		From("author").
+		Where(squirrel.Eq{
+			"uuid": UUID,
+		}).
+		PlaceholderFormat(squirrel.Dollar).
+		ToSql()
+
 	var author domain.Author
-	if err := as.db.QueryRow(getOneAuthorQuery,
-		UUID).Scan(
+	if err := as.db.QueryRow(query, args).Scan(
 		&author.UUID,
 		&author.FullName,
 	); err != nil {
@@ -46,7 +54,12 @@ func (as *authorStorage) GetOne(UUID string) (*domain.Author, error) {
 }
 
 func (as *authorStorage) GetAll(limit, offset int) ([]*domain.Author, error) {
-	rows, err := as.db.Query(getAllAuthorsQuery)
+	query, _, _ := squirrel.Select("uuid", "full_name").
+		From("author").
+		PlaceholderFormat(squirrel.Dollar).
+		ToSql()
+
+	rows, err := as.db.Query(query)
 	if err != nil {
 		as.logger.Errorf("error occurred while selecting all authors. err: %v", err)
 		return nil, err

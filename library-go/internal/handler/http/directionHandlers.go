@@ -1,7 +1,6 @@
 package http
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"github.com/julienschmidt/httprouter"
@@ -59,7 +58,7 @@ func (dh *directionHandler) GetAll(w http.ResponseWriter, r *http.Request, ps ht
 		dh.logger.Debugf("error occurred while parsing offset. err: %v. Assigning '0' to offset", err)
 	}
 
-	directions, err := dh.Service.GetAll(context.Background(), limit, offset)
+	directions, err := dh.Service.GetAll(limit, offset)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(JSON.Error{Msg: fmt.Sprintf("error occurred while getting all directions. err: %v", err)})
@@ -87,7 +86,7 @@ func (dh *directionHandler) GetByUUID(w http.ResponseWriter, r *http.Request, ps
 		return
 	}
 
-	direction, err := dh.Service.GetByUUID(context.Background(), uuid)
+	direction, err := dh.Service.GetByUUID(uuid)
 	if err != nil {
 		w.WriteHeader(http.StatusNotFound)
 		json.NewEncoder(w).Encode(JSON.Error{Msg: fmt.Sprintf("error occurred while getting direction from DB by UUID. err: %v", err)})
@@ -109,7 +108,7 @@ func (dh *directionHandler) Create(w http.ResponseWriter, r *http.Request, ps ht
 		return
 	}
 
-	UUID, err := dh.Service.Create(context.Background(), createDirectionDTO)
+	UUID, err := dh.Service.Create(createDirectionDTO)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(JSON.Error{Msg: fmt.Sprintf("error occurred while creating direction into DB. err: %v", err)})
@@ -137,7 +136,7 @@ func (dh *directionHandler) Delete(w http.ResponseWriter, r *http.Request, ps ht
 		return
 	}
 
-	err = dh.Service.Delete(context.Background(), uuid)
+	err = dh.Service.Delete(uuid)
 	if err != nil {
 		w.WriteHeader(http.StatusNotFound)
 		json.NewEncoder(w).Encode(JSON.Error{Msg: fmt.Sprintf("error occurred while deleting direction from DB. err: %v", err)})
@@ -165,7 +164,7 @@ func (dh *directionHandler) Update(w http.ResponseWriter, r *http.Request, ps ht
 		return
 	}
 
-	err := dh.Service.Update(context.Background(), updateDirectionDTO)
+	err := dh.Service.Update(updateDirectionDTO)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(JSON.Error{Msg: fmt.Sprintf("error occurred while updating direction into DB. err: %v", err)})

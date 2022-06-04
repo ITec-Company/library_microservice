@@ -16,4 +16,5 @@ logs/
 .idea
 store/articles/
 store/books/
-store/images/
+store/audios/
+store/videos/

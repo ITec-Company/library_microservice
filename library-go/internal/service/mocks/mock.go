@@ -5,10 +5,11 @@
 package mock_service
 
 import (
-	context "context"
 	gomock "github.com/golang/mock/gomock"
+	image "image"
 	io "io"
 	domain "library-go/internal/domain"
+	utils "library-go/pkg/utils"
 	reflect "reflect"
 )
 
@@ -36,18 +37,18 @@ func (m *MockArticleService) EXPECT() *MockArticleServiceMockRecorder {
 }
 
 // GetByUUID mocks base method
-func (m *MockArticleService) GetByUUID(ctx context.Context, UUID string) (*domain.Article, error) {
+func (m *MockArticleService) GetByUUID(UUID string) (*domain.Article, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetByUUID", ctx, UUID)
+	ret := m.ctrl.Call(m, "GetByUUID", UUID)
 	ret0, _ := ret[0].(*domain.Article)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetByUUID indicates an expected call of GetByUUID
-func (mr *MockArticleServiceMockRecorder) GetByUUID(ctx, UUID interface{}) *gomock.Call {
+func (mr *MockArticleServiceMockRecorder) GetByUUID(UUID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetByUUID", reflect.TypeOf((*MockArticleService)(nil).GetByUUID), ctx, UUID)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetByUUID", reflect.TypeOf((*MockArticleService)(nil).GetByUUID), UUID)
 }
 
 // GetAll mocks base method
@@ -67,75 +68,132 @@ func (mr *MockArticleServiceMockRecorder) GetAll(sortingOptions interface{}) *go
 }
 
 // Delete mocks base method
-func (m *MockArticleService) Delete(ctx context.Context, UUID string) error {
+func (m *MockArticleService) Delete(UUID string) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Delete", ctx, UUID)
+	ret := m.ctrl.Call(m, "Delete", UUID)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // Delete indicates an expected call of Delete
-func (mr *MockArticleServiceMockRecorder) Delete(ctx, UUID interface{}) *gomock.Call {
+func (mr *MockArticleServiceMockRecorder) Delete(UUID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockArticleService)(nil).Delete), ctx, UUID)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockArticleService)(nil).Delete), UUID)
 }
 
 // Create mocks base method
-func (m *MockArticleService) Create(ctx context.Context, article *domain.CreateArticleDTO) (string, error) {
+func (m *MockArticleService) Create(article *domain.CreateArticleDTO) (string, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Create", ctx, article)
+	ret := m.ctrl.Call(m, "Create", article)
 	ret0, _ := ret[0].(string)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // Create indicates an expected call of Create
-func (mr *MockArticleServiceMockRecorder) Create(ctx, article interface{}) *gomock.Call {
+func (mr *MockArticleServiceMockRecorder) Create(article interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockArticleService)(nil).Create), ctx, article)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockArticleService)(nil).Create), article)
 }
 
 // Update mocks base method
-func (m *MockArticleService) Update(ctx context.Context, article *domain.UpdateArticleDTO) error {
+func (m *MockArticleService) Update(article *domain.UpdateArticleDTO) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Update", ctx, article)
+	ret := m.ctrl.Call(m, "Update", article)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // Update indicates an expected call of Update
-func (mr *MockArticleServiceMockRecorder) Update(ctx, article interface{}) *gomock.Call {
+func (mr *MockArticleServiceMockRecorder) Update(article interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*MockArticleService)(nil).Update), ctx, article)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*MockArticleService)(nil).Update), article)
 }
 
-// Load mocks base method
-func (m *MockArticleService) Load(ctx context.Context, path string) ([]byte, error) {
+// LoadFile mocks base method
+func (m *MockArticleService) LoadFile(path string) ([]byte, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Load", ctx, path)
+	ret := m.ctrl.Call(m, "LoadFile", path)
 	ret0, _ := ret[0].([]byte)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// Load indicates an expected call of Load
-func (mr *MockArticleServiceMockRecorder) Load(ctx, path interface{}) *gomock.Call {
+// LoadFile indicates an expected call of LoadFile
+func (mr *MockArticleServiceMockRecorder) LoadFile(path interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Load", reflect.TypeOf((*MockArticleService)(nil).Load), ctx, path)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "LoadFile", reflect.TypeOf((*MockArticleService)(nil).LoadFile), path)
 }
 
-// Save mocks base method
-func (m *MockArticleService) Save(ctx context.Context, path, fileName string, file io.Reader) error {
+// SaveFile mocks base method
+func (m *MockArticleService) SaveFile(path, fileName string, file io.Reader) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Save", ctx, path, fileName, file)
+	ret := m.ctrl.Call(m, "SaveFile", path, fileName, file)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
-// Save indicates an expected call of Save
-func (mr *MockArticleServiceMockRecorder) Save(ctx, path, fileName, file interface{}) *gomock.Call {
+// SaveFile indicates an expected call of SaveFile
+func (mr *MockArticleServiceMockRecorder) SaveFile(path, fileName, file interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Save", reflect.TypeOf((*MockArticleService)(nil).Save), ctx, path, fileName, file)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SaveFile", reflect.TypeOf((*MockArticleService)(nil).SaveFile), path, fileName, file)
+}
+
+// UpdateFile mocks base method
+func (m *MockArticleService) UpdateFile(path, fileName string, file io.Reader) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateFile", path, fileName, file)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpdateFile indicates an expected call of UpdateFile
+func (mr *MockArticleServiceMockRecorder) UpdateFile(path, fileName, file interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateFile", reflect.TypeOf((*MockArticleService)(nil).UpdateFile), path, fileName, file)
+}
+
+// LoadImage mocks base method
+func (m *MockArticleService) LoadImage(path string, format utils.Format, extension utils.Extension) (*image.Image, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "LoadImage", path, format, extension)
+	ret0, _ := ret[0].(*image.Image)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// LoadImage indicates an expected call of LoadImage
+func (mr *MockArticleServiceMockRecorder) LoadImage(path, format, extension interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "LoadImage", reflect.TypeOf((*MockArticleService)(nil).LoadImage), path, format, extension)
+}
+
+// SaveImage mocks base method
+func (m *MockArticleService) SaveImage(path string, image *image.Image) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SaveImage", path, image)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// SaveImage indicates an expected call of SaveImage
+func (mr *MockArticleServiceMockRecorder) SaveImage(path, image interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SaveImage", reflect.TypeOf((*MockArticleService)(nil).SaveImage), path, image)
+}
+
+// UpdateImage mocks base method
+func (m *MockArticleService) UpdateImage(path string, image *image.Image) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateImage", path, image)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpdateImage indicates an expected call of UpdateImage
+func (mr *MockArticleServiceMockRecorder) UpdateImage(path, image interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateImage", reflect.TypeOf((*MockArticleService)(nil).UpdateImage), path, image)
 }
 
 // MockAudioService is a mock of AudioService interface
@@ -162,18 +220,18 @@ func (m *MockAudioService) EXPECT() *MockAudioServiceMockRecorder {
 }
 
 // GetByUUID mocks base method
-func (m *MockAudioService) GetByUUID(ctx context.Context, UUID string) (*domain.Audio, error) {
+func (m *MockAudioService) GetByUUID(UUID string) (*domain.Audio, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetByUUID", ctx, UUID)
+	ret := m.ctrl.Call(m, "GetByUUID", UUID)
 	ret0, _ := ret[0].(*domain.Audio)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetByUUID indicates an expected call of GetByUUID
-func (mr *MockAudioServiceMockRecorder) GetByUUID(ctx, UUID interface{}) *gomock.Call {
+func (mr *MockAudioServiceMockRecorder) GetByUUID(UUID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetByUUID", reflect.TypeOf((*MockAudioService)(nil).GetByUUID), ctx, UUID)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetByUUID", reflect.TypeOf((*MockAudioService)(nil).GetByUUID), UUID)
 }
 
 // GetAll mocks base method
@@ -193,75 +251,89 @@ func (mr *MockAudioServiceMockRecorder) GetAll(sortingOptions interface{}) *gomo
 }
 
 // Delete mocks base method
-func (m *MockAudioService) Delete(ctx context.Context, UUID string) error {
+func (m *MockAudioService) Delete(UUID string) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Delete", ctx, UUID)
+	ret := m.ctrl.Call(m, "Delete", UUID)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // Delete indicates an expected call of Delete
-func (mr *MockAudioServiceMockRecorder) Delete(ctx, UUID interface{}) *gomock.Call {
+func (mr *MockAudioServiceMockRecorder) Delete(UUID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockAudioService)(nil).Delete), ctx, UUID)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockAudioService)(nil).Delete), UUID)
 }
 
 // Create mocks base method
-func (m *MockAudioService) Create(ctx context.Context, audio *domain.CreateAudioDTO) (string, error) {
+func (m *MockAudioService) Create(audio *domain.CreateAudioDTO) (string, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Create", ctx, audio)
+	ret := m.ctrl.Call(m, "Create", audio)
 	ret0, _ := ret[0].(string)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // Create indicates an expected call of Create
-func (mr *MockAudioServiceMockRecorder) Create(ctx, audio interface{}) *gomock.Call {
+func (mr *MockAudioServiceMockRecorder) Create(audio interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockAudioService)(nil).Create), ctx, audio)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockAudioService)(nil).Create), audio)
 }
 
 // Update mocks base method
-func (m *MockAudioService) Update(ctx context.Context, audio *domain.UpdateAudioDTO) error {
+func (m *MockAudioService) Update(audio *domain.UpdateAudioDTO) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Update", ctx, audio)
+	ret := m.ctrl.Call(m, "Update", audio)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // Update indicates an expected call of Update
-func (mr *MockAudioServiceMockRecorder) Update(ctx, audio interface{}) *gomock.Call {
+func (mr *MockAudioServiceMockRecorder) Update(audio interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*MockAudioService)(nil).Update), ctx, audio)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*MockAudioService)(nil).Update), audio)
 }
 
-// Load mocks base method
-func (m *MockAudioService) Load(ctx context.Context, path string) ([]byte, error) {
+// LoadFile mocks base method
+func (m *MockAudioService) LoadFile(path string) ([]byte, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Load", ctx, path)
+	ret := m.ctrl.Call(m, "LoadFile", path)
 	ret0, _ := ret[0].([]byte)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// Load indicates an expected call of Load
-func (mr *MockAudioServiceMockRecorder) Load(ctx, path interface{}) *gomock.Call {
+// LoadFile indicates an expected call of LoadFile
+func (mr *MockAudioServiceMockRecorder) LoadFile(path interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Load", reflect.TypeOf((*MockAudioService)(nil).Load), ctx, path)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "LoadFile", reflect.TypeOf((*MockAudioService)(nil).LoadFile), path)
 }
 
-// Save mocks base method
-func (m *MockAudioService) Save(ctx context.Context, path, fileName string, file io.Reader) error {
+// SaveFile mocks base method
+func (m *MockAudioService) SaveFile(path, fileName string, file io.Reader) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Save", ctx, path, fileName, file)
+	ret := m.ctrl.Call(m, "SaveFile", path, fileName, file)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
-// Save indicates an expected call of Save
-func (mr *MockAudioServiceMockRecorder) Save(ctx, path, fileName, file interface{}) *gomock.Call {
+// SaveFile indicates an expected call of SaveFile
+func (mr *MockAudioServiceMockRecorder) SaveFile(path, fileName, file interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Save", reflect.TypeOf((*MockAudioService)(nil).Save), ctx, path, fileName, file)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SaveFile", reflect.TypeOf((*MockAudioService)(nil).SaveFile), path, fileName, file)
+}
+
+// UpdateFile mocks base method
+func (m *MockAudioService) UpdateFile(path, fileName string, file io.Reader) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateFile", path, fileName, file)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpdateFile indicates an expected call of UpdateFile
+func (mr *MockAudioServiceMockRecorder) UpdateFile(path, fileName, file interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateFile", reflect.TypeOf((*MockAudioService)(nil).UpdateFile), path, fileName, file)
 }
 
 // MockAuthorService is a mock of AuthorService interface
@@ -288,76 +360,76 @@ func (m *MockAuthorService) EXPECT() *MockAuthorServiceMockRecorder {
 }
 
 // GetByUUID mocks base method
-func (m *MockAuthorService) GetByUUID(ctx context.Context, UUID string) (*domain.Author, error) {
+func (m *MockAuthorService) GetByUUID(UUID string) (*domain.Author, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetByUUID", ctx, UUID)
+	ret := m.ctrl.Call(m, "GetByUUID", UUID)
 	ret0, _ := ret[0].(*domain.Author)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetByUUID indicates an expected call of GetByUUID
-func (mr *MockAuthorServiceMockRecorder) GetByUUID(ctx, UUID interface{}) *gomock.Call {
+func (mr *MockAuthorServiceMockRecorder) GetByUUID(UUID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetByUUID", reflect.TypeOf((*MockAuthorService)(nil).GetByUUID), ctx, UUID)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetByUUID", reflect.TypeOf((*MockAuthorService)(nil).GetByUUID), UUID)
 }
 
 // GetAll mocks base method
-func (m *MockAuthorService) GetAll(ctx context.Context, limit, offset int) ([]*domain.Author, error) {
+func (m *MockAuthorService) GetAll(limit, offset int) ([]*domain.Author, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetAll", ctx, limit, offset)
+	ret := m.ctrl.Call(m, "GetAll", limit, offset)
 	ret0, _ := ret[0].([]*domain.Author)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetAll indicates an expected call of GetAll
-func (mr *MockAuthorServiceMockRecorder) GetAll(ctx, limit, offset interface{}) *gomock.Call {
+func (mr *MockAuthorServiceMockRecorder) GetAll(limit, offset interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAll", reflect.TypeOf((*MockAuthorService)(nil).GetAll), ctx, limit, offset)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAll", reflect.TypeOf((*MockAuthorService)(nil).GetAll), limit, offset)
 }
 
 // Delete mocks base method
-func (m *MockAuthorService) Delete(ctx context.Context, UUID string) error {
+func (m *MockAuthorService) Delete(UUID string) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Delete", ctx, UUID)
+	ret := m.ctrl.Call(m, "Delete", UUID)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // Delete indicates an expected call of Delete
-func (mr *MockAuthorServiceMockRecorder) Delete(ctx, UUID interface{}) *gomock.Call {
+func (mr *MockAuthorServiceMockRecorder) Delete(UUID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockAuthorService)(nil).Delete), ctx, UUID)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockAuthorService)(nil).Delete), UUID)
 }
 
 // Create mocks base method
-func (m *MockAuthorService) Create(ctx context.Context, author *domain.CreateAuthorDTO) (string, error) {
+func (m *MockAuthorService) Create(author *domain.CreateAuthorDTO) (string, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Create", ctx, author)
+	ret := m.ctrl.Call(m, "Create", author)
 	ret0, _ := ret[0].(string)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // Create indicates an expected call of Create
-func (mr *MockAuthorServiceMockRecorder) Create(ctx, author interface{}) *gomock.Call {
+func (mr *MockAuthorServiceMockRecorder) Create(author interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockAuthorService)(nil).Create), ctx, author)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockAuthorService)(nil).Create), author)
 }
 
 // Update mocks base method
-func (m *MockAuthorService) Update(ctx context.Context, author *domain.UpdateAuthorDTO) error {
+func (m *MockAuthorService) Update(author *domain.UpdateAuthorDTO) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Update", ctx, author)
+	ret := m.ctrl.Call(m, "Update", author)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // Update indicates an expected call of Update
-func (mr *MockAuthorServiceMockRecorder) Update(ctx, author interface{}) *gomock.Call {
+func (mr *MockAuthorServiceMockRecorder) Update(author interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*MockAuthorService)(nil).Update), ctx, author)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*MockAuthorService)(nil).Update), author)
 }
 
 // MockBookService is a mock of BookService interface
@@ -384,18 +456,18 @@ func (m *MockBookService) EXPECT() *MockBookServiceMockRecorder {
 }
 
 // GetByUUID mocks base method
-func (m *MockBookService) GetByUUID(ctx context.Context, UUID string) (*domain.Book, error) {
+func (m *MockBookService) GetByUUID(UUID string) (*domain.Book, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetByUUID", ctx, UUID)
+	ret := m.ctrl.Call(m, "GetByUUID", UUID)
 	ret0, _ := ret[0].(*domain.Book)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetByUUID indicates an expected call of GetByUUID
-func (mr *MockBookServiceMockRecorder) GetByUUID(ctx, UUID interface{}) *gomock.Call {
+func (mr *MockBookServiceMockRecorder) GetByUUID(UUID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetByUUID", reflect.TypeOf((*MockBookService)(nil).GetByUUID), ctx, UUID)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetByUUID", reflect.TypeOf((*MockBookService)(nil).GetByUUID), UUID)
 }
 
 // GetAll mocks base method
@@ -415,75 +487,132 @@ func (mr *MockBookServiceMockRecorder) GetAll(sortingOptions interface{}) *gomoc
 }
 
 // Delete mocks base method
-func (m *MockBookService) Delete(ctx context.Context, UUID string) error {
+func (m *MockBookService) Delete(UUID string) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Delete", ctx, UUID)
+	ret := m.ctrl.Call(m, "Delete", UUID)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // Delete indicates an expected call of Delete
-func (mr *MockBookServiceMockRecorder) Delete(ctx, UUID interface{}) *gomock.Call {
+func (mr *MockBookServiceMockRecorder) Delete(UUID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockBookService)(nil).Delete), ctx, UUID)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockBookService)(nil).Delete), UUID)
 }
 
 // Create mocks base method
-func (m *MockBookService) Create(ctx context.Context, book *domain.CreateBookDTO) (string, error) {
+func (m *MockBookService) Create(book *domain.CreateBookDTO) (string, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Create", ctx, book)
+	ret := m.ctrl.Call(m, "Create", book)
 	ret0, _ := ret[0].(string)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // Create indicates an expected call of Create
-func (mr *MockBookServiceMockRecorder) Create(ctx, book interface{}) *gomock.Call {
+func (mr *MockBookServiceMockRecorder) Create(book interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockBookService)(nil).Create), ctx, book)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockBookService)(nil).Create), book)
 }
 
 // Update mocks base method
-func (m *MockBookService) Update(ctx context.Context, book *domain.UpdateBookDTO) error {
+func (m *MockBookService) Update(book *domain.UpdateBookDTO) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Update", ctx, book)
+	ret := m.ctrl.Call(m, "Update", book)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // Update indicates an expected call of Update
-func (mr *MockBookServiceMockRecorder) Update(ctx, book interface{}) *gomock.Call {
+func (mr *MockBookServiceMockRecorder) Update(book interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*MockBookService)(nil).Update), ctx, book)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*MockBookService)(nil).Update), book)
 }
 
-// Load mocks base method
-func (m *MockBookService) Load(ctx context.Context, path string) ([]byte, error) {
+// LoadFile mocks base method
+func (m *MockBookService) LoadFile(path string) ([]byte, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Load", ctx, path)
+	ret := m.ctrl.Call(m, "LoadFile", path)
 	ret0, _ := ret[0].([]byte)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// Load indicates an expected call of Load
-func (mr *MockBookServiceMockRecorder) Load(ctx, path interface{}) *gomock.Call {
+// LoadFile indicates an expected call of LoadFile
+func (mr *MockBookServiceMockRecorder) LoadFile(path interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Load", reflect.TypeOf((*MockBookService)(nil).Load), ctx, path)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "LoadFile", reflect.TypeOf((*MockBookService)(nil).LoadFile), path)
 }
 
-// Save mocks base method
-func (m *MockBookService) Save(ctx context.Context, path, fileName string, file io.Reader) error {
+// SaveFile mocks base method
+func (m *MockBookService) SaveFile(path, fileName string, file io.Reader) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Save", ctx, path, fileName, file)
+	ret := m.ctrl.Call(m, "SaveFile", path, fileName, file)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
-// Save indicates an expected call of Save
-func (mr *MockBookServiceMockRecorder) Save(ctx, path, fileName, file interface{}) *gomock.Call {
+// SaveFile indicates an expected call of SaveFile
+func (mr *MockBookServiceMockRecorder) SaveFile(path, fileName, file interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Save", reflect.TypeOf((*MockBookService)(nil).Save), ctx, path, fileName, file)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SaveFile", reflect.TypeOf((*MockBookService)(nil).SaveFile), path, fileName, file)
+}
+
+// UpdateFile mocks base method
+func (m *MockBookService) UpdateFile(path, fileName string, file io.Reader) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateFile", path, fileName, file)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpdateFile indicates an expected call of UpdateFile
+func (mr *MockBookServiceMockRecorder) UpdateFile(path, fileName, file interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateFile", reflect.TypeOf((*MockBookService)(nil).UpdateFile), path, fileName, file)
+}
+
+// LoadImage mocks base method
+func (m *MockBookService) LoadImage(path string, format utils.Format, extension utils.Extension) (*image.Image, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "LoadImage", path, format, extension)
+	ret0, _ := ret[0].(*image.Image)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// LoadImage indicates an expected call of LoadImage
+func (mr *MockBookServiceMockRecorder) LoadImage(path, format, extension interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "LoadImage", reflect.TypeOf((*MockBookService)(nil).LoadImage), path, format, extension)
+}
+
+// SaveImage mocks base method
+func (m *MockBookService) SaveImage(path string, image *image.Image) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SaveImage", path, image)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// SaveImage indicates an expected call of SaveImage
+func (mr *MockBookServiceMockRecorder) SaveImage(path, image interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SaveImage", reflect.TypeOf((*MockBookService)(nil).SaveImage), path, image)
+}
+
+// UpdateImage mocks base method
+func (m *MockBookService) UpdateImage(path string, image *image.Image) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateImage", path, image)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpdateImage indicates an expected call of UpdateImage
+func (mr *MockBookServiceMockRecorder) UpdateImage(path, image interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateImage", reflect.TypeOf((*MockBookService)(nil).UpdateImage), path, image)
 }
 
 // MockDirectionService is a mock of DirectionService interface
@@ -510,76 +639,76 @@ func (m *MockDirectionService) EXPECT() *MockDirectionServiceMockRecorder {
 }
 
 // GetByUUID mocks base method
-func (m *MockDirectionService) GetByUUID(ctx context.Context, UUID string) (*domain.Direction, error) {
+func (m *MockDirectionService) GetByUUID(UUID string) (*domain.Direction, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetByUUID", ctx, UUID)
+	ret := m.ctrl.Call(m, "GetByUUID", UUID)
 	ret0, _ := ret[0].(*domain.Direction)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetByUUID indicates an expected call of GetByUUID
-func (mr *MockDirectionServiceMockRecorder) GetByUUID(ctx, UUID interface{}) *gomock.Call {
+func (mr *MockDirectionServiceMockRecorder) GetByUUID(UUID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetByUUID", reflect.TypeOf((*MockDirectionService)(nil).GetByUUID), ctx, UUID)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetByUUID", reflect.TypeOf((*MockDirectionService)(nil).GetByUUID), UUID)
 }
 
 // GetAll mocks base method
-func (m *MockDirectionService) GetAll(ctx context.Context, limit, offset int) ([]*domain.Direction, error) {
+func (m *MockDirectionService) GetAll(limit, offset int) ([]*domain.Direction, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetAll", ctx, limit, offset)
+	ret := m.ctrl.Call(m, "GetAll", limit, offset)
 	ret0, _ := ret[0].([]*domain.Direction)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetAll indicates an expected call of GetAll
-func (mr *MockDirectionServiceMockRecorder) GetAll(ctx, limit, offset interface{}) *gomock.Call {
+func (mr *MockDirectionServiceMockRecorder) GetAll(limit, offset interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAll", reflect.TypeOf((*MockDirectionService)(nil).GetAll), ctx, limit, offset)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAll", reflect.TypeOf((*MockDirectionService)(nil).GetAll), limit, offset)
 }
 
 // Delete mocks base method
-func (m *MockDirectionService) Delete(ctx context.Context, UUID string) error {
+func (m *MockDirectionService) Delete(UUID string) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Delete", ctx, UUID)
+	ret := m.ctrl.Call(m, "Delete", UUID)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // Delete indicates an expected call of Delete
-func (mr *MockDirectionServiceMockRecorder) Delete(ctx, UUID interface{}) *gomock.Call {
+func (mr *MockDirectionServiceMockRecorder) Delete(UUID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockDirectionService)(nil).Delete), ctx, UUID)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockDirectionService)(nil).Delete), UUID)
 }
 
 // Create mocks base method
-func (m *MockDirectionService) Create(ctx context.Context, direction *domain.CreateDirectionDTO) (string, error) {
+func (m *MockDirectionService) Create(direction *domain.CreateDirectionDTO) (string, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Create", ctx, direction)
+	ret := m.ctrl.Call(m, "Create", direction)
 	ret0, _ := ret[0].(string)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // Create indicates an expected call of Create
-func (mr *MockDirectionServiceMockRecorder) Create(ctx, direction interface{}) *gomock.Call {
+func (mr *MockDirectionServiceMockRecorder) Create(direction interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockDirectionService)(nil).Create), ctx, direction)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockDirectionService)(nil).Create), direction)
 }
 
 // Update mocks base method
-func (m *MockDirectionService) Update(ctx context.Context, direction *domain.UpdateDirectionDTO) error {
+func (m *MockDirectionService) Update(direction *domain.UpdateDirectionDTO) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Update", ctx, direction)
+	ret := m.ctrl.Call(m, "Update", direction)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // Update indicates an expected call of Update
-func (mr *MockDirectionServiceMockRecorder) Update(ctx, direction interface{}) *gomock.Call {
+func (mr *MockDirectionServiceMockRecorder) Update(direction interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*MockDirectionService)(nil).Update), ctx, direction)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*MockDirectionService)(nil).Update), direction)
 }
 
 // MockReviewService is a mock of ReviewService interface
@@ -606,76 +735,76 @@ func (m *MockReviewService) EXPECT() *MockReviewServiceMockRecorder {
 }
 
 // GetByUUID mocks base method
-func (m *MockReviewService) GetByUUID(ctx context.Context, UUID string) (*domain.Review, error) {
+func (m *MockReviewService) GetByUUID(UUID string) (*domain.Review, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetByUUID", ctx, UUID)
+	ret := m.ctrl.Call(m, "GetByUUID", UUID)
 	ret0, _ := ret[0].(*domain.Review)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetByUUID indicates an expected call of GetByUUID
-func (mr *MockReviewServiceMockRecorder) GetByUUID(ctx, UUID interface{}) *gomock.Call {
+func (mr *MockReviewServiceMockRecorder) GetByUUID(UUID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetByUUID", reflect.TypeOf((*MockReviewService)(nil).GetByUUID), ctx, UUID)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetByUUID", reflect.TypeOf((*MockReviewService)(nil).GetByUUID), UUID)
 }
 
 // GetAll mocks base method
-func (m *MockReviewService) GetAll(ctx context.Context, limit, offset int) ([]*domain.Review, error) {
+func (m *MockReviewService) GetAll(limit, offset int) ([]*domain.Review, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetAll", ctx, limit, offset)
+	ret := m.ctrl.Call(m, "GetAll", limit, offset)
 	ret0, _ := ret[0].([]*domain.Review)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetAll indicates an expected call of GetAll
-func (mr *MockReviewServiceMockRecorder) GetAll(ctx, limit, offset interface{}) *gomock.Call {
+func (mr *MockReviewServiceMockRecorder) GetAll(limit, offset interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAll", reflect.TypeOf((*MockReviewService)(nil).GetAll), ctx, limit, offset)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAll", reflect.TypeOf((*MockReviewService)(nil).GetAll), limit, offset)
 }
 
 // Delete mocks base method
-func (m *MockReviewService) Delete(ctx context.Context, UUID string) error {
+func (m *MockReviewService) Delete(UUID string) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Delete", ctx, UUID)
+	ret := m.ctrl.Call(m, "Delete", UUID)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // Delete indicates an expected call of Delete
-func (mr *MockReviewServiceMockRecorder) Delete(ctx, UUID interface{}) *gomock.Call {
+func (mr *MockReviewServiceMockRecorder) Delete(UUID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockReviewService)(nil).Delete), ctx, UUID)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockReviewService)(nil).Delete), UUID)
 }
 
 // Create mocks base method
-func (m *MockReviewService) Create(ctx context.Context, review *domain.CreateReviewDTO) (string, error) {
+func (m *MockReviewService) Create(review *domain.CreateReviewDTO) (string, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Create", ctx, review)
+	ret := m.ctrl.Call(m, "Create", review)
 	ret0, _ := ret[0].(string)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // Create indicates an expected call of Create
-func (mr *MockReviewServiceMockRecorder) Create(ctx, review interface{}) *gomock.Call {
+func (mr *MockReviewServiceMockRecorder) Create(review interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockReviewService)(nil).Create), ctx, review)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockReviewService)(nil).Create), review)
 }
 
 // Update mocks base method
-func (m *MockReviewService) Update(ctx context.Context, review *domain.UpdateReviewDTO) error {
+func (m *MockReviewService) Update(review *domain.UpdateReviewDTO) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Update", ctx, review)
+	ret := m.ctrl.Call(m, "Update", review)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // Update indicates an expected call of Update
-func (mr *MockReviewServiceMockRecorder) Update(ctx, review interface{}) *gomock.Call {
+func (mr *MockReviewServiceMockRecorder) Update(review interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*MockReviewService)(nil).Update), ctx, review)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*MockReviewService)(nil).Update), review)
 }
 
 // MockTagService is a mock of TagService interface
@@ -702,91 +831,91 @@ func (m *MockTagService) EXPECT() *MockTagServiceMockRecorder {
 }
 
 // GetByUUID mocks base method
-func (m *MockTagService) GetByUUID(ctx context.Context, UUID string) (*domain.Tag, error) {
+func (m *MockTagService) GetByUUID(UUID string) (*domain.Tag, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetByUUID", ctx, UUID)
+	ret := m.ctrl.Call(m, "GetByUUID", UUID)
 	ret0, _ := ret[0].(*domain.Tag)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetByUUID indicates an expected call of GetByUUID
-func (mr *MockTagServiceMockRecorder) GetByUUID(ctx, UUID interface{}) *gomock.Call {
+func (mr *MockTagServiceMockRecorder) GetByUUID(UUID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetByUUID", reflect.TypeOf((*MockTagService)(nil).GetByUUID), ctx, UUID)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetByUUID", reflect.TypeOf((*MockTagService)(nil).GetByUUID), UUID)
 }
 
 // GetManyByUUIDs mocks base method
-func (m *MockTagService) GetManyByUUIDs(ctx context.Context, UUIDs []string) ([]*domain.Tag, error) {
+func (m *MockTagService) GetManyByUUIDs(UUIDs []string) ([]*domain.Tag, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetManyByUUIDs", ctx, UUIDs)
+	ret := m.ctrl.Call(m, "GetManyByUUIDs", UUIDs)
 	ret0, _ := ret[0].([]*domain.Tag)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetManyByUUIDs indicates an expected call of GetManyByUUIDs
-func (mr *MockTagServiceMockRecorder) GetManyByUUIDs(ctx, UUIDs interface{}) *gomock.Call {
+func (mr *MockTagServiceMockRecorder) GetManyByUUIDs(UUIDs interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetManyByUUIDs", reflect.TypeOf((*MockTagService)(nil).GetManyByUUIDs), ctx, UUIDs)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetManyByUUIDs", reflect.TypeOf((*MockTagService)(nil).GetManyByUUIDs), UUIDs)
 }
 
 // GetAll mocks base method
-func (m *MockTagService) GetAll(ctx context.Context, limit, offset int) ([]*domain.Tag, error) {
+func (m *MockTagService) GetAll(limit, offset int) ([]*domain.Tag, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetAll", ctx, limit, offset)
+	ret := m.ctrl.Call(m, "GetAll", limit, offset)
 	ret0, _ := ret[0].([]*domain.Tag)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetAll indicates an expected call of GetAll
-func (mr *MockTagServiceMockRecorder) GetAll(ctx, limit, offset interface{}) *gomock.Call {
+func (mr *MockTagServiceMockRecorder) GetAll(limit, offset interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAll", reflect.TypeOf((*MockTagService)(nil).GetAll), ctx, limit, offset)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAll", reflect.TypeOf((*MockTagService)(nil).GetAll), limit, offset)
 }
 
 // Delete mocks base method
-func (m *MockTagService) Delete(ctx context.Context, UUID string) error {
+func (m *MockTagService) Delete(UUID string) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Delete", ctx, UUID)
+	ret := m.ctrl.Call(m, "Delete", UUID)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // Delete indicates an expected call of Delete
-func (mr *MockTagServiceMockRecorder) Delete(ctx, UUID interface{}) *gomock.Call {
+func (mr *MockTagServiceMockRecorder) Delete(UUID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockTagService)(nil).Delete), ctx, UUID)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockTagService)(nil).Delete), UUID)
 }
 
 // Create mocks base method
-func (m *MockTagService) Create(ctx context.Context, tag *domain.CreateTagDTO) (string, error) {
+func (m *MockTagService) Create(tag *domain.CreateTagDTO) (string, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Create", ctx, tag)
+	ret := m.ctrl.Call(m, "Create", tag)
 	ret0, _ := ret[0].(string)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // Create indicates an expected call of Create
-func (mr *MockTagServiceMockRecorder) Create(ctx, tag interface{}) *gomock.Call {
+func (mr *MockTagServiceMockRecorder) Create(tag interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockTagService)(nil).Create), ctx, tag)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockTagService)(nil).Create), tag)
 }
 
 // Update mocks base method
-func (m *MockTagService) Update(ctx context.Context, tag *domain.UpdateTagDTO) error {
+func (m *MockTagService) Update(tag *domain.UpdateTagDTO) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Update", ctx, tag)
+	ret := m.ctrl.Call(m, "Update", tag)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // Update indicates an expected call of Update
-func (mr *MockTagServiceMockRecorder) Update(ctx, tag interface{}) *gomock.Call {
+func (mr *MockTagServiceMockRecorder) Update(tag interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*MockTagService)(nil).Update), ctx, tag)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*MockTagService)(nil).Update), tag)
 }
 
 // MockVideoService is a mock of VideoService interface
@@ -813,18 +942,18 @@ func (m *MockVideoService) EXPECT() *MockVideoServiceMockRecorder {
 }
 
 // GetByUUID mocks base method
-func (m *MockVideoService) GetByUUID(ctx context.Context, UUID string) (*domain.Video, error) {
+func (m *MockVideoService) GetByUUID(UUID string) (*domain.Video, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetByUUID", ctx, UUID)
+	ret := m.ctrl.Call(m, "GetByUUID", UUID)
 	ret0, _ := ret[0].(*domain.Video)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetByUUID indicates an expected call of GetByUUID
-func (mr *MockVideoServiceMockRecorder) GetByUUID(ctx, UUID interface{}) *gomock.Call {
+func (mr *MockVideoServiceMockRecorder) GetByUUID(UUID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetByUUID", reflect.TypeOf((*MockVideoService)(nil).GetByUUID), ctx, UUID)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetByUUID", reflect.TypeOf((*MockVideoService)(nil).GetByUUID), UUID)
 }
 
 // GetAll mocks base method
@@ -844,73 +973,87 @@ func (mr *MockVideoServiceMockRecorder) GetAll(sortingOptions interface{}) *gomo
 }
 
 // Delete mocks base method
-func (m *MockVideoService) Delete(ctx context.Context, UUID string) error {
+func (m *MockVideoService) Delete(UUID string) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Delete", ctx, UUID)
+	ret := m.ctrl.Call(m, "Delete", UUID)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // Delete indicates an expected call of Delete
-func (mr *MockVideoServiceMockRecorder) Delete(ctx, UUID interface{}) *gomock.Call {
+func (mr *MockVideoServiceMockRecorder) Delete(UUID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockVideoService)(nil).Delete), ctx, UUID)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockVideoService)(nil).Delete), UUID)
 }
 
 // Create mocks base method
-func (m *MockVideoService) Create(ctx context.Context, video *domain.CreateVideoDTO) (string, error) {
+func (m *MockVideoService) Create(video *domain.CreateVideoDTO) (string, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Create", ctx, video)
+	ret := m.ctrl.Call(m, "Create", video)
 	ret0, _ := ret[0].(string)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // Create indicates an expected call of Create
-func (mr *MockVideoServiceMockRecorder) Create(ctx, video interface{}) *gomock.Call {
+func (mr *MockVideoServiceMockRecorder) Create(video interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockVideoService)(nil).Create), ctx, video)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockVideoService)(nil).Create), video)
 }
 
 // Update mocks base method
-func (m *MockVideoService) Update(ctx context.Context, video *domain.UpdateVideoDTO) error {
+func (m *MockVideoService) Update(video *domain.UpdateVideoDTO) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Update", ctx, video)
+	ret := m.ctrl.Call(m, "Update", video)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // Update indicates an expected call of Update
-func (mr *MockVideoServiceMockRecorder) Update(ctx, video interface{}) *gomock.Call {
+func (mr *MockVideoServiceMockRecorder) Update(video interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*MockVideoService)(nil).Update), ctx, video)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*MockVideoService)(nil).Update), video)
 }
 
-// Load mocks base method
-func (m *MockVideoService) Load(ctx context.Context, path string) ([]byte, error) {
+// LoadFile mocks base method
+func (m *MockVideoService) LoadFile(path string) ([]byte, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Load", ctx, path)
+	ret := m.ctrl.Call(m, "LoadFile", path)
 	ret0, _ := ret[0].([]byte)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// Load indicates an expected call of Load
-func (mr *MockVideoServiceMockRecorder) Load(ctx, path interface{}) *gomock.Call {
+// LoadFile indicates an expected call of LoadFile
+func (mr *MockVideoServiceMockRecorder) LoadFile(path interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Load", reflect.TypeOf((*MockVideoService)(nil).Load), ctx, path)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "LoadFile", reflect.TypeOf((*MockVideoService)(nil).LoadFile), path)
 }
 
-// Save mocks base method
-func (m *MockVideoService) Save(ctx context.Context, path, fileName string, file io.Reader) error {
+// SaveFile mocks base method
+func (m *MockVideoService) SaveFile(path, fileName string, file io.Reader) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Save", ctx, path, fileName, file)
+	ret := m.ctrl.Call(m, "SaveFile", path, fileName, file)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
-// Save indicates an expected call of Save
-func (mr *MockVideoServiceMockRecorder) Save(ctx, path, fileName, file interface{}) *gomock.Call {
+// SaveFile indicates an expected call of SaveFile
+func (mr *MockVideoServiceMockRecorder) SaveFile(path, fileName, file interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Save", reflect.TypeOf((*MockVideoService)(nil).Save), ctx, path, fileName, file)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SaveFile", reflect.TypeOf((*MockVideoService)(nil).SaveFile), path, fileName, file)
+}
+
+// UpdateFile mocks base method
+func (m *MockVideoService) UpdateFile(path, fileName string, file io.Reader) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateFile", path, fileName, file)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpdateFile indicates an expected call of UpdateFile
+func (mr *MockVideoServiceMockRecorder) UpdateFile(path, fileName, file interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateFile", reflect.TypeOf((*MockVideoService)(nil).UpdateFile), path, fileName, file)
 }

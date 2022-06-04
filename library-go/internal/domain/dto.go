@@ -1,6 +1,10 @@
 package domain
 
-import "time"
+import (
+	"image"
+	"io"
+	"time"
+)
 
 // Article
 
@@ -11,11 +15,11 @@ type CreateArticleDTO struct {
 	Difficulty    string    `json:"difficulty"`
 	EditionDate   time.Time `json:"edition_date"`
 	Description   string    `json:"description"`
-	URL           string    `json:"url"`
+	LocalURL      string    `json:"local_url"`
+	WebURL        string    `json:"web_url,omitempty"`
 	Language      string    `json:"language"`
 	TagsUUIDs     []string  `json:"tags_uuids"`
 	ImageURL      string    `json:"image_url,omitempty"`
-	CreatedAt     time.Time `json:"created_at"`
 }
 
 type UpdateArticleDTO struct {
@@ -27,11 +31,27 @@ type UpdateArticleDTO struct {
 	EditionDate   time.Time `json:"edition_date,omitempty"`
 	Rating        float32   `json:"rating,omitempty"`
 	Description   string    `json:"description,omitempty"`
-	URL           string    `json:"url,omitempty"`
+	LocalURL      string    `json:"local_url,omitempty"`
+	WebURL        string    `json:"web_url,omitempty"`
 	Language      string    `json:"language,omitempty"`
 	TagsUUIDs     []string  `json:"tags_uuids,omitempty"`
 	DownloadCount uint32    `json:"download_count,omitempty"`
 	ImageURL      string    `json:"image_url,omitempty"`
+}
+
+type UpdateArticleFileDTO struct {
+	UUID        string    `json:"uuid"`
+	NewFileName string    `json:"new-file-name"`
+	OldFileName string    `json:"old-file-name"`
+	File        io.Reader `json:"file"`
+	LocalURL    string    `json:"local-url"`
+	LocalPath   string    `json:"local-path"`
+}
+
+type UpdateArticleImageDTO struct {
+	UUID      string      `json:"uuid"`
+	Image     image.Image `json:"image"`
+	LocalPath string      `json:"local-path"`
 }
 
 // Audio
@@ -40,7 +60,7 @@ type CreateAudioDTO struct {
 	Title         string   `json:"title"`
 	DirectionUUID string   `json:"direction_uuid"`
 	Language      string   `json:"language"`
-	URL           string   `json:"url"`
+	LocalURL      string   `json:"local_url"`
 	Difficulty    string   `json:"difficulty"`
 	TagsUUIDs     []string `json:"tags_uuids"`
 }
@@ -51,10 +71,19 @@ type UpdateAudioDTO struct {
 	DirectionUUID string   `json:"direction_uuid,omitempty"`
 	Difficulty    string   `json:"difficulty,omitempty"`
 	Rating        float32  `json:"rating,omitempty"`
-	URL           string   `json:"url,omitempty"`
+	LocalURL      string   `json:"local_url,omitempty"`
 	Language      string   `json:"language,omitempty"`
 	TagsUUIDs     []string `json:"tags_uuids,omitempty"`
 	DownloadCount uint32   `json:"download_count,omitempty"`
+}
+
+type UpdateAudioFileDTO struct {
+	UUID        string    `json:"uuid"`
+	NewFileName string    `json:"new-file-name"`
+	OldFileName string    `json:"old-file-name"`
+	File        io.Reader `json:"file"`
+	LocalURL    string    `json:"local-url"`
+	LocalPath   string    `json:"local-path"`
 }
 
 // Author
@@ -77,11 +106,10 @@ type CreateBookDTO struct {
 	Difficulty    string    `json:"difficulty"`
 	EditionDate   time.Time `json:"edition_date"`
 	Description   string    `json:"description"`
-	URL           string    `json:"url"`
+	LocalURL      string    `json:"local_url"`
 	Language      string    `json:"language"`
 	TagsUUIDs     []string  `json:"tags_uuids"`
 	ImageURL      string    `json:"image_url,omitempty"`
-	CreatedAt     time.Time `json:"created_at"`
 }
 
 type UpdateBookDTO struct {
@@ -93,11 +121,26 @@ type UpdateBookDTO struct {
 	EditionDate   time.Time `json:"edition_date,omitempty"`
 	Rating        float32   `json:"rating,omitempty"`
 	Description   string    `json:"description,omitempty"`
-	URL           string    `json:"url,omitempty"`
+	LocalURL      string    `json:"local_url,omitempty"`
 	Language      string    `json:"language,omitempty"`
 	TagsUUIDs     []string  `json:"tags_uuids,omitempty"`
 	DownloadCount uint32    `json:"download_count,omitempty"`
 	ImageURL      string    `json:"image_url,omitempty"`
+}
+
+type UpdateBookFileDTO struct {
+	UUID        string    `json:"uuid"`
+	NewFileName string    `json:"new-file-name"`
+	OldFileName string    `json:"old-file-name"`
+	File        io.Reader `json:"file"`
+	LocalURL    string    `json:"local-url"`
+	LocalPath   string    `json:"local-path"`
+}
+
+type UpdateBookImageDTO struct {
+	UUID      string      `json:"uuid"`
+	Image     image.Image `json:"image"`
+	LocalPath string      `json:"local-path"`
 }
 
 // Direction
@@ -144,7 +187,8 @@ type CreateVideoDTO struct {
 	Title         string   `json:"title"`
 	DirectionUUID string   `json:"direction_uuid"`
 	Difficulty    string   `json:"difficulty"`
-	URL           string   `json:"url"`
+	LocalURL      string   `json:"local_url"`
+	WebURL        string   `json:"web_url,omitempty"`
 	Language      string   `json:"language"`
 	TagsUUIDs     []string `json:"tags_uuids"`
 }
@@ -155,8 +199,18 @@ type UpdateVideoDTO struct {
 	Title         string   `json:"title,omitempty"`
 	Difficulty    string   `json:"difficulty,omitempty"`
 	Rating        float32  `json:"rating,omitempty"`
-	URL           string   `json:"url,omitempty"`
+	LocalURL      string   `json:"local_url,omitempty"`
+	WebURL        string   `json:"web_url,omitempty"`
 	Language      string   `json:"language,omitempty"`
 	TagsUUIDs     []string `json:"tags_uuids,omitempty"`
 	DownloadCount uint32   `json:"download_count,omitempty"`
+}
+
+type UpdateVideoFileDTO struct {
+	UUID        string    `json:"uuid"`
+	NewFileName string    `json:"new-file-name"`
+	OldFileName string    `json:"old-file-name"`
+	File        io.Reader `json:"file"`
+	LocalURL    string    `json:"local-url"`
+	LocalPath   string    `json:"local-path"`
 }

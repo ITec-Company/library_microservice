@@ -1,7 +1,6 @@
 package service
 
 import (
-	"context"
 	"library-go/internal/domain"
 	"library-go/internal/store"
 	"library-go/pkg/logging"
@@ -18,26 +17,26 @@ func NewTagService(storage store.TagStorage, logger *logging.Logger) TagService 
 		storage: storage}
 }
 
-func (s *tagService) GetByUUID(ctx context.Context, UUID string) (*domain.Tag, error) {
+func (s *tagService) GetByUUID(UUID string) (*domain.Tag, error) {
 	return s.storage.GetOne(UUID)
 }
 
-func (s *tagService) GetManyByUUIDs(ctx context.Context, UUIDs []string) ([]*domain.Tag, error) {
+func (s *tagService) GetManyByUUIDs(UUIDs []string) ([]*domain.Tag, error) {
 	return s.storage.GetMany(UUIDs)
 }
 
-func (s *tagService) GetAll(ctx context.Context, limit, offset int) ([]*domain.Tag, error) {
+func (s *tagService) GetAll(limit, offset int) ([]*domain.Tag, error) {
 	return s.storage.GetAll(limit, offset)
 }
 
-func (s *tagService) Delete(ctx context.Context, UUID string) error {
+func (s *tagService) Delete(UUID string) error {
 	return s.storage.Delete(UUID)
 }
 
-func (s *tagService) Create(ctx context.Context, tag *domain.CreateTagDTO) (string, error) {
+func (s *tagService) Create(tag *domain.CreateTagDTO) (string, error) {
 	return s.storage.Create(tag)
 }
 
-func (s *tagService) Update(ctx context.Context, tag *domain.UpdateTagDTO) error {
+func (s *tagService) Update(tag *domain.UpdateTagDTO) error {
 	return s.storage.Update(tag)
 }

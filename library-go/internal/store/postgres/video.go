@@ -18,7 +18,7 @@ const (
 		V.title,
 		V.difficulty,
 		V.rating,
-		V.url,
+		V.local_url,
 		V.language,
 		V.download_count,
 		D.uuid as direction_uuid,
@@ -28,13 +28,14 @@ const (
 	LEFT JOIN direction AS D ON D.uuid = V.direction_uuid
 	LEFT JOIN tag AS T ON  T.uuid = any (V.tags_uuids)
 	WHERE  V.uuid = $1
-	GROUP BY V.uuid, V.title, V.rating, V.url, V.language, V.download_count, D.uuid, D.name`
+	GROUP BY V.uuid, V.title, V.rating, V.local_url, V.language, V.download_count, D.uuid, D.name`
+
 	getAllVideosQuery = `SELECT
 		V.uuid,
 		V.title,
 		V.difficulty,
 		V.rating,
-		V.url,
+		V.local_url,
 		V.language,
 		V.download_count,
 		D.uuid as direction_uuid,
@@ -43,26 +44,29 @@ const (
 	FROM video AS V
 	LEFT JOIN direction AS D ON D.uuid = V.direction_uuid
 	LEFT JOIN tag AS T ON  T.uuid = any (V.tags_uuids)
-	GROUP BY V.uuid, V.title, V.difficulty, V.rating, V.url, V.language, V.download_count, D.uuid, D.name`
+	GROUP BY V.uuid, V.title, V.difficulty, V.rating, V.local_url, V.language, V.download_count, D.uuid, D.name`
+
 	createVideoQuery = `INSERT INTO video (
                      title, 
                    	 difficulty,
                      direction_uuid, 
                      rating, 
-                     url, 
+                     local_url, 
                      language, 
                      tags_uuids, 
                      download_count
 				) SELECT $1, $2 , $3, $4, $5, $6, $7, $8
 				WHERE EXISTS(SELECT uuid FROM direction where $3 = direction.uuid) AND
 				EXISTS(SELECT uuid FROM tag where tag.uuid = any($7)) RETURNING video.uuid`
+
 	deleteVideoQuery = `DELETE FROM video WHERE uuid = $1`
+
 	updateVideoQuery = `UPDATE video SET 
 			title = COALESCE(NULLIF($1, ''), title), 
-			difficulty = COALESCE($2, difficulty), 
+			difficulty = (CASE WHEN ($2 = any(enum_range(difficulty))) THEN $2 ELSE difficulty END), 
 			direction_uuid = (CASE WHEN (EXISTS(SELECT uuid FROM direction where direction.uuid = $3)) THEN $3 ELSE COALESCE(NULLIF($3, 0), direction_uuid) END), 
 			rating = COALESCE(NULLIF($4, 0), rating), 
-			url = COALESCE(NULLIF($5, ''), url), 
+			local_url = COALESCE(NULLIF($5, ''), local_url), 
 			language = COALESCE(NULLIF($6, ''), language), 
 			tags_uuids = (CASE WHEN (EXISTS(SELECT uuid FROM tag where tag.uuid = any($7))) THEN $7 ELSE COALESCE($7, tags_uuids) END),
 			download_count = COALESCE(NULLIF($8, 0), download_count)
@@ -82,15 +86,36 @@ func NewVideoStorage(db *sql.DB, logger *logging.Logger) store.VideoStorage {
 }
 
 func (vs *videoStorage) GetOne(UUID string) (*domain.Video, error) {
+
+	query, args, _ := squirrel.Select(
+		"V.uuid",
+		"V.title",
+		"V.difficulty",
+		"V.rating",
+		"V.local_url",
+		"V.web_url",
+		"V.language",
+		"V.download_count",
+		"D.uuid as direction_uuid",
+		"D.name as direction_name",
+		"array_agg(DISTINCT T) as tags").
+		From("video AS V").
+		Where("V.uuid = ?", UUID).
+		PlaceholderFormat(squirrel.Dollar).
+		LeftJoin("direction AS D ON D.uuid = V.direction_uuid").
+		LeftJoin("tag AS T ON  T.uuid = any (V.tags_uuids)").
+		GroupBy("V.uuid, V.title, V.difficulty, V.rating, V.local_url, V.web_url, V.language, V.download_count, D.uuid, D.name").
+		ToSql()
+
 	var video domain.Video
 	var tagsStr []string
-	if err := vs.db.QueryRow(getOneVideoQuery,
-		UUID).Scan(
+	if err := vs.db.QueryRow(query, args...).Scan(
 		&video.UUID,
 		&video.Title,
 		&video.Difficulty,
 		&video.Rating,
-		&video.URL,
+		&video.LocalURL,
+		&video.WebURL,
 		&video.Language,
 		&video.DownloadCount,
 		&video.Direction.UUID,
@@ -113,11 +138,23 @@ func (vs *videoStorage) GetOne(UUID string) (*domain.Video, error) {
 }
 
 func (vs *videoStorage) GetAll(sortOptions *domain.SortFilterPagination) ([]*domain.Video, int, error) {
-	s := squirrel.Select("V.uuid, V.title, V.difficulty, V.rating, V.url, V.language, V.download_count, D.uuid as direction_uuid, D.name as direction_name, array_agg(DISTINCT T) as tags, count(*) OVER() AS full_count").
+	s := squirrel.Select(
+		"V.uuid",
+		"V.title",
+		"V.difficulty",
+		"V.rating",
+		"V.local_url",
+		"V.web_url",
+		"V.language",
+		"V.download_count",
+		"D.uuid as direction_uuid",
+		"D.name as direction_name",
+		"array_agg(DISTINCT T) as tags",
+		"count(*) OVER() AS full_count").
 		From("video AS V").
 		LeftJoin("direction AS D ON D.uuid = V.direction_uuid").
 		LeftJoin("tag AS T ON  T.uuid = any (V.tags_uuids)").
-		GroupBy("V.uuid, V.title, V.difficulty, V.rating, V.url, V.language, V.download_count, D.uuid, D.name")
+		GroupBy("V.uuid, V.title, V.difficulty, V.rating, V.local_url, V.web_url, V.language, V.download_count, D.uuid, D.name")
 
 	if sortOptions.Limit != 0 {
 		s = s.Limit(sortOptions.Limit)
@@ -154,7 +191,8 @@ func (vs *videoStorage) GetAll(sortOptions *domain.SortFilterPagination) ([]*dom
 			&video.Title,
 			&video.Difficulty,
 			&video.Rating,
-			&video.URL,
+			&video.LocalURL,
+			&video.WebURL,
 			&video.Language,
 			&video.DownloadCount,
 			&video.Direction.UUID,
@@ -202,7 +240,7 @@ func (vs *videoStorage) Create(videoCreateDTO *domain.CreateVideoDTO) (string, e
 		videoCreateDTO.Difficulty,
 		videoCreateDTO.DirectionUUID,
 		0,
-		videoCreateDTO.URL,
+		videoCreateDTO.LocalURL,
 		videoCreateDTO.Language,
 		pq.Array(videoCreateDTO.TagsUUIDs),
 		0,
@@ -217,13 +255,18 @@ func (vs *videoStorage) Create(videoCreateDTO *domain.CreateVideoDTO) (string, e
 }
 
 func (vs *videoStorage) Delete(UUID string) error {
+	query, args, _ := squirrel.Delete("video").
+		Where("uuid = ?", UUID).
+		PlaceholderFormat(squirrel.Dollar).
+		ToSql()
+
 	tx, err := vs.db.Begin()
 	if err != nil {
 		vs.logger.Errorf("error occurred while creating transaction. err: %v", err)
 		return err
 	}
 
-	result, err := vs.db.Exec(deleteVideoQuery, UUID)
+	result, err := vs.db.Exec(query, args...)
 	if err != nil {
 		tx.Rollback()
 		vs.logger.Errorf("error occurred while deleting video. err: %v.", err)
@@ -247,6 +290,10 @@ func (vs *videoStorage) Delete(UUID string) error {
 }
 
 func (vs *videoStorage) Update(videoUpdateDTO *domain.UpdateVideoDTO) error {
+	if videoUpdateDTO.DirectionUUID == "" {
+		videoUpdateDTO.DirectionUUID = "0"
+	}
+
 	tx, err := vs.db.Begin()
 	if err != nil {
 		vs.logger.Errorf("error occurred while creating transaction. err: %v", err)
@@ -258,7 +305,7 @@ func (vs *videoStorage) Update(videoUpdateDTO *domain.UpdateVideoDTO) error {
 		videoUpdateDTO.Difficulty,
 		videoUpdateDTO.DirectionUUID,
 		videoUpdateDTO.Rating,
-		videoUpdateDTO.URL,
+		videoUpdateDTO.LocalURL,
 		videoUpdateDTO.Language,
 		pq.Array(videoUpdateDTO.TagsUUIDs),
 		videoUpdateDTO.DownloadCount,

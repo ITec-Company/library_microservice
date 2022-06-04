@@ -31,11 +31,12 @@ type Article struct {
 	EditionDate   time.Time  `json:"edition_date"`
 	Rating        float32    `json:"rating,omitempty"`
 	Description   string     `json:"description,omitempty"`
-	URL           string     `json:"url,omitempty"`
+	LocalURL      string     `json:"local_url,omitempty"`
+	ImageURL      string     `json:"image_url,omitempty"`
+	WebURL        string     `json:"web_url,omitempty"`
 	Language      string     `json:"language,omitempty"`
 	Tags          []Tag      `json:"tags,omitempty"`
 	DownloadCount uint32     `json:"download_count,omitempty"`
-	ImageURL      string     `json:"image_url,omitempty"`
 	CreatedAt     time.Time  `json:"created_at"`
 }
 
@@ -45,7 +46,7 @@ type Audio struct {
 	Direction     Direction  `json:"direction,omitempty"`
 	Difficulty    Difficulty `json:"difficulty,omitempty"`
 	Rating        float32    `json:"rating,omitempty"`
-	URL           string     `json:"url,omitempty"`
+	LocalURL      string     `json:"local_url,omitempty"`
 	Language      string     `json:"language,omitempty"`
 	Tags          []Tag      `json:"tags,omitempty"`
 	DownloadCount uint32     `json:"download_count,omitempty"`
@@ -65,7 +66,7 @@ type Book struct {
 	EditionDate   time.Time  `json:"edition_date"`
 	Rating        float32    `json:"rating,omitempty"`
 	Description   string     `json:"description,omitempty"`
-	URL           string     `json:"url,omitempty"`
+	LocalURL      string     `json:"local_url,omitempty"`
 	Language      string     `json:"language,omitempty"`
 	Tags          []Tag      `json:"tags,omitempty"`
 	DownloadCount uint32     `json:"download_count,omitempty"`
@@ -99,7 +100,8 @@ type Video struct {
 	Direction     Direction  `json:"direction,omitempty"`
 	Rating        float32    `json:"rating,omitempty"`
 	Difficulty    Difficulty `json:"difficulty,omitempty"`
-	URL           string     `json:"url,omitempty"`
+	LocalURL      string     `json:"local_url,omitempty"`
+	WebURL        string     `json:"web_url,omitempty"`
 	Language      string     `json:"language,omitempty"`
 	Tags          []Tag      `json:"tags,omitempty"`
 	DownloadCount uint32     `json:"download_count,omitempty"`

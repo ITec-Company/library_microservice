@@ -2,7 +2,6 @@ package http
 
 import (
 	"bytes"
-	"context"
 	"encoding/json"
 	"fmt"
 	"github.com/julienschmidt/httprouter"
@@ -18,12 +17,14 @@ import (
 )
 
 const (
-	getAllVideosURL       = "/videos"
-	getVideoByUUIDURL     = "/video/:uuid"
-	createVideoURL        = "/video"
-	deleteVideoURL        = "/video/:uuid"
-	updateVideoURL        = "/video"
-	loadVideoURL          = "/load/video"
+	getAllVideosURL    = "/videos"
+	getVideoByUUIDURL  = "/video/:uuid"
+	createVideoURL     = "/video"
+	deleteVideoURL     = "/video/:uuid"
+	updateVideoURL     = "/video"
+	loadVideoFileURL   = "/file/video"
+	updateVideoFileURL = "/file/video"
+
 	videoLocalStoragePath = "../store/videos/"
 )
 
@@ -47,7 +48,8 @@ func (vh *videoHandler) Register(router *httprouter.Router) {
 	router.POST(createVideoURL, vh.Middleware.createVideo(vh.Create()))
 	router.DELETE(deleteVideoURL, vh.Delete)
 	router.PUT(updateVideoURL, vh.Update)
-	router.GET(loadVideoURL, vh.Load)
+	router.GET(loadVideoFileURL, vh.LoadFile)
+	router.PUT(updateVideoFileURL, vh.Middleware.updateVideoFile(vh.UpdateFile()))
 }
 
 func (vh *videoHandler) GetAll() http.HandlerFunc {
@@ -89,7 +91,7 @@ func (vh *videoHandler) GetByUUID(w http.ResponseWriter, r *http.Request, ps htt
 		return
 	}
 
-	video, err := vh.Service.GetByUUID(context.Background(), uuid)
+	video, err := vh.Service.GetByUUID(uuid)
 	if err != nil {
 		w.WriteHeader(http.StatusNotFound)
 		json.NewEncoder(w).Encode(JSON.Error{Msg: fmt.Sprintf("error occurred while getting video from DB by UUID. err: %v", err)})
@@ -117,9 +119,9 @@ func (vh *videoHandler) Create() http.Handler {
 		createVideoDTO.TagsUUIDs = strings.Split(data["tags_uuids"].(string), ",")
 
 		fileName := data["fileName"].(string)
-		createVideoDTO.URL = fmt.Sprintf("%s?url=%s", loadVideoURL, fileName)
+		createVideoDTO.LocalURL = fmt.Sprintf("%s?url=%s", loadVideoFileURL, fileName)
 
-		err := vh.Service.Save(context.Background(), videoLocalStoragePath, fileName, file)
+		err := vh.Service.SaveFile(videoLocalStoragePath, fileName, file)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			vh.logger.Errorf("error occurred while saving video into local database. err: %v.", err)
@@ -127,7 +129,7 @@ func (vh *videoHandler) Create() http.Handler {
 			return
 		}
 
-		UUID, err := vh.Service.Create(context.Background(), &createVideoDTO)
+		UUID, err := vh.Service.Create(&createVideoDTO)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			json.NewEncoder(w).Encode(JSON.Error{Msg: fmt.Sprintf("error occurred while creating video into DB. err: %v", err)})
@@ -156,7 +158,7 @@ func (vh *videoHandler) Delete(w http.ResponseWriter, r *http.Request, ps httpro
 		return
 	}
 
-	err = vh.Service.Delete(context.Background(), uuid)
+	err = vh.Service.Delete(uuid, fmt.Sprintf("%s%s/", videoLocalStoragePath, uuid))
 	if err != nil {
 		w.WriteHeader(http.StatusNotFound)
 		json.NewEncoder(w).Encode(JSON.Error{Msg: fmt.Sprintf("error occurred while deleting video from DB. err: %v", err)})
@@ -184,7 +186,7 @@ func (vh *videoHandler) Update(w http.ResponseWriter, r *http.Request, ps httpro
 		return
 	}
 
-	err := vh.Service.Update(context.Background(), updateVideoDTO)
+	err := vh.Service.Update(updateVideoDTO)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(JSON.Error{Msg: fmt.Sprintf("error occurred while updating video into DB. err: %v", err)})
@@ -195,7 +197,7 @@ func (vh *videoHandler) Update(w http.ResponseWriter, r *http.Request, ps httpro
 	json.NewEncoder(w).Encode(JSON.Info{Msg: "Video updated successfully"})
 }
 
-func (vh *videoHandler) Load(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+func (vh *videoHandler) LoadFile(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 
 	url := r.URL.Query().Get("url")
 	if url == "" {
@@ -209,7 +211,7 @@ func (vh *videoHandler) Load(w http.ResponseWriter, r *http.Request, ps httprout
 
 	path := fmt.Sprintf("%s%s", videoLocalStoragePath, url)
 
-	fileBytes, err := vh.Service.Load(context.Background(), path)
+	fileBytes, err := vh.Service.LoadFile(path)
 	_, pathError := err.(*os.PathError)
 	if pathError {
 		w.Header().Set("Content-Type", "application/json")
@@ -227,4 +229,26 @@ func (vh *videoHandler) Load(w http.ResponseWriter, r *http.Request, ps httprout
 	}
 
 	w.Write(fileBytes)
+}
+
+func (vh *videoHandler) UpdateFile() http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+
+		dto := r.Context().Value(CtxKeyUpdateVideoFile).(domain.UpdateVideoFileDTO)
+
+		dto.LocalPath = fmt.Sprintf("%s%s/", videoLocalStoragePath, dto.UUID)
+		dto.LocalURL = fmt.Sprintf("%s?file=%s&uuid=%s", loadVideoFileURL, dto.NewFileName, dto.UUID)
+
+		err := vh.Service.UpdateFile(&dto)
+		if err != nil {
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusInternalServerError)
+			vh.logger.Errorf("error occurred while saving video into local store. err: %v.", err)
+			json.NewEncoder(w).Encode(JSON.Error{Msg: fmt.Sprintf("error occurred while saving video into local store. err: %v.", err)})
+			return
+		}
+		w.WriteHeader(http.StatusOK)
+		json.NewEncoder(w).Encode(JSON.Info{Msg: "File updated successfully"})
+	})
 }

@@ -2,6 +2,7 @@ package postgres
 
 import (
 	"database/sql"
+	"github.com/Masterminds/squirrel"
 	"library-go/internal/domain"
 	"library-go/internal/store"
 	"library-go/pkg/logging"
@@ -33,8 +34,15 @@ func NewDirectionStorage(db *sql.DB, logger *logging.Logger) store.DirectionStor
 
 func (ds *directionStorage) GetOne(UUID string) (*domain.Direction, error) {
 	var direction domain.Direction
-	if err := ds.db.QueryRow(getOneDirectionQuery,
-		UUID).Scan(
+	query, args, _ := squirrel.Select("uuid", "name").
+		From("direction").
+		Where(squirrel.Eq{
+			"uuid": UUID,
+		}).
+		PlaceholderFormat(squirrel.Dollar).
+		ToSql()
+
+	if err := ds.db.QueryRow(query, args...).Scan(
 		&direction.UUID,
 		&direction.Name,
 	); err != nil {
@@ -46,7 +54,13 @@ func (ds *directionStorage) GetOne(UUID string) (*domain.Direction, error) {
 }
 
 func (ds *directionStorage) GetAll(limit, offset int) ([]*domain.Direction, error) {
-	rows, err := ds.db.Query(getAllDirectionsQuery)
+
+	query, _, _ := squirrel.Select("uuid", "name").
+		From("direction").
+		PlaceholderFormat(squirrel.Dollar).
+		ToSql()
+
+	rows, err := ds.db.Query(query)
 	if err != nil {
 		ds.logger.Errorf("error occurred while selecting all directions. err: %v", err)
 		return nil, err

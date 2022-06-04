@@ -1,7 +1,6 @@
 package http
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"github.com/julienschmidt/httprouter"
@@ -59,7 +58,7 @@ func (rh *reviewHandler) GetAll(w http.ResponseWriter, r *http.Request, ps httpr
 		rh.logger.Debugf("error occurred while parsing offset. err: %v. Assigning '0' to offset", err)
 	}
 
-	reviews, err := rh.Service.GetAll(context.Background(), limit, offset)
+	reviews, err := rh.Service.GetAll(limit, offset)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(JSON.Error{Msg: fmt.Sprintf("error occurred while getting all reviews. err: %v", err)})
@@ -87,7 +86,7 @@ func (rh *reviewHandler) GetByUUID(w http.ResponseWriter, r *http.Request, ps ht
 		return
 	}
 
-	review, err := rh.Service.GetByUUID(context.Background(), uuid)
+	review, err := rh.Service.GetByUUID(uuid)
 	if err != nil {
 		w.WriteHeader(http.StatusNotFound)
 		json.NewEncoder(w).Encode(JSON.Error{Msg: fmt.Sprintf("error occurred while getting review from DB by UUID. err: %v", err)})
@@ -109,7 +108,7 @@ func (rh *reviewHandler) Create(w http.ResponseWriter, r *http.Request, ps httpr
 		return
 	}
 
-	UUID, err := rh.Service.Create(context.Background(), createReviewDTO)
+	UUID, err := rh.Service.Create(createReviewDTO)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(JSON.Error{Msg: fmt.Sprintf("error occurred while creating review into DB. err: %v", err)})
@@ -137,7 +136,7 @@ func (rh *reviewHandler) Delete(w http.ResponseWriter, r *http.Request, ps httpr
 		return
 	}
 
-	err = rh.Service.Delete(context.Background(), uuid)
+	err = rh.Service.Delete(uuid)
 	if err != nil {
 		w.WriteHeader(http.StatusNotFound)
 		json.NewEncoder(w).Encode(JSON.Error{Msg: fmt.Sprintf("error occurred while deleting review from DB. err: %v", err)})
@@ -165,7 +164,7 @@ func (rh *reviewHandler) Update(w http.ResponseWriter, r *http.Request, ps httpr
 		return
 	}
 
-	err := rh.Service.Update(context.Background(), updateReviewDTO)
+	err := rh.Service.Update(updateReviewDTO)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(JSON.Error{Msg: fmt.Sprintf("error occurred while updating review into DB. err: %v", err)})

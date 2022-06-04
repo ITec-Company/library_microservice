@@ -21,11 +21,15 @@ type CtxKey int8
 const (
 	defaultLimit = 20
 
-	CtxKeyCreateArticle  CtxKey = 1
-	CtxKeyCreateBook     CtxKey = 2
-	CtxKeyCreateVideo    CtxKey = 3
-	CtxKeyCreateAudio    CtxKey = 4
-	CtxKeySortAndFilters CtxKey = 5
+	CtxKeyCreateArticle     CtxKey = 1
+	CtxKeyCreateBook        CtxKey = 2
+	CtxKeyCreateVideo       CtxKey = 3
+	CtxKeyCreateAudio       CtxKey = 4
+	CtxKeySortAndFilters    CtxKey = 5
+	CtxKeyUpdateArticleFile CtxKey = 6
+	CtxKeyUpdateAudioFile   CtxKey = 7
+	CtxKeyUpdateBookFile    CtxKey = 8
+	CtxKeyUpdateVideoFile   CtxKey = 9
 )
 
 type Middleware struct {
@@ -84,7 +88,68 @@ func (m *Middleware) createArticle(next http.Handler) httprouter.Handle {
 		data["title"] = strings.Replace(data["title"].(string), " ", "_", -1)
 		data["fileName"] = fmt.Sprintf("author(%s)-title(%s).%s", data["author_uuid"].(string), data["title"].(string), kind.Extension)
 
-		next.ServeHTTP(w, r.WithContext(context.WithValue(context.Background(), CtxKeyCreateArticle, data)))
+		next.ServeHTTP(w, r.WithContext(context.WithValue(r.Context(), CtxKeyCreateArticle, data)))
+	}
+}
+
+func (m *Middleware) updateArticleFile(next http.Handler) httprouter.Handle {
+	return func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+
+		fileName := r.URL.Query().Get("file")
+		if fileName == "" {
+			w.WriteHeader(http.StatusBadRequest)
+			m.logger.Errorf("file query can't be empty")
+			return
+		}
+
+		uuid := r.URL.Query().Get("uuid")
+		if uuid == "" {
+			w.WriteHeader(http.StatusBadRequest)
+			m.logger.Errorf("uuid query can't be empty")
+			return
+		}
+
+		file := new(bytes.Buffer)
+		_, err := file.ReadFrom(r.Body)
+		if err != nil {
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusBadRequest)
+			m.logger.Errorf("error occurred while updating article file. err: %v.", err)
+			json.NewEncoder(w).Encode(JSON.Error{Msg: fmt.Sprintf("error occurred while ckecking file extension. err: %v", err)})
+			return
+		}
+
+		if !filetype.IsDocument(file.Bytes()) {
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusBadRequest)
+			m.logger.Errorf("file is not a document, allowed extensions: Doc, Docx, Xls, Xlsx, Ppt, Pptx")
+			json.NewEncoder(w).Encode(JSON.Error{Msg: "file is not a document, allowed extensions: Doc, Docx, Xls, Xlsx, Ppt, Pptx"})
+			return
+		}
+
+		kind, err := filetype.Match(file.Bytes())
+		if err != nil {
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusBadRequest)
+			m.logger.Errorf("error occurred while ckecking file extension. err: %v.", err)
+			json.NewEncoder(w).Encode(JSON.Error{Msg: fmt.Sprintf("error occurred while ckecking file extension. err: %v", err)})
+			return
+		}
+
+		fileNameSplit := strings.Split(fileName, ".")
+		if fileNameSplit[len(fileNameSplit)-1] != kind.Extension {
+			fileNameSplit[len(fileNameSplit)-1] = kind.Extension
+		}
+		NewFileName := strings.Join(fileNameSplit, ".")
+
+		data := domain.UpdateArticleFileDTO{
+			UUID:        uuid,
+			NewFileName: NewFileName,
+			OldFileName: fileName,
+			File:        file,
+		}
+
+		next.ServeHTTP(w, r.WithContext(context.WithValue(r.Context(), CtxKeyUpdateArticleFile, data)))
 	}
 }
 
@@ -142,7 +207,76 @@ func (m *Middleware) createBook(next http.Handler) httprouter.Handle {
 		data["title"] = strings.Replace(data["title"].(string), " ", "_", -1)
 		data["fileName"] = fmt.Sprintf("author(%s)-title(%s).%s", data["author_uuid"].(string), data["title"].(string), kind.Extension)
 
-		next.ServeHTTP(w, r.WithContext(context.WithValue(context.Background(), CtxKeyCreateBook, data)))
+		next.ServeHTTP(w, r.WithContext(context.WithValue(r.Context(), CtxKeyCreateBook, data)))
+	}
+}
+
+func (m *Middleware) updateBookFile(next http.Handler) httprouter.Handle {
+	return func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+
+		fileName := r.URL.Query().Get("file")
+		if fileName == "" {
+			w.WriteHeader(http.StatusBadRequest)
+			m.logger.Errorf("file query can't be empty")
+			return
+		}
+
+		uuid := r.URL.Query().Get("uuid")
+		if uuid == "" {
+			w.WriteHeader(http.StatusBadRequest)
+			m.logger.Errorf("uuid query can't be empty")
+			return
+		}
+
+		file := new(bytes.Buffer)
+		_, err := file.ReadFrom(r.Body)
+		if err != nil {
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusBadRequest)
+			m.logger.Errorf("error occurred while updating article file. err: %v.", err)
+			json.NewEncoder(w).Encode(JSON.Error{Msg: fmt.Sprintf("error occurred while ckecking file extension. err: %v", err)})
+			return
+		}
+
+		if !filetype.IsArchive(file.Bytes()) {
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusBadRequest)
+			m.logger.Errorf("file is not a pdf, allowed extensions: pdf")
+			json.NewEncoder(w).Encode(JSON.Error{Msg: "file is not a pdf, allowed extensions: pdf"})
+			return
+		}
+
+		kind, err := filetype.Match(file.Bytes())
+		if err != nil {
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusBadRequest)
+			m.logger.Errorf("error occurred while ckecking file extension. err: %v.", err)
+			json.NewEncoder(w).Encode(JSON.Error{Msg: fmt.Sprintf("error occurred while ckecking file extension. err: %v", err)})
+			return
+		}
+
+		if kind.Extension != "pdf" {
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusBadRequest)
+			m.logger.Errorf("file is not a document, allowed extensions: pdf")
+			json.NewEncoder(w).Encode(JSON.Error{Msg: "file is not a document, allowed extensions: pdf"})
+			return
+		}
+
+		fileNameSplit := strings.Split(fileName, ".")
+		if fileNameSplit[len(fileNameSplit)-1] != kind.Extension {
+			fileNameSplit[len(fileNameSplit)-1] = kind.Extension
+		}
+		NewFileName := strings.Join(fileNameSplit, ".")
+
+		data := domain.UpdateBookFileDTO{
+			UUID:        uuid,
+			NewFileName: NewFileName,
+			OldFileName: fileName,
+			File:        file,
+		}
+
+		next.ServeHTTP(w, r.WithContext(context.WithValue(r.Context(), CtxKeyUpdateBookFile, data)))
 	}
 }
 
@@ -188,7 +322,68 @@ func (m *Middleware) createVideo(next http.Handler) httprouter.Handle {
 		data["title"] = strings.Replace(data["title"].(string), " ", "_", -1)
 		data["fileName"] = fmt.Sprintf("title(%s).%s", data["title"].(string), kind.Extension)
 
-		next.ServeHTTP(w, r.WithContext(context.WithValue(context.Background(), CtxKeyCreateVideo, data)))
+		next.ServeHTTP(w, r.WithContext(context.WithValue(r.Context(), CtxKeyCreateVideo, data)))
+	}
+}
+
+func (m *Middleware) updateVideoFile(next http.Handler) httprouter.Handle {
+	return func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+
+		fileName := r.URL.Query().Get("file")
+		if fileName == "" {
+			w.WriteHeader(http.StatusBadRequest)
+			m.logger.Errorf("file query can't be empty")
+			return
+		}
+
+		uuid := r.URL.Query().Get("uuid")
+		if uuid == "" {
+			w.WriteHeader(http.StatusBadRequest)
+			m.logger.Errorf("uuid query can't be empty")
+			return
+		}
+
+		file := new(bytes.Buffer)
+		_, err := file.ReadFrom(r.Body)
+		if err != nil {
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusBadRequest)
+			m.logger.Errorf("error occurred while updating article file. err: %v.", err)
+			json.NewEncoder(w).Encode(JSON.Error{Msg: fmt.Sprintf("error occurred while ckecking file extension. err: %v", err)})
+			return
+		}
+
+		if !filetype.IsVideo(file.Bytes()) {
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusBadRequest)
+			m.logger.Errorf("file is not a video, allowed extensions: mp4, m4v, mkv, webm, mov, avi, wmv, mpg, flv, 3gp")
+			json.NewEncoder(w).Encode(JSON.Error{Msg: "file is not a video, allowed extensions: mp4, m4v, mkv, webm, mov, avi, wmv, mpg, flv, 3gp"})
+			return
+		}
+
+		kind, err := filetype.Match(file.Bytes())
+		if err != nil {
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusBadRequest)
+			m.logger.Errorf("error occurred while ckecking file extension. err: %v.", err)
+			json.NewEncoder(w).Encode(JSON.Error{Msg: fmt.Sprintf("error occurred while ckecking file extension. err: %v", err)})
+			return
+		}
+
+		fileNameSplit := strings.Split(fileName, ".")
+		if fileNameSplit[len(fileNameSplit)-1] != kind.Extension {
+			fileNameSplit[len(fileNameSplit)-1] = kind.Extension
+		}
+		NewFileName := strings.Join(fileNameSplit, ".")
+
+		data := domain.UpdateVideoFileDTO{
+			UUID:        uuid,
+			NewFileName: NewFileName,
+			OldFileName: fileName,
+			File:        file,
+		}
+
+		next.ServeHTTP(w, r.WithContext(context.WithValue(r.Context(), CtxKeyUpdateVideoFile, data)))
 	}
 }
 
@@ -236,7 +431,68 @@ func (m *Middleware) createAudio(next http.Handler) httprouter.Handle {
 		data["title"] = strings.Replace(data["title"].(string), " ", "_", -1)
 		data["fileName"] = fmt.Sprintf("title(%s).%s", data["title"].(string), kind.Extension)
 
-		next.ServeHTTP(w, r.WithContext(context.WithValue(context.Background(), CtxKeyCreateAudio, data)))
+		next.ServeHTTP(w, r.WithContext(context.WithValue(r.Context(), CtxKeyCreateAudio, data)))
+	}
+}
+
+func (m *Middleware) updateAudioFile(next http.Handler) httprouter.Handle {
+	return func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+
+		fileName := r.URL.Query().Get("file")
+		if fileName == "" {
+			w.WriteHeader(http.StatusBadRequest)
+			m.logger.Errorf("file query can't be empty")
+			return
+		}
+
+		uuid := r.URL.Query().Get("uuid")
+		if uuid == "" {
+			w.WriteHeader(http.StatusBadRequest)
+			m.logger.Errorf("uuid query can't be empty")
+			return
+		}
+
+		file := new(bytes.Buffer)
+		_, err := file.ReadFrom(r.Body)
+		if err != nil {
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusBadRequest)
+			m.logger.Errorf("error occurred while updating article file. err: %v.", err)
+			json.NewEncoder(w).Encode(JSON.Error{Msg: fmt.Sprintf("error occurred while ckecking file extension. err: %v", err)})
+			return
+		}
+
+		if !filetype.IsAudio(file.Bytes()) {
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusBadRequest)
+			m.logger.Errorf("file is not an audio, allowed extensions: mid, mp3, m4a, ogg, flac, wav, amr, aac, aiff")
+			json.NewEncoder(w).Encode(JSON.Error{Msg: "file is not an audio, allowed extensions: mid, mp3, m4a, ogg, flac, wav, amr, aac, aiff"})
+			return
+		}
+
+		kind, err := filetype.Match(file.Bytes())
+		if err != nil {
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusBadRequest)
+			m.logger.Errorf("error occurred while ckecking file extension. err: %v.", err)
+			json.NewEncoder(w).Encode(JSON.Error{Msg: fmt.Sprintf("error occurred while ckecking file extension. err: %v", err)})
+			return
+		}
+
+		fileNameSplit := strings.Split(fileName, ".")
+		if fileNameSplit[len(fileNameSplit)-1] != kind.Extension {
+			fileNameSplit[len(fileNameSplit)-1] = kind.Extension
+		}
+		NewFileName := strings.Join(fileNameSplit, ".")
+
+		data := domain.UpdateAudioFileDTO{
+			UUID:        uuid,
+			NewFileName: NewFileName,
+			OldFileName: fileName,
+			File:        file,
+		}
+
+		next.ServeHTTP(w, r.WithContext(context.WithValue(r.Context(), CtxKeyUpdateAudioFile, data)))
 	}
 }
 

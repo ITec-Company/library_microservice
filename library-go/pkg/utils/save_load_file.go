@@ -12,12 +12,15 @@ import (
 )
 
 type Format string
+type Extension string
 
 var (
 	FormatOriginal Format = "original"
 	FormatQVGA     Format = "QVGA"
 	FormatVGA      Format = "VGA"
 	FormatHD720p   Format = "HD720p"
+
+	JPG Extension = ".jpg"
 
 	ErrNilPointer = errors.New("nil pointer reference")
 )
@@ -58,30 +61,29 @@ func LoadFile(path string) ([]byte, error) {
 	return fileBytes, nil
 }
 
-// SaveImage original and resized copy. As default returns a name of original image saved
-func SaveImage(image *image.Image, path string) (string, error) {
+func SaveImage(image *image.Image, path string) error {
 
 	if err := os.MkdirAll(path, os.ModePerm); err != nil {
-		return "", err
+		return err
 	}
 
 	imagesMap, err := ResizeImage(image)
 	if err != nil {
-		return "", err
+		return err
 	}
 
 	for format, img := range imagesMap {
 		file, err := os.Create(fmt.Sprintf("%s/%s.jpg", path, string(format)))
 		if err != nil {
-			return "", err
+			return err
 		}
 
 		if err = jpeg.Encode(file, img, nil); err != nil {
-			return "", err
+			return err
 		}
 		file.Close()
 	}
-	return fmt.Sprintf("%s.jpg", string(FormatOriginal)), nil
+	return nil
 }
 
 func ResizeImage(original *image.Image) (map[Format]image.Image, error) {
@@ -97,8 +99,8 @@ func ResizeImage(original *image.Image) (map[Format]image.Image, error) {
 	return images, nil
 }
 
-func GetImageFromLocalStore(path string) (*image.Image, error) {
-	file, err := os.Open(path)
+func GetImageFromLocalStore(path string, format Format, extension Extension) (*image.Image, error) {
+	file, err := os.Open(fmt.Sprintf("%s%s%s", path, string(format), string(extension)))
 	if err != nil {
 		return nil, err
 	}

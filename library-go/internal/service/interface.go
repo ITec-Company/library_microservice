@@ -1,87 +1,93 @@
 package service
 
 import (
-	"context"
 	"image"
 	"io"
 	"library-go/internal/domain"
+	"library-go/pkg/utils"
 )
 
 //go:generate mockgen -source=interface.go -destination=mocks/mock.go
 
 type ArticleService interface {
-	GetByUUID(ctx context.Context, UUID string) (*domain.Article, error)
+	GetByUUID(UUID string) (*domain.Article, error)
 	GetAll(sortingOptions *domain.SortFilterPagination) ([]*domain.Article, int, error)
-	Delete(ctx context.Context, UUID string) error
-	Create(ctx context.Context, article *domain.CreateArticleDTO) (string, error)
-	Update(ctx context.Context, article *domain.UpdateArticleDTO) error
-	Load(ctx context.Context, path string) ([]byte, error)
-	Save(ctx context.Context, path, fileName string, file io.Reader) error
-	LoadImage(ctx context.Context, path string) (*image.Image, error)
-	SaveImage(ctx context.Context, path string, image *image.Image) (string, error)
+	Delete(UUID, path string) error
+	Create(article *domain.CreateArticleDTO) (string, error)
+	Update(article *domain.UpdateArticleDTO) error
+	LoadFile(path string) ([]byte, error)
+	SaveFile(path, fileName string, file io.Reader) error
+	UpdateFile(dto *domain.UpdateArticleFileDTO) error
+	LoadImage(path string, format utils.Format, extension utils.Extension) (*image.Image, error)
+	SaveImage(path string, image *image.Image) error
+	UpdateImage(path string, image *image.Image) error
 }
 
 type AudioService interface {
-	GetByUUID(ctx context.Context, UUID string) (*domain.Audio, error)
+	GetByUUID(UUID string) (*domain.Audio, error)
 	GetAll(sortingOptions *domain.SortFilterPagination) ([]*domain.Audio, int, error)
-	Delete(ctx context.Context, UUID string) error
-	Create(ctx context.Context, audio *domain.CreateAudioDTO) (string, error)
-	Update(ctx context.Context, audio *domain.UpdateAudioDTO) error
-	Load(ctx context.Context, path string) ([]byte, error)
-	Save(ctx context.Context, path, fileName string, file io.Reader) error
+	Delete(UUID, path string) error
+	Create(audio *domain.CreateAudioDTO) (string, error)
+	Update(audio *domain.UpdateAudioDTO) error
+	LoadFile(path string) ([]byte, error)
+	SaveFile(path, fileName string, file io.Reader) error
+	UpdateFile(dto *domain.UpdateAudioFileDTO) error
 }
 
 type AuthorService interface {
-	GetByUUID(ctx context.Context, UUID string) (*domain.Author, error)
-	GetAll(ctx context.Context, limit, offset int) ([]*domain.Author, error)
-	Delete(ctx context.Context, UUID string) error
-	Create(ctx context.Context, author *domain.CreateAuthorDTO) (string, error)
-	Update(ctx context.Context, author *domain.UpdateAuthorDTO) error
+	GetByUUID(UUID string) (*domain.Author, error)
+	GetAll(limit, offset int) ([]*domain.Author, error)
+	Delete(UUID string) error
+	Create(author *domain.CreateAuthorDTO) (string, error)
+	Update(author *domain.UpdateAuthorDTO) error
 }
 
 type BookService interface {
-	GetByUUID(ctx context.Context, UUID string) (*domain.Book, error)
+	GetByUUID(UUID string) (*domain.Book, error)
 	GetAll(sortingOptions *domain.SortFilterPagination) ([]*domain.Book, int, error)
-	Delete(ctx context.Context, UUID string) error
-	Create(ctx context.Context, book *domain.CreateBookDTO) (string, error)
-	Update(ctx context.Context, book *domain.UpdateBookDTO) error
-	Load(ctx context.Context, path string) ([]byte, error)
-	Save(ctx context.Context, path, fileName string, file io.Reader) error
-	LoadImage(ctx context.Context, path string) (*image.Image, error)
-	SaveImage(ctx context.Context, path string, image *image.Image) (string, error)
+	Delete(UUID, path string) error
+	Create(book *domain.CreateBookDTO) (string, error)
+	Update(book *domain.UpdateBookDTO) error
+	LoadFile(path string) ([]byte, error)
+	SaveFile(path, fileName string, file io.Reader) error
+	UpdateFile(dto *domain.UpdateBookFileDTO) error
+	LoadImage(path string, format utils.Format, extension utils.Extension) (*image.Image, error)
+	SaveImage(path string, image *image.Image) error
+	UpdateImage(path string, image *image.Image) error
 }
 
 type DirectionService interface {
-	GetByUUID(ctx context.Context, UUID string) (*domain.Direction, error)
-	GetAll(ctx context.Context, limit, offset int) ([]*domain.Direction, error)
-	Delete(ctx context.Context, UUID string) error
-	Create(ctx context.Context, direction *domain.CreateDirectionDTO) (string, error)
-	Update(ctx context.Context, direction *domain.UpdateDirectionDTO) error
+	GetByUUID(UUID string) (*domain.Direction, error)
+	GetAll(limit, offset int) ([]*domain.Direction, error)
+	Delete(UUID string) error
+	Create(direction *domain.CreateDirectionDTO) (string, error)
+	Update(direction *domain.UpdateDirectionDTO) error
 }
 
 type ReviewService interface {
-	GetByUUID(ctx context.Context, UUID string) (*domain.Review, error)
-	GetAll(ctx context.Context, limit, offset int) ([]*domain.Review, error)
-	Delete(ctx context.Context, UUID string) error
-	Create(ctx context.Context, review *domain.CreateReviewDTO) (string, error)
-	Update(ctx context.Context, review *domain.UpdateReviewDTO) error
+	GetByUUID(UUID string) (*domain.Review, error)
+	GetAll(limit, offset int) ([]*domain.Review, error)
+	Delete(UUID string) error
+	Create(review *domain.CreateReviewDTO) (string, error)
+	Update(review *domain.UpdateReviewDTO) error
 }
 
 type TagService interface {
-	GetByUUID(ctx context.Context, UUID string) (*domain.Tag, error)
-	GetManyByUUIDs(ctx context.Context, UUIDs []string) ([]*domain.Tag, error)
-	GetAll(ctx context.Context, limit, offset int) ([]*domain.Tag, error)
-	Delete(ctx context.Context, UUID string) error
-	Create(ctx context.Context, tag *domain.CreateTagDTO) (string, error)
-	Update(ctx context.Context, tag *domain.UpdateTagDTO) error
+	GetByUUID(UUID string) (*domain.Tag, error)
+	GetManyByUUIDs(UUIDs []string) ([]*domain.Tag, error)
+	GetAll(limit, offset int) ([]*domain.Tag, error)
+	Delete(UUID string) error
+	Create(tag *domain.CreateTagDTO) (string, error)
+	Update(tag *domain.UpdateTagDTO) error
 }
 
 type VideoService interface {
-	GetByUUID(ctx context.Context, UUID string) (*domain.Video, error)
+	GetByUUID(UUID string) (*domain.Video, error)
 	GetAll(sortingOptions *domain.SortFilterPagination) ([]*domain.Video, int, error)
-	Delete(ctx context.Context, UUID string) error
-	Create(ctx context.Context, video *domain.CreateVideoDTO) (string, error)
-	Update(ctx context.Context, video *domain.UpdateVideoDTO) error
-	Load(ctx context.Context, path string) ([]byte, error)
-	Save(ctx context.Context, path, fileName string, file io.Reader) error
+	Delete(UUID, path string) error
+	Create(video *domain.CreateVideoDTO) (string, error)
+	Update(video *domain.UpdateVideoDTO) error
+	LoadFile(path string) ([]byte, error)
+	SaveFile(path, fileName string, file io.Reader) error
+	UpdateFile(dto *domain.UpdateVideoFileDTO) error
 }

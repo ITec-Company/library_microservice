@@ -1,12 +1,13 @@
 package service
 
 import (
-	"context"
+	"fmt"
 	"io"
 	"library-go/internal/domain"
 	"library-go/internal/store"
 	"library-go/pkg/logging"
 	"library-go/pkg/utils"
+	"os"
 )
 
 type videoService struct {
@@ -21,7 +22,7 @@ func NewService(storage store.VideoStorage, logger *logging.Logger) VideoService
 	}
 }
 
-func (s *videoService) GetByUUID(ctx context.Context, UUID string) (*domain.Video, error) {
+func (s *videoService) GetByUUID(UUID string) (*domain.Video, error) {
 	return s.storage.GetOne(UUID)
 }
 
@@ -29,22 +30,48 @@ func (s *videoService) GetAll(sortingOptions *domain.SortFilterPagination) ([]*d
 	return s.storage.GetAll(sortingOptions)
 }
 
-func (s *videoService) Delete(ctx context.Context, UUID string) error {
+func (s *videoService) Delete(UUID, path string) error {
+	err := os.RemoveAll(path)
+	if err != nil {
+		return err
+	}
 	return s.storage.Delete(UUID)
 }
 
-func (s *videoService) Create(ctx context.Context, video *domain.CreateVideoDTO) (string, error) {
+func (s *videoService) Create(video *domain.CreateVideoDTO) (string, error) {
 	return s.storage.Create(video)
 }
 
-func (s *videoService) Update(ctx context.Context, video *domain.UpdateVideoDTO) error {
+func (s *videoService) Update(video *domain.UpdateVideoDTO) error {
 	return s.storage.Update(video)
 }
 
-func (s *videoService) Load(ctx context.Context, path string) ([]byte, error) {
+func (s *videoService) LoadFile(path string) ([]byte, error) {
 	return utils.LoadFile(path)
 }
 
-func (s *videoService) Save(ctx context.Context, path, fileName string, file io.Reader) error {
+func (s *videoService) SaveFile(path, fileName string, file io.Reader) error {
 	return utils.SaveFile(path, fileName, file)
+}
+
+func (s *videoService) UpdateFile(dto *domain.UpdateVideoFileDTO) error {
+	if dto.OldFileName != dto.NewFileName {
+		err := os.Remove(fmt.Sprintf("%s%s", dto.LocalPath, dto.OldFileName))
+		if err != nil {
+			return err
+		}
+
+		err = utils.SaveFile(dto.LocalPath, dto.NewFileName, dto.File)
+		if err != nil {
+			return err
+		}
+
+		return s.storage.Update(&domain.UpdateVideoDTO{
+			UUID:     dto.UUID,
+			LocalURL: dto.LocalURL,
+		})
+
+	} else {
+		return utils.SaveFile(dto.LocalPath, dto.NewFileName, dto.File)
+	}
 }

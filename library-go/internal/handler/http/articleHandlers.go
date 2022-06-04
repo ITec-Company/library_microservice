@@ -2,7 +2,6 @@ package http
 
 import (
 	"bytes"
-	"context"
 	"encoding/json"
 	"fmt"
 	"github.com/julienschmidt/httprouter"
@@ -22,15 +21,17 @@ import (
 )
 
 const (
-	getAllArticlesURL       = "/articles"
-	getArticleByUUIDURL     = "/article/:uuid"
-	createArticleURL        = "/article"
-	deleteArticleURL        = "/article/:uuid"
-	updateArticleURL        = "/article"
-	loadArticleURL          = "/load/article"
-	loadArticleImageURL     = "/load/image/article"
+	getAllArticlesURL     = "/articles"
+	getArticleByUUIDURL   = "/article/:uuid"
+	createArticleURL      = "/article"
+	deleteArticleURL      = "/article/:uuid"
+	updateArticleURL      = "/article"
+	loadArticleFileURL    = "/file/article"
+	updateArticleFileURL  = "/file/article"
+	loadArticleImageURL   = "/image/article"
+	updateArticleImageURL = "/image/article"
+
 	articleLocalStoragePath = "../store/articles/"
-	articleImageStoragePath = "../store/images/articles/"
 )
 
 type articleHandler struct {
@@ -53,8 +54,10 @@ func (ah *articleHandler) Register(router *httprouter.Router) {
 	router.POST(createArticleURL, ah.Middleware.createArticle(ah.Create()))
 	router.DELETE(deleteArticleURL, ah.Delete)
 	router.PUT(updateArticleURL, ah.Update)
-	router.GET(loadArticleURL, ah.Load)
+	router.GET(loadArticleFileURL, ah.LoadFile)
+	router.PUT(updateArticleFileURL, ah.Middleware.updateArticleFile(ah.UpdateFile()))
 	router.GET(loadArticleImageURL, ah.LoadImage)
+	router.PUT(updateArticleImageURL, ah.UpdateImage)
 }
 
 func (ah *articleHandler) GetAll() http.HandlerFunc {
@@ -96,7 +99,7 @@ func (ah *articleHandler) GetByUUID(w http.ResponseWriter, r *http.Request, ps h
 		return
 	}
 
-	article, err := ah.Service.GetByUUID(context.Background(), uuid)
+	article, err := ah.Service.GetByUUID(uuid)
 	if err != nil {
 		w.WriteHeader(http.StatusNotFound)
 		json.NewEncoder(w).Encode(JSON.Error{Msg: fmt.Sprintf("error occurred while getting article from DB by UUID. err: %v", err)})
@@ -115,53 +118,46 @@ func (ah *articleHandler) Create() http.Handler {
 
 		createArticleDTO := domain.CreateArticleDTO{}
 
-		t, _ := time.Parse("2006-01-02", data["edition_date"].(string))
-		createAt := time.Now().UTC()
-
-		file := data["file"].(*bytes.Buffer)
-
 		createArticleDTO.Title = data["title"].(string)
 		createArticleDTO.DirectionUUID = data["direction_uuid"].(string)
 		createArticleDTO.AuthorUUID = data["author_uuid"].(string)
 		createArticleDTO.Difficulty = data["difficulty"].(string)
+		t, _ := time.Parse("2006-01-02", data["edition_date"].(string))
 		createArticleDTO.EditionDate = t
 		createArticleDTO.Description = data["description"].(string)
 		createArticleDTO.Language = data["language"].(string)
 		createArticleDTO.TagsUUIDs = strings.Split(data["tags_uuids"].(string), ",")
-
-		createArticleDTO.CreatedAt = createAt
-		createdStr := createAt.Format("2006-01-02-15-04-05")
-
-		img := data["image"].(image.Image)
-		imagePath := fmt.Sprintf("%s/%s", articleImageStoragePath, createdStr)
-		imageFileName, err := ah.Service.SaveImage(context.Background(), imagePath, &img)
-		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			ah.logger.Errorf("error occurred while saving article image into local store. err: %v.", err)
-			json.NewEncoder(w).Encode(JSON.Error{Msg: fmt.Sprintf("error occurred while saving article image into local store. err: %v.", err)})
-			return
-		}
-
-		createArticleDTO.ImageURL = fmt.Sprintf("%s?url=%s%%2F%s", loadArticleImageURL, createdStr, imageFileName)
-
 		fileName := data["fileName"].(string)
-		createArticleDTO.URL = fmt.Sprintf("%s?url=%s", loadArticleURL, fileName)
+		createArticleDTO.LocalURL = fmt.Sprintf("%s?file=%s&uuid=", loadArticleFileURL, fileName)
+		createArticleDTO.ImageURL = fmt.Sprintf("%s?format=%s&uuid=", loadArticleImageURL, string(utils.FormatOriginal))
 
-		err = ah.Service.Save(context.Background(), articleLocalStoragePath, fileName, file)
-		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			ah.logger.Errorf("error occurred while saving article into local database. err: %v.", err)
-			json.NewEncoder(w).Encode(JSON.Error{Msg: fmt.Sprintf("error occurred while saving article into local database. err: %v", err)})
-			return
-		}
-
-		UUID, err := ah.Service.Create(context.Background(), &createArticleDTO)
+		UUID, err := ah.Service.Create(&createArticleDTO)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			json.NewEncoder(w).Encode(JSON.Error{Msg: fmt.Sprintf("error occurred while creating article into DB. err: %v", err)})
 			return
 		}
 
+		path := fmt.Sprintf("%s%s/", articleLocalStoragePath, UUID)
+
+		file := data["file"].(*bytes.Buffer)
+		err = ah.Service.SaveFile(path, fileName, file)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			ah.logger.Errorf("error occurred while saving article into local store. err: %v.", err)
+			json.NewEncoder(w).Encode(JSON.Error{Msg: fmt.Sprintf("error occurred while saving article into local store. err: %v.", err)})
+			return
+		}
+
+		img := data["image"].(image.Image)
+		err = ah.Service.SaveImage(path, &img)
+		if err != nil {
+			os.Remove(fmt.Sprintf("%s%s", path, fileName))
+			w.WriteHeader(http.StatusInternalServerError)
+			ah.logger.Errorf("error occurred while saving article image. err: %v.", err)
+			json.NewEncoder(w).Encode(JSON.Error{Msg: fmt.Sprintf("error occurred while saving article into local store. err: %v.", err)})
+			return
+		}
 		w.WriteHeader(http.StatusCreated)
 		json.NewEncoder(w).Encode(JSON.Info{Msg: fmt.Sprintf("Article created successfully. UUID: %s", UUID)})
 	})
@@ -184,7 +180,7 @@ func (ah *articleHandler) Delete(w http.ResponseWriter, r *http.Request, ps http
 		return
 	}
 
-	err = ah.Service.Delete(context.Background(), uuid)
+	err = ah.Service.Delete(uuid, fmt.Sprintf("%s%s/", articleLocalStoragePath, uuid))
 	if err != nil {
 		w.WriteHeader(http.StatusNotFound)
 		json.NewEncoder(w).Encode(JSON.Error{Msg: fmt.Sprintf("error occurred while deleting article from DB. err: %v", err)})
@@ -212,7 +208,7 @@ func (ah *articleHandler) Update(w http.ResponseWriter, r *http.Request, ps http
 		return
 	}
 
-	err := ah.Service.Update(context.Background(), updateArticleDTO)
+	err := ah.Service.Update(updateArticleDTO)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(JSON.Error{Msg: fmt.Sprintf("error occurred while updating article into DB. err: %v", err)})
@@ -223,20 +219,27 @@ func (ah *articleHandler) Update(w http.ResponseWriter, r *http.Request, ps http
 	json.NewEncoder(w).Encode(JSON.Info{Msg: "Article updated successfully"})
 }
 
-func (ah *articleHandler) Load(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	url := r.URL.Query().Get("url")
-	if url == "" {
+func (ah *articleHandler) LoadFile(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	file := r.URL.Query().Get("file")
+	if file == "" {
 		w.WriteHeader(http.StatusBadRequest)
-		ah.logger.Errorf("url can't be empty")
+		ah.logger.Errorf("file query can't be empty")
 		return
 	}
 
-	w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=%s", url))
+	uuid := r.URL.Query().Get("uuid")
+	if uuid == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		ah.logger.Errorf("uuid query can't be empty")
+		return
+	}
+
+	path := fmt.Sprintf("%s%s/%s", articleLocalStoragePath, uuid, file)
+
+	w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=%s", file))
 	w.Header().Set("Content-Type", "application/octet-stream")
 
-	path := fmt.Sprintf("%s%s", articleLocalStoragePath, url)
-
-	fileBytes, err := ah.Service.Load(context.Background(), path)
+	fileBytes, err := ah.Service.LoadFile(path)
 	_, pathError := err.(*os.PathError)
 	if pathError {
 		w.Header().Set("Content-Type", "application/json")
@@ -256,19 +259,48 @@ func (ah *articleHandler) Load(w http.ResponseWriter, r *http.Request, ps httpro
 	w.Write(fileBytes)
 }
 
+func (ah *articleHandler) UpdateFile() http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+
+		dto := r.Context().Value(CtxKeyUpdateArticleFile).(domain.UpdateArticleFileDTO)
+
+		dto.LocalPath = fmt.Sprintf("%s%s/", articleLocalStoragePath, dto.UUID)
+		dto.LocalURL = fmt.Sprintf("%s?file=%s&uuid=%s", loadArticleFileURL, dto.NewFileName, dto.UUID)
+
+		err := ah.Service.UpdateFile(&dto)
+		if err != nil {
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusInternalServerError)
+			ah.logger.Errorf("error occurred while saving article into local store. err: %v.", err)
+			json.NewEncoder(w).Encode(JSON.Error{Msg: fmt.Sprintf("error occurred while saving article into local store. err: %v.", err)})
+			return
+		}
+		w.WriteHeader(http.StatusOK)
+		json.NewEncoder(w).Encode(JSON.Info{Msg: "File updated successfully"})
+	})
+}
+
 func (ah *articleHandler) LoadImage(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	w.Header().Set("Content-Type", "image/jpeg")
 
-	url := r.URL.Query().Get("url")
-	if url == "" {
+	format := r.URL.Query().Get("format")
+	if format == "" {
 		w.WriteHeader(http.StatusBadRequest)
-		ah.logger.Errorf("url can't be empty")
+		ah.logger.Errorf("format query can't be empty")
 		return
 	}
 
-	path := fmt.Sprintf("%s%s", articleImageStoragePath, url)
+	uuid := r.URL.Query().Get("uuid")
+	if uuid == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		ah.logger.Errorf("uuid can't be empty")
+		return
+	}
 
-	img, err := utils.GetImageFromLocalStore(path)
+	path := fmt.Sprintf("%s%s/", articleLocalStoragePath, uuid)
+
+	img, err := utils.GetImageFromLocalStore(path, utils.Format(format), utils.JPG)
 	if err != nil {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusInternalServerError)
@@ -279,4 +311,35 @@ func (ah *articleHandler) LoadImage(w http.ResponseWriter, r *http.Request, ps h
 
 	w.WriteHeader(http.StatusOK)
 	jpeg.Encode(w, *img, nil)
+}
+
+func (ah *articleHandler) UpdateImage(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	w.Header().Set("Content-Type", "image/jpeg")
+
+	uuid := r.URL.Query().Get("uuid")
+	if uuid == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		ah.logger.Errorf("uuid can't be empty")
+		return
+	}
+
+	path := fmt.Sprintf("%s%s/", articleLocalStoragePath, uuid)
+
+	img, err := jpeg.Decode(r.Body)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		ah.logger.Errorf("error occurred while updating article image. err: %v.", err)
+		json.NewEncoder(w).Encode(JSON.Error{Msg: fmt.Sprintf("error occurred while saving book into local store. err: %v.", err)})
+		return
+	}
+
+	err = ah.Service.SaveImage(path, &img)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		ah.logger.Errorf("error occurred while updating article image. err: %v.", err)
+		json.NewEncoder(w).Encode(JSON.Error{Msg: fmt.Sprintf("error occurred while saving book into local store. err: %v.", err)})
+		return
+	}
+
+	json.NewEncoder(w).Encode(JSON.Info{Msg: "Article image updated successfully"})
 }

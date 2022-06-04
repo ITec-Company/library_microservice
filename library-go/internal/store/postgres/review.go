@@ -2,6 +2,7 @@ package postgres
 
 import (
 	"database/sql"
+	"github.com/Masterminds/squirrel"
 	"library-go/internal/domain"
 	"library-go/internal/store"
 	"library-go/pkg/logging"
@@ -55,9 +56,17 @@ func NewReviewStorage(db *sql.DB, logger *logging.Logger) store.ReviewStorage {
 }
 
 func (rs *reviewStorage) GetOne(UUID string) (*domain.Review, error) {
+	query, args, _ := squirrel.Select("uuid", "full_name", "text", "rating", "source", "date", "literature_uuid").
+		From("review").
+		Where(squirrel.Eq{
+			"uuid": UUID,
+		}).
+		PlaceholderFormat(squirrel.Dollar).
+		ToSql()
+
 	var review domain.Review
-	if err := rs.db.QueryRow(getOneReviewQuery,
-		UUID).Scan(
+
+	if err := rs.db.QueryRow(query, args...).Scan(
 		&review.UUID,
 		&review.FullName,
 		&review.Text,
@@ -74,7 +83,12 @@ func (rs *reviewStorage) GetOne(UUID string) (*domain.Review, error) {
 }
 
 func (rs *reviewStorage) GetAll(limit, offset int) ([]*domain.Review, error) {
-	rows, err := rs.db.Query(getAllReviewsQuery)
+	query, _, _ := squirrel.Select("uuid", "full_name", "text", "rating", "source", "date", "literature_uuid").
+		From("review").
+		PlaceholderFormat(squirrel.Dollar).
+		ToSql()
+
+	rows, err := rs.db.Query(query)
 	if err != nil {
 		rs.logger.Errorf("error occurred while selecting all reviews. err: %v", err)
 		return nil, err

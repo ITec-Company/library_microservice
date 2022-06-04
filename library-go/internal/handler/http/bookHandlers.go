@@ -2,7 +2,6 @@ package http
 
 import (
 	"bytes"
-	"context"
 	"encoding/json"
 	"fmt"
 	"github.com/julienschmidt/httprouter"
@@ -22,15 +21,17 @@ import (
 )
 
 const (
-	getAllBooksURL       = "/books"
-	getBookByUUIDURL     = "/book/:uuid"
-	createBookURL        = "/book"
-	deleteBookURL        = "/book/:uuid"
-	updateBookURL        = "/book"
-	loadBookURL          = "/load/book"
-	loadBookImageURL     = "/load/image/book"
+	getAllBooksURL     = "/books"
+	getBookByUUIDURL   = "/book/:uuid"
+	createBookURL      = "/book"
+	deleteBookURL      = "/book/:uuid"
+	updateBookURL      = "/book"
+	loadBookFileURL    = "/file/book"
+	updateBookFileURL  = "/file/book"
+	loadBookImageURL   = "/image/book"
+	updateBookImageURL = "/image/book"
+
 	bookLocalStoragePath = "../store/books/"
-	bookImageStoragePath = "../store/images/books/"
 )
 
 type bookHandler struct {
@@ -53,8 +54,10 @@ func (bh *bookHandler) Register(router *httprouter.Router) {
 	router.POST(createBookURL, bh.Middleware.createBook(bh.Create()))
 	router.DELETE(deleteBookURL, bh.Delete)
 	router.PUT(updateBookURL, bh.Update)
-	router.GET(loadBookURL, bh.Load)
+	router.GET(loadBookFileURL, bh.LoadFile)
+	router.PUT(updateBookFileURL, bh.Middleware.updateBookFile(bh.UpdateFile()))
 	router.GET(loadBookImageURL, bh.LoadImage)
+	router.PUT(updateBookImageURL, bh.UpdateImage)
 }
 
 func (bh *bookHandler) GetAll() http.HandlerFunc {
@@ -97,7 +100,7 @@ func (bh *bookHandler) GetByUUID(w http.ResponseWriter, r *http.Request, ps http
 		return
 	}
 
-	book, err := bh.Service.GetByUUID(context.Background(), uuid)
+	book, err := bh.Service.GetByUUID(uuid)
 	if err != nil {
 		w.WriteHeader(http.StatusNotFound)
 		json.NewEncoder(w).Encode(JSON.Error{Msg: fmt.Sprintf("error occurred while getting book from DB by UUID. err: %v", err)})
@@ -116,54 +119,46 @@ func (bh *bookHandler) Create() http.Handler {
 
 		createBookDTO := domain.CreateBookDTO{}
 
-		t, _ := time.Parse("2006-01-02", data["edition_date"].(string))
-		createAt := time.Now().UTC()
-
-		file := data["file"].(*bytes.Buffer)
-
 		createBookDTO.Title = data["title"].(string)
 		createBookDTO.DirectionUUID = data["direction_uuid"].(string)
 		createBookDTO.AuthorUUID = data["author_uuid"].(string)
 		createBookDTO.Difficulty = data["difficulty"].(string)
+		t, _ := time.Parse("2006-01-02", data["edition_date"].(string))
 		createBookDTO.EditionDate = t
 		createBookDTO.Description = data["description"].(string)
 		createBookDTO.Language = data["language"].(string)
 		createBookDTO.TagsUUIDs = strings.Split(data["tags_uuids"].(string), ",")
-
-		createBookDTO.CreatedAt = createAt
-		createdStr := createAt.Format("2006-01-02-15-04-05")
-
-		img := data["image"].(image.Image)
-		imagePath := fmt.Sprintf("%s/%s", bookImageStoragePath, createdStr)
-		imageFileName, err := bh.Service.SaveImage(context.Background(), imagePath, &img)
-		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			bh.logger.Errorf("error occurred while saving book image into local store. err: %v.", err)
-			json.NewEncoder(w).Encode(JSON.Error{Msg: fmt.Sprintf("error occurred while saving book image into local store. err: %v.", err)})
-			return
-		}
-		bh.logger.Errorf("%v", createAt)
-
-		createBookDTO.ImageURL = fmt.Sprintf("%s?url=%s%%2F%s", loadBookImageURL, createdStr, imageFileName)
-
 		fileName := data["fileName"].(string)
-		createBookDTO.URL = fmt.Sprintf("%s?url=%s", loadBookURL, fileName)
+		createBookDTO.LocalURL = fmt.Sprintf("%s?file=%s&uuid=", loadBookFileURL, fileName)
+		createBookDTO.ImageURL = fmt.Sprintf("%s?format=%s&uuid=", loadBookImageURL, string(utils.FormatOriginal))
 
-		err = bh.Service.Save(context.Background(), bookLocalStoragePath, fileName, file)
-		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			bh.logger.Errorf("error occurred while saving book into local database. err: %v.", err)
-			json.NewEncoder(w).Encode(JSON.Error{Msg: fmt.Sprintf("error occurred while saving book into local database. err: %v", err)})
-			return
-		}
-
-		UUID, err := bh.Service.Create(context.Background(), &createBookDTO)
+		UUID, err := bh.Service.Create(&createBookDTO)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			json.NewEncoder(w).Encode(JSON.Error{Msg: fmt.Sprintf("error occurred while creating book into DB. err: %v", err)})
 			return
 		}
 
+		path := fmt.Sprintf("%s%s/", bookLocalStoragePath, UUID)
+
+		file := data["file"].(*bytes.Buffer)
+		err = bh.Service.SaveFile(path, fileName, file)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			bh.logger.Errorf("error occurred while saving book into local store. err: %v.", err)
+			json.NewEncoder(w).Encode(JSON.Error{Msg: fmt.Sprintf("error occurred while saving book into local store. err: %v.", err)})
+			return
+		}
+
+		img := data["image"].(image.Image)
+		err = bh.Service.SaveImage(path, &img)
+		if err != nil {
+			os.Remove(fmt.Sprintf("%s%s", path, fileName))
+			w.WriteHeader(http.StatusInternalServerError)
+			bh.logger.Errorf("error occurred while updating book image. err: %v.", err)
+			json.NewEncoder(w).Encode(JSON.Error{Msg: fmt.Sprintf("error occurred while saving book into local store. err: %v.", err)})
+			return
+		}
 		w.WriteHeader(http.StatusCreated)
 		json.NewEncoder(w).Encode(JSON.Info{Msg: fmt.Sprintf("Book created successfully. UUID: %s", UUID)})
 	})
@@ -186,7 +181,7 @@ func (bh *bookHandler) Delete(w http.ResponseWriter, r *http.Request, ps httprou
 		return
 	}
 
-	err = bh.Service.Delete(context.Background(), uuid)
+	err = bh.Service.Delete(uuid, fmt.Sprintf("%s%s/", articleLocalStoragePath, uuid))
 	if err != nil {
 		w.WriteHeader(http.StatusNotFound)
 		json.NewEncoder(w).Encode(JSON.Error{Msg: fmt.Sprintf("error occurred while deleting book from DB. err: %v", err)})
@@ -214,7 +209,7 @@ func (bh *bookHandler) Update(w http.ResponseWriter, r *http.Request, ps httprou
 		return
 	}
 
-	err := bh.Service.Update(context.Background(), updateBookDTO)
+	err := bh.Service.Update(updateBookDTO)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(JSON.Error{Msg: fmt.Sprintf("error occurred while updating book into DB. err: %v", err)})
@@ -225,20 +220,27 @@ func (bh *bookHandler) Update(w http.ResponseWriter, r *http.Request, ps httprou
 	json.NewEncoder(w).Encode(JSON.Info{Msg: "Book updated successfully"})
 }
 
-func (bh *bookHandler) Load(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	url := r.URL.Query().Get("url")
-	if url == "" {
+func (bh *bookHandler) LoadFile(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	file := r.URL.Query().Get("file")
+	if file == "" {
 		w.WriteHeader(http.StatusBadRequest)
-		bh.logger.Errorf("url can't be empty")
+		bh.logger.Errorf("file query can't be empty")
 		return
 	}
 
-	w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=%s", url))
+	uuid := r.URL.Query().Get("uuid")
+	if uuid == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		bh.logger.Errorf("uuid query can't be empty")
+		return
+	}
+
+	path := fmt.Sprintf("%s%s/%s", bookLocalStoragePath, uuid, file)
+
+	w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=%s", file))
 	w.Header().Set("Content-Type", "application/octet-stream")
 
-	path := fmt.Sprintf("%s%s", bookLocalStoragePath, url)
-
-	fileBytes, err := bh.Service.Load(context.Background(), path)
+	fileBytes, err := bh.Service.LoadFile(path)
 	_, pathError := err.(*os.PathError)
 	if pathError {
 		w.Header().Set("Content-Type", "application/json")
@@ -259,19 +261,48 @@ func (bh *bookHandler) Load(w http.ResponseWriter, r *http.Request, ps httproute
 
 }
 
+func (bh *bookHandler) UpdateFile() http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+
+		dto := r.Context().Value(CtxKeyUpdateBookFile).(domain.UpdateBookFileDTO)
+
+		dto.LocalPath = fmt.Sprintf("%s%s/", bookLocalStoragePath, dto.UUID)
+		dto.LocalURL = fmt.Sprintf("%s?file=%s&uuid=%s", loadBookFileURL, dto.NewFileName, dto.UUID)
+
+		err := bh.Service.UpdateFile(&dto)
+		if err != nil {
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusInternalServerError)
+			bh.logger.Errorf("error occurred while saving book into local store. err: %v.", err)
+			json.NewEncoder(w).Encode(JSON.Error{Msg: fmt.Sprintf("error occurred while saving book into local store. err: %v.", err)})
+			return
+		}
+		w.WriteHeader(http.StatusOK)
+		json.NewEncoder(w).Encode(JSON.Info{Msg: "File updated successfully"})
+	})
+}
+
 func (bh *bookHandler) LoadImage(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	w.Header().Set("Content-Type", "image/jpeg")
 
-	url := r.URL.Query().Get("url")
-	if url == "" {
+	format := r.URL.Query().Get("format")
+	if format == "" {
 		w.WriteHeader(http.StatusBadRequest)
-		bh.logger.Errorf("url can't be empty")
+		bh.logger.Errorf("format query can't be empty")
 		return
 	}
 
-	path := fmt.Sprintf("%s%s", bookImageStoragePath, url)
+	uuid := r.URL.Query().Get("uuid")
+	if uuid == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		bh.logger.Errorf("uuid can't be empty")
+		return
+	}
 
-	img, err := utils.GetImageFromLocalStore(path)
+	path := fmt.Sprintf("%s%s/", bookLocalStoragePath, uuid)
+
+	img, err := utils.GetImageFromLocalStore(path, utils.Format(format), utils.JPG)
 	if err != nil {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusInternalServerError)
@@ -283,4 +314,35 @@ func (bh *bookHandler) LoadImage(w http.ResponseWriter, r *http.Request, ps http
 	w.WriteHeader(http.StatusOK)
 	jpeg.Encode(w, *img, nil)
 
+}
+
+func (bh *bookHandler) UpdateImage(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	w.Header().Set("Content-Type", "image/jpeg")
+
+	uuid := r.URL.Query().Get("uuid")
+	if uuid == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		bh.logger.Errorf("uuid can't be empty")
+		return
+	}
+
+	path := fmt.Sprintf("%s%s/", bookLocalStoragePath, uuid)
+
+	img, err := jpeg.Decode(r.Body)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		bh.logger.Errorf("error occurred while updating book image. err: %v.", err)
+		json.NewEncoder(w).Encode(JSON.Error{Msg: fmt.Sprintf("error occurred while saving book into local store. err: %v.", err)})
+		return
+	}
+
+	err = bh.Service.SaveImage(path, &img)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		bh.logger.Errorf("error occurred while updating book image. err: %v.", err)
+		json.NewEncoder(w).Encode(JSON.Error{Msg: fmt.Sprintf("error occurred while saving book into local store. err: %v.", err)})
+		return
+	}
+
+	json.NewEncoder(w).Encode(JSON.Info{Msg: "Book image updated successfully"})
 }

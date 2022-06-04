@@ -1,7 +1,6 @@
 package http
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"github.com/julienschmidt/httprouter"
@@ -59,7 +58,7 @@ func (ah *authorHandler) GetAll(w http.ResponseWriter, r *http.Request, ps httpr
 		ah.logger.Debugf("error occurred while parsing offset. err: %v. Assigning '0' to offset", err)
 	}
 
-	authors, err := ah.Service.GetAll(context.Background(), limit, offset)
+	authors, err := ah.Service.GetAll(limit, offset)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(JSON.Error{Msg: fmt.Sprintf("error occurred while getting all authors. err: %v", err)})
@@ -88,7 +87,7 @@ func (ah *authorHandler) GetByUUID(w http.ResponseWriter, r *http.Request, ps ht
 		return
 	}
 
-	author, err := ah.Service.GetByUUID(context.Background(), uuid)
+	author, err := ah.Service.GetByUUID(uuid)
 	if err != nil {
 		w.WriteHeader(http.StatusNotFound)
 		json.NewEncoder(w).Encode(JSON.Error{Msg: fmt.Sprintf("error occurred while getting author from DB by UUID. err: %v", err)})
@@ -110,7 +109,7 @@ func (ah *authorHandler) Create(w http.ResponseWriter, r *http.Request, ps httpr
 		return
 	}
 
-	UUID, err := ah.Service.Create(context.Background(), createAuthorDTO)
+	UUID, err := ah.Service.Create(createAuthorDTO)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(JSON.Error{Msg: fmt.Sprintf("error occurred while creating author into DB. err: %v", err)})
@@ -138,7 +137,7 @@ func (ah *authorHandler) Delete(w http.ResponseWriter, r *http.Request, ps httpr
 		return
 	}
 
-	err = ah.Service.Delete(context.Background(), uuid)
+	err = ah.Service.Delete(uuid)
 	if err != nil {
 		w.WriteHeader(http.StatusNotFound)
 		json.NewEncoder(w).Encode(JSON.Error{Msg: fmt.Sprintf("error occurred while deleting author from DB. err: %v", err)})
@@ -166,7 +165,7 @@ func (ah *authorHandler) Update(w http.ResponseWriter, r *http.Request, ps httpr
 		return
 	}
 
-	err := ah.Service.Update(context.Background(), updateAuthorDTO)
+	err := ah.Service.Update(updateAuthorDTO)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(JSON.Error{Msg: fmt.Sprintf("error occurred while updating author into DB. err: %v", err)})
