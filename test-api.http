@@ -3,7 +3,7 @@
 #use GetAll methods with Query Params:
 #?sort_by=fieldName
 #?sort_order=order (asc is default)
-#?filter=fieldName1%3Aargument1%2Cargument2%7CfieldName2%3Aargument1%2Crgument2
+#?filter=fieldName1 %3A argument1 %2C argument2 %7C fieldName2%3Aargument1%2Crgument2
 #?limit=limitNum&page=PageNum
 
 #You can use all or only one and dont use any of query params. Example:

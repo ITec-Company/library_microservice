@@ -55,4 +55,3 @@ services:
             ]
         depends_on:
             - librarydb
-

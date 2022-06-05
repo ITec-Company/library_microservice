@@ -36,11 +36,11 @@ const (
 	updateAudioQuery = `UPDATE audio SET 
 			title = COALESCE(NULLIF($1, ''), title),
 			difficulty = (CASE WHEN ($2 = any(enum_range(difficulty))) THEN $2 ELSE difficulty END), 
-			direction_uuid = (CASE WHEN (EXISTS(SELECT uuid FROM direction where direction.uuid = $3)) THEN $3 ELSE COALESCE(NULLIF($3, 0), direction_uuid) END), 
+			direction_uuid = (CASE WHEN (EXISTS(SELECT uuid FROM direction where direction.uuid = $3)) THEN $3 ELSE direction_uuid END), 
 			rating = COALESCE(NULLIF($4, 0.0), rating), 
 			local_url = COALESCE(NULLIF($5, ''), local_url), 
 			language = COALESCE(NULLIF($6, ''), language), 
-			tags_uuids = (CASE WHEN (EXISTS(SELECT uuid FROM tag where tag.uuid = any($7))) THEN $7 ELSE COALESCE($7, tags_uuids) END),
+			tags_uuids = (CASE WHEN (EXISTS(SELECT uuid FROM tag where tag.uuid = any($7))) THEN $7 ELSE tags_uuids END),
 			download_count = COALESCE(NULLIF($8, 0), download_count)
 		WHERE uuid = $9`
 )

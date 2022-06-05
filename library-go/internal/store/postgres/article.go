@@ -89,15 +89,15 @@ const (
 
 	updateArticleQuery = `UPDATE article SET 
 			title = COALESCE(NULLIF($1, ''), title),  
-			direction_uuid = (CASE WHEN (EXISTS(SELECT uuid FROM direction where direction.uuid = $2)) THEN $2 ELSE COALESCE(NULLIF($2, 0), direction_uuid) END), 
-			author_uuid = (CASE WHEN (EXISTS(SELECT uuid FROM author where author.uuid = $3)) THEN $3 ELSE COALESCE(NULLIF($3, 0), author_uuid) END), 
+			direction_uuid = (CASE WHEN EXISTS(SELECT uuid FROM direction where direction.uuid = $2) THEN $2 ELSE direction_uuid END), 
+			author_uuid = (CASE WHEN (EXISTS(SELECT uuid FROM author where author.uuid = $3)) THEN $3 ELSE author_uuid END), 
 			difficulty = (CASE WHEN ($4 = any(enum_range(difficulty))) THEN $4 ELSE difficulty END), 
 			edition_date = (CASE WHEN ($5 != date('0001-01-01 00:00:00')) THEN $5 ELSE edition_date END),
 			rating = COALESCE(NULLIF($6, 0.0), rating), 
 			description = COALESCE(NULLIF($7, ''), description), 
 			local_url = COALESCE(NULLIF($8, ''), local_url), 
 			language = COALESCE(NULLIF($9, ''), language), 
-			tags_uuids = (CASE WHEN (EXISTS(SELECT uuid FROM tag where tag.uuid = any($10))) THEN $10 ELSE COALESCE($10, tags_uuids) END),
+			tags_uuids = (CASE WHEN (EXISTS(SELECT uuid FROM tag where tag.uuid = any($10))) THEN $10 ELSE tags_uuids END),
 			download_count = COALESCE(NULLIF($11, 0), download_count)
 		WHERE uuid = $12`
 )
