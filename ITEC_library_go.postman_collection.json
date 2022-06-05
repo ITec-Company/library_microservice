@@ -1,8 +1,10 @@
 {
 	"info": {
-		"_postman_id": "bc587cef-3c98-466d-b9af-e03a6156d3c5",
+		"_postman_id": "32786343-13a2-4734-a9d0-d3c6c1e26c8b",
 		"name": "ITEC_library_go",
-		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+		"description": "``` plaintext\n\nSort, filters and pagination:\nuse GetAll methods with Query Params:\n?sort_by=fieldName\n?sort_order=order (asc is default)\n?filter=fieldName1:argument1,argument2|fieldName2:argument1,rgument2\n?limit=limitNum&page=PageNum\nEndFragment\n\nYou can use all or only one and dont use any of query params. Example:\nGET articles?sort_by=edition_date&oreder_by=desc&filter=difficulty:middle*junior&limit=5&page=1\n\n\n```",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "18453668"
 	},
 	"item": [
 		{
@@ -21,7 +23,7 @@
 							"formdata": []
 						},
 						"url": {
-							"raw": "http://localhost:1000/article/9",
+							"raw": "http://localhost:1000/article/6",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -29,7 +31,7 @@
 							"port": "1000",
 							"path": [
 								"article",
-								"9"
+								"6"
 							]
 						}
 					},
@@ -41,47 +43,9 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:1000/articles",
-							"protocol": "http",
+							"raw": "ITEC_library_go",
 							"host": [
-								"localhost"
-							],
-							"port": "1000",
-							"path": [
-								"articles"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Load",
-					"protocolProfileBehavior": {
-						"disableBodyPruning": true
-					},
-					"request": {
-						"method": "GET",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\r\n    \"path\": \"../store/videos/1/middle/Yazyk_Go_Dlya_Nachinayuschikh_M_Zhashkevich.pdf\"\r\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "http://localhost:1000/load/article/1-middle-Yazyk_Go_Dlya_Nachinayuschikh_M_Zhashkevich.pdf",
-							"protocol": "http",
-							"host": [
-								"localhost"
-							],
-							"port": "1000",
-							"path": [
-								"load",
-								"article",
-								"1-middle-Yazyk_Go_Dlya_Nachinayuschikh_M_Zhashkevich.pdf"
+								"ITEC_library_go"
 							]
 						}
 					},
@@ -98,11 +62,11 @@
 								{
 									"key": "file",
 									"type": "file",
-									"src": "/C:/Users/kazbe/Desktop/Yazyk_Go_Dlya_Nachinayuschikh_M_Zhashkevich.pdf"
+									"src": "/C:/Users/kazbe/Desktop/author(1)-title(software_testing).docx"
 								},
 								{
 									"key": "title",
-									"value": "software testing",
+									"value": "article three",
 									"type": "text"
 								},
 								{
@@ -139,6 +103,11 @@
 									"key": "tags_uuids",
 									"value": "1,2",
 									"type": "text"
+								},
+								{
+									"key": "image",
+									"type": "file",
+									"src": "/C:/Users/kazbe/Desktop/test-image.jpg"
 								}
 							]
 						},
@@ -163,7 +132,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"uuid\": \"2\",\r\n    \"title\": \"asdasd-compose its all you need\",\r\n    \"direction_uuid\": \"1\",\r\n    \"difficulty\": \"middle\",\r\n    \"author_uuid\": \"1\",\r\n    \"edition_date\": \"2000-10-10T00:00:00Z\",\r\n    \"description\": \"description\",\r\n    \"url\": \"newURL\",\r\n    \"language\": \"rus\",\r\n    \"tags_uuids\": [\"1\", \"2\"],\r\n    \"download_count\": 5\r\n}",
+							"raw": "{\r\n    \"uuid\": \"5\",\r\n    \"title\": \"updated article\",\r\n    \"direction_uuid\": \"2\",\r\n    \"difficulty\": \"junior\",\r\n    \"author_uuid\": \"2\",\r\n    \"rating\": 3.3,\r\n    \"edition_date\": \"2000-10-10T00:00:00Z\",\r\n    \"description\": \"updated description\",\r\n    \"url\": \"newURL\",\r\n    \"language\": \"eng\",\r\n    \"tags_uuids\": [\"1\", \"4\"],\r\n    \"download_count\": 100\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -190,7 +159,7 @@
 						"method": "DELETE",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:1000/article/3",
+							"raw": "http://localhost:1000/article/5",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -198,7 +167,151 @@
 							"port": "1000",
 							"path": [
 								"article",
-								"3"
+								"5"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Load file",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"path\": \"../store/videos/1/middle/Yazyk_Go_Dlya_Nachinayuschikh_M_Zhashkevich.pdf\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:1000/file/article?file=author(1)-title(article_three).docx&uuid=6",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "1000",
+							"path": [
+								"file",
+								"article"
+							],
+							"query": [
+								{
+									"key": "file",
+									"value": "author(1)-title(article_three).docx"
+								},
+								{
+									"key": "uuid",
+									"value": "6"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update file",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "file",
+							"file": {
+								"src": "/C:/Users/kazbe/Desktop/author(1)asdasd-title(software_testing).doc"
+							}
+						},
+						"url": {
+							"raw": "http://localhost:1000/file/article?file=author(1)-title(article_three).docx&uuid=6",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "1000",
+							"path": [
+								"file",
+								"article"
+							],
+							"query": [
+								{
+									"key": "file",
+									"value": "author(1)-title(article_three).docx"
+								},
+								{
+									"key": "uuid",
+									"value": "6"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Load image",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:1000/image/article?format=original&uuid=6",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "1000",
+							"path": [
+								"image",
+								"article"
+							],
+							"query": [
+								{
+									"key": "format",
+									"value": "original"
+								},
+								{
+									"key": "uuid",
+									"value": "6"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update image",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "file",
+							"file": {
+								"src": "/C:/Users/kazbe/Desktop/test-image.jpg"
+							}
+						},
+						"url": {
+							"raw": "http://localhost:1000/image/article?format=original&uuid=6",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "1000",
+							"path": [
+								"image",
+								"article"
+							],
+							"query": [
+								{
+									"key": "format",
+									"value": "original"
+								},
+								{
+									"key": "uuid",
+									"value": "6"
+								}
 							]
 						}
 					},
@@ -255,7 +368,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"full_name\": \"ivan  ivan\"\r\n}",
+							"raw": "{\r\n    \"full_name\": \"author one\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -283,7 +396,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"uuid\": \"2\",\r\n    \"full_name\": \"vasya  ivan\"\r\n}",
+							"raw": "{\r\n    \"uuid\": \"1\",\r\n    \"full_name\": \"author after update\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -314,7 +427,7 @@
 							"raw": ""
 						},
 						"url": {
-							"raw": "http://localhost:1000/author/2",
+							"raw": "http://localhost:1000/author/3",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -322,7 +435,7 @@
 							"port": "1000",
 							"path": [
 								"author",
-								"2"
+								"3"
 							]
 						}
 					},
@@ -339,7 +452,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:1000/audio/13",
+							"raw": "http://localhost:1000/audio/1",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -347,7 +460,7 @@
 							"port": "1000",
 							"path": [
 								"audio",
-								"13"
+								"1"
 							]
 						}
 					},
@@ -373,39 +486,6 @@
 					"response": []
 				},
 				{
-					"name": "Load",
-					"protocolProfileBehavior": {
-						"disableBodyPruning": true
-					},
-					"request": {
-						"method": "GET",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\r\n    \"path\": \"../store/videos/1/middle/Yazyk_Go_Dlya_Nachinayuschikh_M_Zhashkevich.pdf\"\r\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "http://localhost:1000/load/audio/1-middle-Golang_Learning_program.docx",
-							"protocol": "http",
-							"host": [
-								"localhost"
-							],
-							"port": "1000",
-							"path": [
-								"load",
-								"audio",
-								"1-middle-Golang_Learning_program.docx"
-							]
-						}
-					},
-					"response": []
-				},
-				{
 					"name": "Create",
 					"request": {
 						"method": "POST",
@@ -416,7 +496,7 @@
 								{
 									"key": "file",
 									"type": "file",
-									"src": "/C:/Users/kazbe/Desktop/Golang_Learning_program.docx"
+									"src": "/C:/Users/kazbe/Desktop/sample-3s.mp3"
 								},
 								{
 									"key": "title",
@@ -466,7 +546,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"uuid\": \"3\",\r\n    \"title\": \"Java for dummies\",\r\n    \"direction_uuid\": \"1\",\r\n    \"difficulty\": \"junior\",\r\n    \"rating\": 5,\r\n    \"url\": \"newURL\",\r\n    \"language\": \"rus\",\r\n    \"tags_uuids\": [\"1\", \"4\"],\r\n    \"download_count\": 5\r\n}",
+							"raw": "{\r\n    \"uuid\": \"2\",\r\n    \"title\": \"updated audio\",\r\n    \"direction_uuid\": \"2\",\r\n    \"difficulty\": \"middle\",\r\n    \"rating\": 3.5,\r\n    \"url\": \"newURL\",\r\n    \"language\": \"eng\",\r\n    \"tags_uuids\": [\"1\", \"4\"],\r\n    \"download_count\": 100\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -493,7 +573,7 @@
 						"method": "DELETE",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:1000/audio/3",
+							"raw": "http://localhost:1000/audio/2",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -501,7 +581,85 @@
 							"port": "1000",
 							"path": [
 								"audio",
-								"3"
+								"2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Load file",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"path\": \"../store/videos/1/middle/Yazyk_Go_Dlya_Nachinayuschikh_M_Zhashkevich.pdf\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:1000/file/audio?file=title(software_testing).mp3&uuid=1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "1000",
+							"path": [
+								"file",
+								"audio"
+							],
+							"query": [
+								{
+									"key": "file",
+									"value": "title(software_testing).mp3"
+								},
+								{
+									"key": "uuid",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update file",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "file",
+							"file": {
+								"src": "/C:/Users/kazbe/Desktop/sample-3s.mp3"
+							}
+						},
+						"url": {
+							"raw": "http://localhost:1000/file/audio?file=title(software_testing).mp3&uuid=1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "1000",
+							"path": [
+								"file",
+								"audio"
+							],
+							"query": [
+								{
+									"key": "file",
+									"value": "title(software_testing).mp3"
+								},
+								{
+									"key": "uuid",
+									"value": "1"
+								}
 							]
 						}
 					},
@@ -518,7 +676,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:1000/book/9",
+							"raw": "http://localhost:1000/book/4",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -526,7 +684,7 @@
 							"port": "1000",
 							"path": [
 								"book",
-								"9"
+								"4"
 							]
 						}
 					},
@@ -552,39 +710,6 @@
 					"response": []
 				},
 				{
-					"name": "Load",
-					"protocolProfileBehavior": {
-						"disableBodyPruning": true
-					},
-					"request": {
-						"method": "GET",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\r\n    \"path\": \"../store/videos/1/middle/Yazyk_Go_Dlya_Nachinayuschikh_M_Zhashkevich.pdf\"\r\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "http://localhost:1000/load/book/1-middle-Yazyk_Go_Dlya_Nachinayuschikh_M_Zhashkevich (5).pdf",
-							"protocol": "http",
-							"host": [
-								"localhost"
-							],
-							"port": "1000",
-							"path": [
-								"load",
-								"book",
-								"1-middle-Yazyk_Go_Dlya_Nachinayuschikh_M_Zhashkevich (5).pdf"
-							]
-						}
-					},
-					"response": []
-				},
-				{
 					"name": "Create",
 					"request": {
 						"method": "POST",
@@ -595,7 +720,7 @@
 								{
 									"key": "file",
 									"type": "file",
-									"src": "/C:/Users/kazbe/Desktop/Yazyk_Go_Dlya_Nachinayuschikh_M_Zhashkevich (5).pdf"
+									"src": "/D:/Библиотека/Программирование/Software Testing - Base Course (Svyatoslav Kulikov) - 2nd edition.pdf"
 								},
 								{
 									"key": "title",
@@ -636,6 +761,11 @@
 									"key": "tags_uuids",
 									"value": "1,2",
 									"type": "text"
+								},
+								{
+									"key": "image",
+									"type": "file",
+									"src": "/C:/Users/kazbe/Desktop/test-image.jpg"
 								}
 							]
 						},
@@ -660,7 +790,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"uuid\": \"2\",\r\n    \"title\": \"asdasd-compose its all you need\",\r\n    \"direction_uuid\": \"1\",\r\n    \"author_uuid\": \"1\",\r\n    \"difficulty\": \"senior\",\r\n    \"edition_date\": \"2000-10-10T00:00:00Z\",\r\n    \"description\": \"description\",\r\n    \"url\": \"newURL\",\r\n    \"language\": \"rus\",\r\n    \"tags_uuids\": [\"1\", \"2\"],\r\n    \"download_count\": 5\r\n}",
+							"raw": "{\r\n    \"uuid\": \"2\",\r\n    \"title\": \"updated book\",\r\n    \"direction_uuid\": \"2\",\r\n    \"author_uuid\": \"2\",\r\n    \"difficulty\": \"junior\",\r\n    \"edition_date\": \"2000-10-10T00:00:00Z\",\r\n    \"description\": \"updated description\",\r\n    \"url\": \"newURL\",\r\n    \"rating\": 3.3,\r\n    \"language\": \"eng\",\r\n    \"tags_uuids\": [\"1\", \"4\"],\r\n    \"download_count\": 100\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -696,6 +826,150 @@
 							"path": [
 								"book",
 								"3"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Load file",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"path\": \"../store/videos/1/middle/Yazyk_Go_Dlya_Nachinayuschikh_M_Zhashkevich.pdf\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:1000/file/book?file=author(1)-title(software_testing).pdf&uuid=4",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "1000",
+							"path": [
+								"file",
+								"book"
+							],
+							"query": [
+								{
+									"key": "file",
+									"value": "author(1)-title(software_testing).pdf"
+								},
+								{
+									"key": "uuid",
+									"value": "4"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update file",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "file",
+							"file": {
+								"src": "/D:/Библиотека/Программирование/Software Testing - Base Course (Svyatoslav Kulikov) - 2nd edition.pdf"
+							}
+						},
+						"url": {
+							"raw": "http://localhost:1000/file/book?file=author(1)-title(software_testing).pdf&uuid=4",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "1000",
+							"path": [
+								"file",
+								"book"
+							],
+							"query": [
+								{
+									"key": "file",
+									"value": "author(1)-title(software_testing).pdf"
+								},
+								{
+									"key": "uuid",
+									"value": "4"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Load Image",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:1000/image/book?format=original&uuid=4",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "1000",
+							"path": [
+								"image",
+								"book"
+							],
+							"query": [
+								{
+									"key": "format",
+									"value": "original"
+								},
+								{
+									"key": "uuid",
+									"value": "4"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update image",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "file",
+							"file": {
+								"src": "/C:/Users/kazbe/Desktop/test-image.jpg"
+							}
+						},
+						"url": {
+							"raw": "http://localhost:1000/image/book?format=original&uuid=4",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "1000",
+							"path": [
+								"image",
+								"book"
+							],
+							"query": [
+								{
+									"key": "format",
+									"value": "original"
+								},
+								{
+									"key": "uuid",
+									"value": "4"
+								}
 							]
 						}
 					},
@@ -752,7 +1026,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"name\": \"java\"\r\n}",
+							"raw": "{\r\n    \"name\": \"blueprint\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -780,7 +1054,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"uuid\": \"3\",\r\n    \"name\": \"javascript\"\r\n}",
+							"raw": "{\r\n    \"uuid\": \"4\",\r\n    \"name\": \"javascript\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -807,7 +1081,7 @@
 						"method": "DELETE",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:1000/direction/3",
+							"raw": "http://localhost:1000/direction/4",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -815,7 +1089,7 @@
 							"port": "1000",
 							"path": [
 								"direction",
-								"3"
+								"4"
 							]
 						}
 					},
@@ -872,7 +1146,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"text\": \"some comments\",\r\n    \"full_name\": \"ivan\",\r\n    \"source\": \"book\",\r\n    \"literature_uuid\": \"3\"\r\n}",
+							"raw": "{\r\n    \"text\": \"some comments\",\r\n    \"full_name\": \"ivan\",\r\n    \"source\": \"book\",\r\n    \"literature_uuid\": \"1\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -900,7 +1174,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"uuid\": \"2\",\r\n    \"text\": \"new Comment\",\r\n    \"full_name\": \"olya\",\r\n    \"rating\": 5\r\n}",
+							"raw": "{\r\n    \"uuid\": \"1\",\r\n    \"text\": \"updated Comment\",\r\n    \"full_name\": \"updated Ivan\",\r\n    \"rating\": 3.3\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -927,7 +1201,7 @@
 						"method": "DELETE",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:1000/review/3",
+							"raw": "http://localhost:1000/review/2",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -935,7 +1209,7 @@
 							"port": "1000",
 							"path": [
 								"review",
-								"3"
+								"2"
 							]
 						}
 					},
@@ -972,14 +1246,15 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:1000/tags",
+							"raw": "http://localhost:1000/tags/",
 							"protocol": "http",
 							"host": [
 								"localhost"
 							],
 							"port": "1000",
 							"path": [
-								"tags"
+								"tags",
+								""
 							]
 						}
 					},
@@ -1012,7 +1287,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"name\": \"backend\"\r\n}",
+							"raw": "{\r\n    \"name\": \"newbies\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1099,7 +1374,7 @@
 							"formdata": []
 						},
 						"url": {
-							"raw": "http://localhost:1000/video/51",
+							"raw": "http://localhost:1000/video/1",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -1107,40 +1382,7 @@
 							"port": "1000",
 							"path": [
 								"video",
-								"51"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Load",
-					"protocolProfileBehavior": {
-						"disableBodyPruning": true
-					},
-					"request": {
-						"method": "GET",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\r\n    \"path\": \"../store/videos/1/middle/Yazyk_Go_Dlya_Nachinayuschikh_M_Zhashkevich.pdf\"\r\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "http://localhost:1000/load/video/1-middle-Yazyk_Go_Dlya_Nachinayuschikh_M_Zhashkevich.pdf",
-							"protocol": "http",
-							"host": [
-								"localhost"
-							],
-							"port": "1000",
-							"path": [
-								"load",
-								"video",
-								"1-middle-Yazyk_Go_Dlya_Nachinayuschikh_M_Zhashkevich.pdf"
+								"1"
 							]
 						}
 					},
@@ -1176,11 +1418,11 @@
 								{
 									"key": "file",
 									"type": "file",
-									"src": "/C:/Users/kazbe/Desktop/Yazyk_Go_Dlya_Nachinayuschikh_M_Zhashkevich.pdf"
+									"src": "/C:/Users/kazbe/Desktop/test_video.mp4"
 								},
 								{
 									"key": "title",
-									"value": "software testing",
+									"value": "video test two",
 									"type": "text"
 								},
 								{
@@ -1226,7 +1468,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"uuid\": \"2\",\r\n    \"title\": \"Java for us\",\r\n    \"direction_uuid\": \"0\",\r\n    \"rating\": 5,\r\n    \"difficulty\": \"senior\",\r\n    \"url\": \"newURL\",\r\n    \"language\": \"rus\",\r\n    \"tags_uuids\": [\"1\", \"2\"],\r\n    \"download_count\": 5\r\n}",
+							"raw": "{\r\n    \"uuid\": \"2\",\r\n    \"title\": \"updated video\",\r\n    \"direction_uuid\": \"2\",\r\n    \"rating\": 3.5,\r\n    \"difficulty\": \"junior\",\r\n    \"url\": \"newURL\",\r\n    \"language\": \"end\",\r\n    \"tags_uuids\": [\"1\", \"4\"],\r\n    \"download_count\": 100\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1253,7 +1495,7 @@
 						"method": "DELETE",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:1000/video/3",
+							"raw": "http://localhost:1000/video/1",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -1261,7 +1503,77 @@
 							"port": "1000",
 							"path": [
 								"video",
-								"3"
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Load file",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"path\": \"../store/videos/1/middle/Yazyk_Go_Dlya_Nachinayuschikh_M_Zhashkevich.pdf\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:1000/file/video?url=title(video_test_one).mp4",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "1000",
+							"path": [
+								"file",
+								"video"
+							],
+							"query": [
+								{
+									"key": "url",
+									"value": "title(video_test_one).mp4"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update file",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "file",
+							"file": {
+								"src": "/C:/Users/kazbe/Desktop/test_video.mp4"
+							}
+						},
+						"url": {
+							"raw": "http://localhost:1000/file/video?url=title(video_test_one).mp4",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "1000",
+							"path": [
+								"file",
+								"video"
+							],
+							"query": [
+								{
+									"key": "url",
+									"value": "title(video_test_one).mp4"
+								}
 							]
 						}
 					},
