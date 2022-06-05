@@ -26,5 +26,7 @@ GET http://localhost:1000/books?limit=5&page=2
 Content-Type: application/json
 
 // read article in browser
+// video ??
+// rating function to article, book, video, audio, review
 // query refactor    CREATE (look at book create Storage), UPDATE ?
 // tests

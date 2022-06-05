@@ -39,7 +39,7 @@ const (
 	updateReviewQuery = `UPDATE review SET 
 			text = COALESCE(NULLIF($1, ''), text),
 			full_name = COALESCE(NULLIF($2, ''), full_name),
-			rating = COALESCE(NULLIF($3, 0), rating)
+			rating = COALESCE(NULLIF($3, 0.0), rating)
 		WHERE uuid = $4`
 )
 
