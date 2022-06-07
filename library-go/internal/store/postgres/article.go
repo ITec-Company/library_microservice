@@ -62,12 +62,11 @@ const (
                      author_uuid,
                      difficulty,
                      edition_date,
-                     rating, 
                      description,
                      local_url, 
+                     web_url,
                      language, 
                      tags_uuids, 
-                     download_count,
                      image_url
 				) SELECT 
 				      $1, 
@@ -75,13 +74,12 @@ const (
 				      $3, 
 				      $4, 
 				      $5, 
-				      $6, 
-				      $7, 
-				      $8 || (SELECT last_value from article_uuid_seq), 
+				      $6,  
+				      $7 || (SELECT last_value from article_uuid_seq), 
+				      $8, 
 				      $9, 
-				      $10, 
-				      $11, 
-				      $12 || (SELECT last_value from article_uuid_seq)
+				      $10,
+				      $11 || (SELECT last_value from article_uuid_seq)
 				WHERE EXISTS(SELECT uuid FROM author where $3 = author.uuid) AND
 				EXISTS(SELECT uuid FROM direction where $2 = direction.uuid) AND
 			    EXISTS(SELECT uuid FROM tag where tag.uuid = any($10)) RETURNING article.uuid`
@@ -93,13 +91,26 @@ const (
 			author_uuid = (CASE WHEN (EXISTS(SELECT uuid FROM author where author.uuid = $3)) THEN $3 ELSE author_uuid END), 
 			difficulty = (CASE WHEN ($4 = any(enum_range(difficulty))) THEN $4 ELSE difficulty END), 
 			edition_date = (CASE WHEN ($5 != date('0001-01-01 00:00:00')) THEN $5 ELSE edition_date END),
-			rating = COALESCE(NULLIF($6, 0.0), rating), 
-			description = COALESCE(NULLIF($7, ''), description), 
-			local_url = COALESCE(NULLIF($8, ''), local_url), 
+			description = COALESCE(NULLIF($6, ''), description), 
+			local_url = COALESCE(NULLIF($7, ''), local_url), 
+			web_url = COALESCE(NULLIF($8, ''), web_url), 
 			language = COALESCE(NULLIF($9, ''), language), 
-			tags_uuids = (CASE WHEN (EXISTS(SELECT uuid FROM tag where tag.uuid = any($10))) THEN $10 ELSE tags_uuids END),
-			download_count = COALESCE(NULLIF($11, 0), download_count)
-		WHERE uuid = $12`
+			tags_uuids = (CASE WHEN (EXISTS(SELECT uuid FROM tag where tag.uuid = any($10))) THEN $10 ELSE tags_uuids END)
+		WHERE uuid = $11`
+
+	rateArticleQuery = `WITH grades AS (
+   		 SELECT avg((select avg(a) from unnest(array_append(all_grades, $1)) as a)) AS avg
+   		 FROM article
+		)
+		UPDATE article SET
+    	    all_grades = (CASE WHEN (0.0 < $1 AND $1 < 5.1) THEN array_append(all_grades, $1) ELSE all_grades END),
+    	    rating = (CASE WHEN (0.0 < $1 AND $1 < 5.1) THEN grades.avg  ELSE rating END)
+		FROM grades
+		WHERE uuid = $2`
+
+	articleDownloadCountUpQuery = `UPDATE article SET
+			download_count = (download_count + 1)
+			WHERE uuid = $1`
 )
 
 type articleStorage struct {
@@ -290,12 +301,11 @@ func (as *articleStorage) Create(articleCreateDTO *domain.CreateArticleDTO) (str
 		articleCreateDTO.AuthorUUID,
 		articleCreateDTO.Difficulty,
 		articleCreateDTO.EditionDate,
-		0,
 		articleCreateDTO.Description,
 		articleCreateDTO.LocalURL,
+		articleCreateDTO.WebURL,
 		articleCreateDTO.Language,
 		pq.Array(articleCreateDTO.TagsUUIDs),
-		0,
 		articleCreateDTO.ImageURL,
 	)
 
@@ -351,7 +361,6 @@ func (as *articleStorage) Update(articleUpdateDTO *domain.UpdateArticleDTO) erro
 		articleUpdateDTO.AuthorUUID = "0"
 	}
 
-	as.logger.Errorf("%v", articleUpdateDTO)
 	tx, err := as.db.Begin()
 	if err != nil {
 		as.logger.Errorf("error occurred while creating transaction. err: %v", err)
@@ -364,12 +373,11 @@ func (as *articleStorage) Update(articleUpdateDTO *domain.UpdateArticleDTO) erro
 		articleUpdateDTO.AuthorUUID,
 		articleUpdateDTO.Difficulty,
 		articleUpdateDTO.EditionDate,
-		articleUpdateDTO.Rating,
 		articleUpdateDTO.Description,
 		articleUpdateDTO.LocalURL,
+		articleUpdateDTO.WebURL,
 		articleUpdateDTO.Language,
 		pq.Array(articleUpdateDTO.TagsUUIDs),
-		articleUpdateDTO.DownloadCount,
 		articleUpdateDTO.UUID,
 	)
 	if err != nil {
@@ -390,6 +398,71 @@ func (as *articleStorage) Update(articleUpdateDTO *domain.UpdateArticleDTO) erro
 	}
 
 	as.logger.Infof("article with uuid %s was updated.", articleUpdateDTO.UUID)
+
+	return tx.Commit()
+}
+
+func (as *articleStorage) Rate(UUID string, rating float32) error {
+	tx, err := as.db.Begin()
+	if err != nil {
+		as.logger.Errorf("error occurred while creating transaction. err: %v", err)
+		return err
+	}
+
+	result, err := tx.Exec(rateArticleQuery,
+		rating,
+		UUID,
+	)
+	if err != nil {
+		tx.Rollback()
+		as.logger.Errorf("error occurred while rating article. err: %v", err)
+		return err
+	}
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		tx.Rollback()
+		as.logger.Errorf("error occurred while raing article (getting affected rows). err: %v", err)
+		return err
+	}
+	if rowsAffected < 1 {
+		tx.Rollback()
+		as.logger.Errorf("error occurred while raing article. err: %v.", ErrNoRowsAffected)
+		return ErrNoRowsAffected
+	}
+
+	as.logger.Infof("article with uuid %s was rated.", UUID)
+
+	return tx.Commit()
+}
+
+func (as *articleStorage) DownloadCountUp(UUID string) error {
+	tx, err := as.db.Begin()
+	if err != nil {
+		as.logger.Errorf("error occurred while creating transaction. err: %v", err)
+		return err
+	}
+
+	result, err := tx.Exec(articleDownloadCountUpQuery,
+		UUID,
+	)
+	if err != nil {
+		tx.Rollback()
+		as.logger.Errorf("error occurred while rating article. err: %v", err)
+		return err
+	}
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		tx.Rollback()
+		as.logger.Errorf("error occurred while raing article (getting affected rows). err: %v", err)
+		return err
+	}
+	if rowsAffected < 1 {
+		tx.Rollback()
+		as.logger.Errorf("error occurred while raing article. err: %v.", ErrNoRowsAffected)
+		return ErrNoRowsAffected
+	}
+
+	as.logger.Infof("article with uuid %s was rated.", UUID)
 
 	return tx.Commit()
 }

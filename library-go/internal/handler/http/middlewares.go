@@ -51,6 +51,7 @@ func (m *Middleware) createArticle(next http.Handler) httprouter.Handle {
 			"direction_uuid": "text",
 			"author_uuid":    "text",
 			"difficulty":     "text",
+			"web_url":        "text",
 			"edition_date":   "text",
 			"description":    "text",
 			"language":       "text",
@@ -287,6 +288,7 @@ func (m *Middleware) createVideo(next http.Handler) httprouter.Handle {
 			"title":          "text",
 			"direction_uuid": "text",
 			"difficulty":     "text",
+			"web_url":        "text",
 			"language":       "text",
 			"tags_uuids":     "text",
 		}

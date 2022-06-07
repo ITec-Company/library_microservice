@@ -19,6 +19,7 @@ const (
 	createReviewURL    = "/review"
 	deleteReviewURL    = "/review/:uuid"
 	updateReviewURL    = "/review"
+	rateReviewUrl      = "/rate/review"
 )
 
 type reviewHandler struct {
@@ -41,6 +42,7 @@ func (rh *reviewHandler) Register(router *httprouter.Router) {
 	router.POST(createReviewURL, rh.Create)
 	router.DELETE(deleteReviewURL, rh.Delete)
 	router.PUT(updateReviewURL, rh.Update)
+	router.PUT(rateReviewUrl, rh.Rate)
 }
 
 func (rh *reviewHandler) GetAll(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
@@ -173,4 +175,40 @@ func (rh *reviewHandler) Update(w http.ResponseWriter, r *http.Request, ps httpr
 
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(JSON.Info{Msg: "Review updated successfully"})
+}
+
+func (rh *reviewHandler) Rate(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	w.Header().Set("Content-Type", "application/json")
+
+	ratingStr := r.URL.Query().Get("rating")
+	if ratingStr == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		rh.logger.Errorf("rating query can't be empty")
+		return
+	}
+	rating, err := strconv.ParseFloat(ratingStr, 32)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		rh.logger.Errorf("error occurred while parsing rating. Should be float32. err: %v.", err)
+		json.NewEncoder(w).Encode(JSON.Error{Msg: fmt.Sprintf("error occurred while parsing rating. Should be float32. err: %v.", err)})
+		return
+	}
+
+	uuid := r.URL.Query().Get("uuid")
+	if uuid == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		rh.logger.Errorf("uuid can't be empty")
+		return
+	}
+
+	err = rh.Service.Rate(uuid, float32(rating))
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		rh.logger.Errorf("error occurred while rating review image. err: %v.", err)
+		json.NewEncoder(w).Encode(JSON.Error{Msg: fmt.Sprintf("error occurred while rating review into local store. err: %v.", err)})
+		return
+	}
+
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(JSON.Info{Msg: fmt.Sprintf("Review rated successfully. UUID: %s", uuid)})
 }

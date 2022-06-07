@@ -88,3 +88,11 @@ func (s *bookService) SaveImage(path string, image *image.Image) error {
 func (s *bookService) UpdateImage(path string, image *image.Image) error {
 	return utils.SaveImage(image, path)
 }
+
+func (s *bookService) Rate(UUID string, rating float32) error {
+	return s.storage.Rate(UUID, rating)
+}
+
+func (s *bookService) DownloadCountUp(UUID string) error {
+	return s.storage.DownloadCountUp(UUID)
+}

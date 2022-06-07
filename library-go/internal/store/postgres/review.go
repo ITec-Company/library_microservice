@@ -38,9 +38,18 @@ const (
 	deleteReviewQuery = `DELETE FROM review WHERE uuid = $1`
 	updateReviewQuery = `UPDATE review SET 
 			text = COALESCE(NULLIF($1, ''), text),
-			full_name = COALESCE(NULLIF($2, ''), full_name),
-			rating = COALESCE(NULLIF($3, 0.0), rating)
-		WHERE uuid = $4`
+			full_name = COALESCE(NULLIF($2, ''), full_name)
+		WHERE uuid = $3`
+
+	rateReviewQuery = `WITH grades AS (
+   		 SELECT avg((select avg(a) from unnest(array_append(all_grades, $1)) as a)) AS avg
+   		 FROM review
+		)
+		UPDATE review SET
+    	    all_grades = (CASE WHEN (0.0 < $1 AND $1 < 5.1) THEN array_append(all_grades, $1) ELSE all_grades END),
+    	    rating = (CASE WHEN (0.0 < $1 AND $1 < 5.1) THEN grades.avg  ELSE rating END)
+		FROM grades
+		WHERE uuid = $2`
 )
 
 type reviewStorage struct {
@@ -180,7 +189,6 @@ func (rs *reviewStorage) Update(reviewUpdateDTO *domain.UpdateReviewDTO) error {
 	result, err := tx.Exec(updateReviewQuery,
 		reviewUpdateDTO.Text,
 		reviewUpdateDTO.FullName,
-		reviewUpdateDTO.Rating,
 		reviewUpdateDTO.UUID,
 	)
 	if err != nil {
@@ -201,6 +209,39 @@ func (rs *reviewStorage) Update(reviewUpdateDTO *domain.UpdateReviewDTO) error {
 	}
 
 	rs.logger.Infof("Review with uuid %s was updated.", reviewUpdateDTO.UUID)
+
+	return tx.Commit()
+}
+
+func (rs *reviewStorage) Rate(UUID string, rating float32) error {
+	tx, err := rs.db.Begin()
+	if err != nil {
+		rs.logger.Errorf("error occurred while creating transaction. err: %v", err)
+		return err
+	}
+
+	result, err := tx.Exec(rateReviewQuery,
+		rating,
+		UUID,
+	)
+	if err != nil {
+		tx.Rollback()
+		rs.logger.Errorf("error occurred while rating review. err: %v", err)
+		return err
+	}
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		tx.Rollback()
+		rs.logger.Errorf("error occurred while raing review (getting affected rows). err: %v", err)
+		return err
+	}
+	if rowsAffected < 1 {
+		tx.Rollback()
+		rs.logger.Errorf("error occurred while raing review. err: %v.", ErrNoRowsAffected)
+		return ErrNoRowsAffected
+	}
+
+	rs.logger.Infof("review with uuid %s was rated.", UUID)
 
 	return tx.Commit()
 }

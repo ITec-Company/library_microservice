@@ -23,7 +23,7 @@
 							"formdata": []
 						},
 						"url": {
-							"raw": "http://localhost:1000/article/6",
+							"raw": "http://localhost:1000/article/4",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -31,7 +31,7 @@
 							"port": "1000",
 							"path": [
 								"article",
-								"6"
+								"4"
 							]
 						}
 					},
@@ -43,9 +43,14 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "ITEC_library_go",
+							"raw": "http://localhost:1000/articles",
+							"protocol": "http",
 							"host": [
-								"ITEC_library_go"
+								"localhost"
+							],
+							"port": "1000",
+							"path": [
+								"articles"
 							]
 						}
 					},
@@ -62,7 +67,7 @@
 								{
 									"key": "file",
 									"type": "file",
-									"src": "/C:/Users/kazbe/Desktop/author(1)-title(software_testing).docx"
+									"src": "/C:/Users/kazbe/Desktop/Golang_Learning_program.docx"
 								},
 								{
 									"key": "title",
@@ -108,6 +113,11 @@
 									"key": "image",
 									"type": "file",
 									"src": "/C:/Users/kazbe/Desktop/test-image.jpg"
+								},
+								{
+									"key": "web_url",
+									"value": "some url",
+									"type": "text"
 								}
 							]
 						},
@@ -132,7 +142,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"uuid\": \"5\",\r\n    \"title\": \"updated article\",\r\n    \"direction_uuid\": \"2\",\r\n    \"difficulty\": \"junior\",\r\n    \"author_uuid\": \"2\",\r\n    \"rating\": 3.3,\r\n    \"edition_date\": \"2000-10-10T00:00:00Z\",\r\n    \"description\": \"updated description\",\r\n    \"url\": \"newURL\",\r\n    \"language\": \"eng\",\r\n    \"tags_uuids\": [\"1\", \"4\"],\r\n    \"download_count\": 100\r\n}",
+							"raw": "{\r\n    \"uuid\": \"4\",\r\n    \"title\": \"updated article\",\r\n    \"direction_uuid\": \"1\",\r\n    \"difficulty\": \"junior\",\r\n    \"author_uuid\": \"2\",\r\n    \"edition_date\": \"2000-10-10T00:00:00Z\",\r\n    \"web_url\": \"updated url\",\r\n    \"description\": \"updated description\",\r\n    \"language\": \"eng\",\r\n    \"tags_uuids\": [\"1\", \"4\"]\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -159,7 +169,7 @@
 						"method": "DELETE",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:1000/article/5",
+							"raw": "http://localhost:1000/article/8",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -167,7 +177,7 @@
 							"port": "1000",
 							"path": [
 								"article",
-								"5"
+								"8"
 							]
 						}
 					},
@@ -191,7 +201,7 @@
 							}
 						},
 						"url": {
-							"raw": "http://localhost:1000/file/article?file=author(1)-title(article_three).docx&uuid=6",
+							"raw": "http://localhost:1000/file/article?file=author(1)-title(article_three).docx&uuid=1",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -208,7 +218,7 @@
 								},
 								{
 									"key": "uuid",
-									"value": "6"
+									"value": "1"
 								}
 							]
 						}
@@ -311,6 +321,36 @@
 								{
 									"key": "uuid",
 									"value": "6"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Rate",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:1000/rate/article?uuid=1&rating=4.1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "1000",
+							"path": [
+								"rate",
+								"article"
+							],
+							"query": [
+								{
+									"key": "uuid",
+									"value": "1"
+								},
+								{
+									"key": "rating",
+									"value": "4.1"
 								}
 							]
 						}
@@ -496,7 +536,7 @@
 								{
 									"key": "file",
 									"type": "file",
-									"src": "/C:/Users/kazbe/Desktop/sample-3s.mp3"
+									"src": "/C:/Users/kazbe/Desktop/title(software_testing).mp3"
 								},
 								{
 									"key": "title",
@@ -546,7 +586,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"uuid\": \"2\",\r\n    \"title\": \"updated audio\",\r\n    \"direction_uuid\": \"2\",\r\n    \"difficulty\": \"middle\",\r\n    \"rating\": 3.5,\r\n    \"url\": \"newURL\",\r\n    \"language\": \"eng\",\r\n    \"tags_uuids\": [\"1\", \"4\"],\r\n    \"download_count\": 100\r\n}",
+							"raw": "{\r\n    \"uuid\": \"1\",\r\n    \"title\": \"updated audio\",\r\n    \"direction_uuid\": \"2\",\r\n    \"difficulty\": \"middle\",\r\n    \"language\": \"eng\",\r\n    \"tags_uuids\": [\"1\", \"4\"]\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -664,6 +704,36 @@
 						}
 					},
 					"response": []
+				},
+				{
+					"name": "Rate",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:1000/rate/audio?uuid=1&rating=1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "1000",
+							"path": [
+								"rate",
+								"audio"
+							],
+							"query": [
+								{
+									"key": "uuid",
+									"value": "1"
+								},
+								{
+									"key": "rating",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
 				}
 			]
 		},
@@ -676,7 +746,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:1000/book/4",
+							"raw": "http://localhost:1000/book/1",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -684,7 +754,7 @@
 							"port": "1000",
 							"path": [
 								"book",
-								"4"
+								"1"
 							]
 						}
 					},
@@ -790,7 +860,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"uuid\": \"2\",\r\n    \"title\": \"updated book\",\r\n    \"direction_uuid\": \"2\",\r\n    \"author_uuid\": \"2\",\r\n    \"difficulty\": \"junior\",\r\n    \"edition_date\": \"2000-10-10T00:00:00Z\",\r\n    \"description\": \"updated description\",\r\n    \"url\": \"newURL\",\r\n    \"rating\": 3.3,\r\n    \"language\": \"eng\",\r\n    \"tags_uuids\": [\"1\", \"4\"],\r\n    \"download_count\": 100\r\n}",
+							"raw": "{\r\n    \"uuid\": \"1\",\r\n    \"title\": \"updated book\",\r\n    \"direction_uuid\": \"2\",\r\n    \"author_uuid\": \"2\",\r\n    \"difficulty\": \"junior\",\r\n    \"edition_date\": \"2000-10-10T00:00:00Z\",\r\n    \"description\": \"updated description\",\r\n    \"language\": \"eng\",\r\n    \"tags_uuids\": [\"1\", \"4\"]\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -849,7 +919,7 @@
 							}
 						},
 						"url": {
-							"raw": "http://localhost:1000/file/book?file=author(1)-title(software_testing).pdf&uuid=4",
+							"raw": "http://localhost:1000/file/book?file=author(1)-title(software_testing).pdf&uuid=1",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -866,7 +936,7 @@
 								},
 								{
 									"key": "uuid",
-									"value": "4"
+									"value": "1"
 								}
 							]
 						}
@@ -969,6 +1039,36 @@
 								{
 									"key": "uuid",
 									"value": "4"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Rate",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:1000/rate/book?uuid=1&rating=2",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "1000",
+							"path": [
+								"rate",
+								"book"
+							],
+							"query": [
+								{
+									"key": "uuid",
+									"value": "1"
+								},
+								{
+									"key": "rating",
+									"value": "2"
 								}
 							]
 						}
@@ -1214,6 +1314,36 @@
 						}
 					},
 					"response": []
+				},
+				{
+					"name": "Rate",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:1000/rate/review?uuid=1&rating=3",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "1000",
+							"path": [
+								"rate",
+								"review"
+							],
+							"query": [
+								{
+									"key": "uuid",
+									"value": "1"
+								},
+								{
+									"key": "rating",
+									"value": "3"
+								}
+							]
+						}
+					},
+					"response": []
 				}
 			]
 		},
@@ -1374,7 +1504,7 @@
 							"formdata": []
 						},
 						"url": {
-							"raw": "http://localhost:1000/video/1",
+							"raw": "http://localhost:1000/video/4",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -1382,7 +1512,7 @@
 							"port": "1000",
 							"path": [
 								"video",
-								"1"
+								"4"
 							]
 						}
 					},
@@ -1444,6 +1574,11 @@
 									"key": "tags_uuids",
 									"value": "1,2",
 									"type": "text"
+								},
+								{
+									"key": "web_url",
+									"value": "some_url",
+									"type": "text"
 								}
 							]
 						},
@@ -1468,7 +1603,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"uuid\": \"2\",\r\n    \"title\": \"updated video\",\r\n    \"direction_uuid\": \"2\",\r\n    \"rating\": 3.5,\r\n    \"difficulty\": \"junior\",\r\n    \"url\": \"newURL\",\r\n    \"language\": \"end\",\r\n    \"tags_uuids\": [\"1\", \"4\"],\r\n    \"download_count\": 100\r\n}",
+							"raw": "{\r\n    \"uuid\": \"4\",\r\n    \"title\": \"updated video\",\r\n    \"direction_uuid\": \"2\",\r\n    \"difficulty\": \"junior\",\r\n    \"language\": \"end\",\r\n    \"web_url\": \"updated url\",\r\n    \"tags_uuids\": [\"1\", \"4\"]\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1573,6 +1708,36 @@
 								{
 									"key": "url",
 									"value": "title(video_test_one).mp4"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Rate",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:1000/rate/video?uuid=1&rating=3",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "1000",
+							"path": [
+								"rate",
+								"video"
+							],
+							"query": [
+								{
+									"key": "uuid",
+									"value": "1"
+								},
+								{
+									"key": "rating",
+									"value": "3"
 								}
 							]
 						}

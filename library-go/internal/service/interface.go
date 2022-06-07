@@ -21,6 +21,8 @@ type ArticleService interface {
 	LoadImage(path string, format utils.Format, extension utils.Extension) (*image.Image, error)
 	SaveImage(path string, image *image.Image) error
 	UpdateImage(path string, image *image.Image) error
+	Rate(UUID string, rating float32) error
+	DownloadCountUp(UUID string) error
 }
 
 type AudioService interface {
@@ -32,6 +34,8 @@ type AudioService interface {
 	LoadFile(path string) ([]byte, error)
 	SaveFile(path, fileName string, file io.Reader) error
 	UpdateFile(dto *domain.UpdateAudioFileDTO) error
+	Rate(UUID string, rating float32) error
+	DownloadCountUp(UUID string) error
 }
 
 type AuthorService interface {
@@ -54,6 +58,8 @@ type BookService interface {
 	LoadImage(path string, format utils.Format, extension utils.Extension) (*image.Image, error)
 	SaveImage(path string, image *image.Image) error
 	UpdateImage(path string, image *image.Image) error
+	Rate(UUID string, rating float32) error
+	DownloadCountUp(UUID string) error
 }
 
 type DirectionService interface {
@@ -70,6 +76,7 @@ type ReviewService interface {
 	Delete(UUID string) error
 	Create(review *domain.CreateReviewDTO) (string, error)
 	Update(review *domain.UpdateReviewDTO) error
+	Rate(UUID string, rating float32) error
 }
 
 type TagService interface {
@@ -90,4 +97,6 @@ type VideoService interface {
 	LoadFile(path string) ([]byte, error)
 	SaveFile(path, fileName string, file io.Reader) error
 	UpdateFile(dto *domain.UpdateVideoFileDTO) error
+	Rate(UUID string, rating float32) error
+	DownloadCountUp(UUID string) error
 }

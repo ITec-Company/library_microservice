@@ -10,6 +10,8 @@ type ArticleStorage interface {
 	Create(article *domain.CreateArticleDTO) (string, error)
 	Delete(UUID string) error
 	Update(article *domain.UpdateArticleDTO) error
+	Rate(UUID string, rating float32) error
+	DownloadCountUp(UUID string) error
 }
 
 type AudioStorage interface {
@@ -18,6 +20,8 @@ type AudioStorage interface {
 	Create(audio *domain.CreateAudioDTO) (string, error)
 	Delete(UUID string) error
 	Update(audio *domain.UpdateAudioDTO) error
+	Rate(UUID string, rating float32) error
+	DownloadCountUp(UUID string) error
 }
 
 type AuthorStorage interface {
@@ -34,6 +38,8 @@ type BookStorage interface {
 	Create(book *domain.CreateBookDTO) (string, error)
 	Delete(UUID string) error
 	Update(book *domain.UpdateBookDTO) error
+	Rate(UUID string, rating float32) error
+	DownloadCountUp(UUID string) error
 }
 
 type DirectionStorage interface {
@@ -50,6 +56,7 @@ type ReviewStorage interface {
 	Create(review *domain.CreateReviewDTO) (string, error)
 	Delete(UUID string) error
 	Update(review *domain.UpdateReviewDTO) error
+	Rate(UUID string, rating float32) error
 }
 
 type TagStorage interface {
@@ -67,4 +74,6 @@ type VideoStorage interface {
 	Create(video *domain.CreateVideoDTO) (string, error)
 	Delete(UUID string) error
 	Update(video *domain.UpdateVideoDTO) error
+	Rate(UUID string, rating float32) error
+	DownloadCountUp(UUID string) error
 }

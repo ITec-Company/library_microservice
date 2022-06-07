@@ -30,6 +30,7 @@ const (
 	updateArticleFileURL  = "/file/article"
 	loadArticleImageURL   = "/image/article"
 	updateArticleImageURL = "/image/article"
+	rateArticleUrl        = "/rate/article"
 
 	articleLocalStoragePath = "../store/articles/"
 )
@@ -58,6 +59,7 @@ func (ah *articleHandler) Register(router *httprouter.Router) {
 	router.PUT(updateArticleFileURL, ah.Middleware.updateArticleFile(ah.UpdateFile()))
 	router.GET(loadArticleImageURL, ah.LoadImage)
 	router.PUT(updateArticleImageURL, ah.UpdateImage)
+	router.PUT(rateArticleUrl, ah.Rate)
 }
 
 func (ah *articleHandler) GetAll() http.HandlerFunc {
@@ -128,6 +130,7 @@ func (ah *articleHandler) Create() http.Handler {
 		createArticleDTO.Language = data["language"].(string)
 		createArticleDTO.TagsUUIDs = strings.Split(data["tags_uuids"].(string), ",")
 		fileName := data["fileName"].(string)
+		createArticleDTO.WebURL = data["web_url"].(string)
 		createArticleDTO.LocalURL = fmt.Sprintf("%s?file=%s&uuid=", loadArticleFileURL, fileName)
 		createArticleDTO.ImageURL = fmt.Sprintf("%s?format=%s&uuid=", loadArticleImageURL, string(utils.FormatOriginal))
 
@@ -238,6 +241,15 @@ func (ah *articleHandler) LoadFile(w http.ResponseWriter, r *http.Request, ps ht
 		return
 	}
 
+	err := ah.Service.DownloadCountUp(uuid)
+	if err != nil {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusInternalServerError)
+		ah.logger.Errorf("error occurred while downloading (DB ping to increase dowload count). err: %v", err)
+		json.NewEncoder(w).Encode(JSON.Error{Msg: fmt.Sprintf("error occurred while downloading (DB ping to increase dowload count). err: %v", err)})
+		return
+	}
+
 	path := fmt.Sprintf("%s%s/%s", articleLocalStoragePath, uuid, file)
 
 	w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=%s", file))
@@ -333,7 +345,7 @@ func (ah *articleHandler) UpdateImage(w http.ResponseWriter, r *http.Request, ps
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		ah.logger.Errorf("error occurred while updating article image. err: %v.", err)
-		json.NewEncoder(w).Encode(JSON.Error{Msg: fmt.Sprintf("error occurred while saving book into local store. err: %v.", err)})
+		json.NewEncoder(w).Encode(JSON.Error{Msg: fmt.Sprintf("error occurred while saving article into local store. err: %v.", err)})
 		return
 	}
 
@@ -341,9 +353,45 @@ func (ah *articleHandler) UpdateImage(w http.ResponseWriter, r *http.Request, ps
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		ah.logger.Errorf("error occurred while updating article image. err: %v.", err)
-		json.NewEncoder(w).Encode(JSON.Error{Msg: fmt.Sprintf("error occurred while saving book into local store. err: %v.", err)})
+		json.NewEncoder(w).Encode(JSON.Error{Msg: fmt.Sprintf("error occurred while saving article into local store. err: %v.", err)})
 		return
 	}
 
 	json.NewEncoder(w).Encode(JSON.Info{Msg: "Article image updated successfully"})
+}
+
+func (ah *articleHandler) Rate(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	w.Header().Set("Content-Type", "application/json")
+
+	ratingStr := r.URL.Query().Get("rating")
+	if ratingStr == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		ah.logger.Errorf("rating query can't be empty")
+		return
+	}
+	rating, err := strconv.ParseFloat(ratingStr, 32)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		ah.logger.Errorf("error occurred while parsing rating. Should be float32. err: %v.", err)
+		json.NewEncoder(w).Encode(JSON.Error{Msg: fmt.Sprintf("error occurred while parsing rating. Should be float32. err: %v.", err)})
+		return
+	}
+
+	uuid := r.URL.Query().Get("uuid")
+	if uuid == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		ah.logger.Errorf("uuid can't be empty")
+		return
+	}
+
+	err = ah.Service.Rate(uuid, float32(rating))
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		ah.logger.Errorf("error occurred while rating article image. err: %v.", err)
+		json.NewEncoder(w).Encode(JSON.Error{Msg: fmt.Sprintf("error occurred while rating article into local store. err: %v.", err)})
+		return
+	}
+
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(JSON.Info{Msg: fmt.Sprintf("Article rated successfully. UUID: %s", uuid)})
 }

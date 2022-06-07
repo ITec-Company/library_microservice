@@ -18,4 +18,5 @@ store/articles/
 store/books/
 store/audios/
 store/videos/
-database/postgres/data/
+database/postgres/data
+/database/postgres/data/

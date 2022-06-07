@@ -17,32 +17,41 @@ const (
                      title, 
                      difficulty,
                      direction_uuid, 
-                     rating, 
                      local_url, 
                      language, 
-                     tags_uuids, 
-                     download_count
+                     tags_uuids
 				) SELECT 
 				      $1, 
 				      $2, 
 				      $3, 
-				      $4, 
-				      $5 || (SELECT last_value from audio_uuid_seq), 
-				      $6, 
-				      $7, 
-				      $8 
+				      $4 || (SELECT last_value from audio_uuid_seq), 
+				      $5, 
+				      $6
 				WHERE EXISTS(SELECT uuid FROM direction where $3 = direction.uuid) AND
-			    EXISTS(SELECT uuid FROM tag where tag.uuid = any($7)) RETURNING audio.uuid`
+			    EXISTS(SELECT uuid FROM tag where tag.uuid = any($6)) RETURNING audio.uuid`
+
 	updateAudioQuery = `UPDATE audio SET 
 			title = COALESCE(NULLIF($1, ''), title),
 			difficulty = (CASE WHEN ($2 = any(enum_range(difficulty))) THEN $2 ELSE difficulty END), 
 			direction_uuid = (CASE WHEN (EXISTS(SELECT uuid FROM direction where direction.uuid = $3)) THEN $3 ELSE direction_uuid END), 
-			rating = COALESCE(NULLIF($4, 0.0), rating), 
-			local_url = COALESCE(NULLIF($5, ''), local_url), 
-			language = COALESCE(NULLIF($6, ''), language), 
-			tags_uuids = (CASE WHEN (EXISTS(SELECT uuid FROM tag where tag.uuid = any($7))) THEN $7 ELSE tags_uuids END),
-			download_count = COALESCE(NULLIF($8, 0), download_count)
-		WHERE uuid = $9`
+			local_url = COALESCE(NULLIF($4, ''), local_url), 
+			language = COALESCE(NULLIF($5, ''), language), 
+			tags_uuids = (CASE WHEN (EXISTS(SELECT uuid FROM tag where tag.uuid = any($6))) THEN $6 ELSE tags_uuids END)
+		WHERE uuid = $7`
+
+	rateAudioQuery = `WITH grades AS (
+   		 SELECT avg((select avg(a) from unnest(array_append(all_grades, $1)) as a)) AS avg
+   		 FROM audio
+		)
+		UPDATE audio SET
+    	    all_grades = (CASE WHEN (0.0 < $1 AND $1 < 5.1) THEN array_append(all_grades, $1) ELSE all_grades END),
+    	    rating = (CASE WHEN (0.0 < $1 AND $1 < 5.1) THEN grades.avg  ELSE rating END)
+		FROM grades
+		WHERE uuid = $2`
+
+	audioDownloadCountUpQuery = `UPDATE audio SET
+			download_count = (download_count + 1)
+			WHERE uuid = $1`
 )
 
 type audioStorage struct {
@@ -208,11 +217,9 @@ func (as *audioStorage) Create(audioCreateDTO *domain.CreateAudioDTO) (string, e
 		audioCreateDTO.Title,
 		audioCreateDTO.Difficulty,
 		audioCreateDTO.DirectionUUID,
-		0,
 		audioCreateDTO.LocalURL,
 		audioCreateDTO.Language,
 		pq.Array(audioCreateDTO.TagsUUIDs),
-		0,
 	)
 	if err := row.Scan(&UUID); err != nil {
 		tx.Rollback()
@@ -277,11 +284,9 @@ func (as *audioStorage) Update(audioUpdateDTO *domain.UpdateAudioDTO) error {
 		audioUpdateDTO.Title,
 		audioUpdateDTO.Difficulty,
 		audioUpdateDTO.DirectionUUID,
-		audioUpdateDTO.Rating,
 		audioUpdateDTO.LocalURL,
 		audioUpdateDTO.Language,
 		pq.Array(audioUpdateDTO.TagsUUIDs),
-		audioUpdateDTO.DownloadCount,
 		audioUpdateDTO.UUID,
 	)
 	if err != nil {
@@ -302,6 +307,71 @@ func (as *audioStorage) Update(audioUpdateDTO *domain.UpdateAudioDTO) error {
 	}
 
 	as.logger.Infof("Audio with uuid %s was updated.", audioUpdateDTO.UUID)
+
+	return tx.Commit()
+}
+
+func (as *audioStorage) Rate(UUID string, rating float32) error {
+	tx, err := as.db.Begin()
+	if err != nil {
+		as.logger.Errorf("error occurred while creating transaction. err: %v", err)
+		return err
+	}
+
+	result, err := tx.Exec(rateAudioQuery,
+		rating,
+		UUID,
+	)
+	if err != nil {
+		tx.Rollback()
+		as.logger.Errorf("error occurred while rating audio. err: %v", err)
+		return err
+	}
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		tx.Rollback()
+		as.logger.Errorf("error occurred while raing audio (getting affected rows). err: %v", err)
+		return err
+	}
+	if rowsAffected < 1 {
+		tx.Rollback()
+		as.logger.Errorf("error occurred while raing audio. err: %v.", ErrNoRowsAffected)
+		return ErrNoRowsAffected
+	}
+
+	as.logger.Infof("audio with uuid %s was rated.", UUID)
+
+	return tx.Commit()
+}
+
+func (as *audioStorage) DownloadCountUp(UUID string) error {
+	tx, err := as.db.Begin()
+	if err != nil {
+		as.logger.Errorf("error occurred while creating transaction. err: %v", err)
+		return err
+	}
+
+	result, err := tx.Exec(audioDownloadCountUpQuery,
+		UUID,
+	)
+	if err != nil {
+		tx.Rollback()
+		as.logger.Errorf("error occurred while rating audio. err: %v", err)
+		return err
+	}
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		tx.Rollback()
+		as.logger.Errorf("error occurred while raing audio (getting affected rows). err: %v", err)
+		return err
+	}
+	if rowsAffected < 1 {
+		tx.Rollback()
+		as.logger.Errorf("error occurred while raing audio. err: %v.", ErrNoRowsAffected)
+		return ErrNoRowsAffected
+	}
+
+	as.logger.Infof("audio with uuid %s was rated.", UUID)
 
 	return tx.Commit()
 }

@@ -88,3 +88,11 @@ func (s *articleService) SaveImage(path string, image *image.Image) error {
 func (s *articleService) UpdateImage(path string, image *image.Image) error {
 	return utils.SaveImage(image, path)
 }
+
+func (s *articleService) Rate(UUID string, rating float32) error {
+	return s.storage.Rate(UUID, rating)
+}
+
+func (s *articleService) DownloadCountUp(UUID string) error {
+	return s.storage.DownloadCountUp(UUID)
+}

@@ -36,3 +36,7 @@ func (s *reviewService) Create(review *domain.CreateReviewDTO) (string, error) {
 func (s *reviewService) Update(review *domain.UpdateReviewDTO) error {
 	return s.storage.Update(review)
 }
+
+func (s *reviewService) Rate(UUID string, rating float32) error {
+	return s.storage.Rate(UUID, rating)
+}

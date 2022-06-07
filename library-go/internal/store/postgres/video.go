@@ -50,12 +50,18 @@ const (
                      title, 
                    	 difficulty,
                      direction_uuid, 
-                     rating, 
                      local_url, 
+                   	 web_url,
                      language, 
-                     tags_uuids, 
-                     download_count
-				) SELECT $1, $2 , $3, $4, $5, $6, $7, $8
+                     tags_uuids
+				) SELECT 
+				      $1,
+				      $2,
+				      $3,
+				      $4, 
+				      $5, 
+				      $6,
+				      $7
 				WHERE EXISTS(SELECT uuid FROM direction where $3 = direction.uuid) AND
 				EXISTS(SELECT uuid FROM tag where tag.uuid = any($7)) RETURNING video.uuid`
 
@@ -65,12 +71,25 @@ const (
 			title = COALESCE(NULLIF($1, ''), title), 
 			difficulty = (CASE WHEN ($2 = any(enum_range(difficulty))) THEN $2 ELSE difficulty END), 
 			direction_uuid = (CASE WHEN (EXISTS(SELECT uuid FROM direction where direction.uuid = $3)) THEN $3 ELSE direction_uuid END), 
-			rating = COALESCE(NULLIF($4, 0.0), rating), 
-			local_url = COALESCE(NULLIF($5, ''), local_url), 
+			local_url = COALESCE(NULLIF($4, ''), local_url), 
+			web_url = COALESCE(NULLIF($5, ''), web_url), 
 			language = COALESCE(NULLIF($6, ''), language), 
-			tags_uuids = (CASE WHEN (EXISTS(SELECT uuid FROM tag where tag.uuid = any($7))) THEN $7 ELSE tags_uuids END),
-			download_count = COALESCE(NULLIF($8, 0), download_count)
-		WHERE uuid = $9`
+			tags_uuids = (CASE WHEN (EXISTS(SELECT uuid FROM tag where tag.uuid = any($7))) THEN $7 ELSE tags_uuids END)
+		WHERE uuid = $8`
+
+	rateVideoQuery = `WITH grades AS (
+   		 SELECT avg((select avg(a) from unnest(array_append(all_grades, $1)) as a)) AS avg
+   		 FROM video
+		)
+		UPDATE video SET
+    	    all_grades = (CASE WHEN (0.0 < $1 AND $1 < 5.1) THEN array_append(all_grades, $1) ELSE all_grades END),
+    	    rating = (CASE WHEN (0.0 < $1 AND $1 < 5.1) THEN grades.avg  ELSE rating END)
+		FROM grades
+		WHERE uuid = $2`
+
+	videoDownloadCountUpQuery = `UPDATE video SET
+			download_count = (download_count + 1)
+			WHERE uuid = $1`
 )
 
 type videoStorage struct {
@@ -96,6 +115,7 @@ func (vs *videoStorage) GetOne(UUID string) (*domain.Video, error) {
 		"V.web_url",
 		"V.language",
 		"V.download_count",
+		"V.web_url",
 		"D.uuid as direction_uuid",
 		"D.name as direction_name",
 		"array_agg(DISTINCT T) as tags").
@@ -104,7 +124,7 @@ func (vs *videoStorage) GetOne(UUID string) (*domain.Video, error) {
 		PlaceholderFormat(squirrel.Dollar).
 		LeftJoin("direction AS D ON D.uuid = V.direction_uuid").
 		LeftJoin("tag AS T ON  T.uuid = any (V.tags_uuids)").
-		GroupBy("V.uuid, V.title, V.difficulty, V.rating, V.local_url, V.web_url, V.language, V.download_count, D.uuid, D.name").
+		GroupBy("V.uuid, V.title, V.difficulty, V.rating, V.local_url, V.web_url, V.language, V.download_count, V.web_url, D.uuid, D.name").
 		ToSql()
 
 	var video domain.Video
@@ -118,6 +138,7 @@ func (vs *videoStorage) GetOne(UUID string) (*domain.Video, error) {
 		&video.WebURL,
 		&video.Language,
 		&video.DownloadCount,
+		&video.WebURL,
 		&video.Direction.UUID,
 		&video.Direction.Name,
 		pq.Array(&tagsStr),
@@ -147,6 +168,7 @@ func (vs *videoStorage) GetAll(sortOptions *domain.SortFilterPagination) ([]*dom
 		"V.web_url",
 		"V.language",
 		"V.download_count",
+		"V.web_url",
 		"D.uuid as direction_uuid",
 		"D.name as direction_name",
 		"array_agg(DISTINCT T) as tags",
@@ -154,7 +176,7 @@ func (vs *videoStorage) GetAll(sortOptions *domain.SortFilterPagination) ([]*dom
 		From("video AS V").
 		LeftJoin("direction AS D ON D.uuid = V.direction_uuid").
 		LeftJoin("tag AS T ON  T.uuid = any (V.tags_uuids)").
-		GroupBy("V.uuid, V.title, V.difficulty, V.rating, V.local_url, V.web_url, V.language, V.download_count, D.uuid, D.name")
+		GroupBy("V.uuid, V.title, V.difficulty, V.rating, V.local_url, V.web_url, V.language, V.download_count, V.web_url, D.uuid, D.name")
 
 	if sortOptions.Limit != 0 {
 		s = s.Limit(sortOptions.Limit)
@@ -195,6 +217,7 @@ func (vs *videoStorage) GetAll(sortOptions *domain.SortFilterPagination) ([]*dom
 			&video.WebURL,
 			&video.Language,
 			&video.DownloadCount,
+			&video.WebURL,
 			&video.Direction.UUID,
 			&video.Direction.Name,
 			pq.Array(&tagsStr),
@@ -239,11 +262,10 @@ func (vs *videoStorage) Create(videoCreateDTO *domain.CreateVideoDTO) (string, e
 		videoCreateDTO.Title,
 		videoCreateDTO.Difficulty,
 		videoCreateDTO.DirectionUUID,
-		0,
 		videoCreateDTO.LocalURL,
+		videoCreateDTO.WebURL,
 		videoCreateDTO.Language,
 		pq.Array(videoCreateDTO.TagsUUIDs),
-		0,
 	)
 	if err := row.Scan(&UUID); err != nil {
 		tx.Rollback()
@@ -304,11 +326,10 @@ func (vs *videoStorage) Update(videoUpdateDTO *domain.UpdateVideoDTO) error {
 		videoUpdateDTO.Title,
 		videoUpdateDTO.Difficulty,
 		videoUpdateDTO.DirectionUUID,
-		videoUpdateDTO.Rating,
 		videoUpdateDTO.LocalURL,
+		videoUpdateDTO.WebURL,
 		videoUpdateDTO.Language,
 		pq.Array(videoUpdateDTO.TagsUUIDs),
-		videoUpdateDTO.DownloadCount,
 		videoUpdateDTO.UUID,
 	)
 	if err != nil {
@@ -329,6 +350,71 @@ func (vs *videoStorage) Update(videoUpdateDTO *domain.UpdateVideoDTO) error {
 	}
 
 	vs.logger.Infof("Video with uuid %s was updated.", videoUpdateDTO.UUID)
+
+	return tx.Commit()
+}
+
+func (vs *videoStorage) Rate(UUID string, rating float32) error {
+	tx, err := vs.db.Begin()
+	if err != nil {
+		vs.logger.Errorf("error occurred while creating transaction. err: %v", err)
+		return err
+	}
+
+	result, err := tx.Exec(rateVideoQuery,
+		rating,
+		UUID,
+	)
+	if err != nil {
+		tx.Rollback()
+		vs.logger.Errorf("error occurred while rating video. err: %v", err)
+		return err
+	}
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		tx.Rollback()
+		vs.logger.Errorf("error occurred while raing video (getting affected rows). err: %v", err)
+		return err
+	}
+	if rowsAffected < 1 {
+		tx.Rollback()
+		vs.logger.Errorf("error occurred while raing video. err: %v.", ErrNoRowsAffected)
+		return ErrNoRowsAffected
+	}
+
+	vs.logger.Infof("video with uuid %s was rated.", UUID)
+
+	return tx.Commit()
+}
+
+func (vs *videoStorage) DownloadCountUp(UUID string) error {
+	tx, err := vs.db.Begin()
+	if err != nil {
+		vs.logger.Errorf("error occurred while creating transaction. err: %v", err)
+		return err
+	}
+
+	result, err := tx.Exec(videoDownloadCountUpQuery,
+		UUID,
+	)
+	if err != nil {
+		tx.Rollback()
+		vs.logger.Errorf("error occurred while rating video. err: %v", err)
+		return err
+	}
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		tx.Rollback()
+		vs.logger.Errorf("error occurred while raing video (getting affected rows). err: %v", err)
+		return err
+	}
+	if rowsAffected < 1 {
+		tx.Rollback()
+		vs.logger.Errorf("error occurred while raing video. err: %v.", ErrNoRowsAffected)
+		return ErrNoRowsAffected
+	}
+
+	vs.logger.Infof("video with uuid %s was rated.", UUID)
 
 	return tx.Commit()
 }

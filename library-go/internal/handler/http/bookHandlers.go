@@ -30,6 +30,7 @@ const (
 	updateBookFileURL  = "/file/book"
 	loadBookImageURL   = "/image/book"
 	updateBookImageURL = "/image/book"
+	rateBookUrl        = "/rate/book"
 
 	bookLocalStoragePath = "../store/books/"
 )
@@ -58,6 +59,7 @@ func (bh *bookHandler) Register(router *httprouter.Router) {
 	router.PUT(updateBookFileURL, bh.Middleware.updateBookFile(bh.UpdateFile()))
 	router.GET(loadBookImageURL, bh.LoadImage)
 	router.PUT(updateBookImageURL, bh.UpdateImage)
+	router.PUT(rateBookUrl, bh.Rate)
 }
 
 func (bh *bookHandler) GetAll() http.HandlerFunc {
@@ -239,6 +241,15 @@ func (bh *bookHandler) LoadFile(w http.ResponseWriter, r *http.Request, ps httpr
 		return
 	}
 
+	err := bh.Service.DownloadCountUp(uuid)
+	if err != nil {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusInternalServerError)
+		bh.logger.Errorf("error occurred while downloading (DB ping to increase dowload count). err: %v", err)
+		json.NewEncoder(w).Encode(JSON.Error{Msg: fmt.Sprintf("error occurred while downloading (DB ping to increase dowload count). err: %v", err)})
+		return
+	}
+
 	path := fmt.Sprintf("%s%s/%s", bookLocalStoragePath, uuid, file)
 
 	w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=%s", file))
@@ -349,4 +360,40 @@ func (bh *bookHandler) UpdateImage(w http.ResponseWriter, r *http.Request, ps ht
 	}
 
 	json.NewEncoder(w).Encode(JSON.Info{Msg: "Book image updated successfully"})
+}
+
+func (bh *bookHandler) Rate(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	w.Header().Set("Content-Type", "application/json")
+
+	ratingStr := r.URL.Query().Get("rating")
+	if ratingStr == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		bh.logger.Errorf("rating query can't be empty")
+		return
+	}
+	rating, err := strconv.ParseFloat(ratingStr, 32)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		bh.logger.Errorf("error occurred while parsing rating. Should be float32. err: %v.", err)
+		json.NewEncoder(w).Encode(JSON.Error{Msg: fmt.Sprintf("error occurred while parsing rating. Should be float32. err: %v.", err)})
+		return
+	}
+
+	uuid := r.URL.Query().Get("uuid")
+	if uuid == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		bh.logger.Errorf("uuid can't be empty")
+		return
+	}
+
+	err = bh.Service.Rate(uuid, float32(rating))
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		bh.logger.Errorf("error occurred while rating book image. err: %v.", err)
+		json.NewEncoder(w).Encode(JSON.Error{Msg: fmt.Sprintf("error occurred while rating book into local store. err: %v.", err)})
+		return
+	}
+
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(JSON.Info{Msg: fmt.Sprintf("Book rated successfully. UUID: %s", uuid)})
 }

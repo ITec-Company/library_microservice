@@ -75,3 +75,11 @@ func (s *audioService) UpdateFile(dto *domain.UpdateAudioFileDTO) error {
 		return utils.SaveFile(dto.LocalPath, dto.NewFileName, dto.File)
 	}
 }
+
+func (s *audioService) Rate(UUID string, rating float32) error {
+	return s.storage.Rate(UUID, rating)
+}
+
+func (s *audioService) DownloadCountUp(UUID string) error {
+	return s.storage.DownloadCountUp(UUID)
+}

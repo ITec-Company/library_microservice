@@ -75,3 +75,11 @@ func (s *videoService) UpdateFile(dto *domain.UpdateVideoFileDTO) error {
 		return utils.SaveFile(dto.LocalPath, dto.NewFileName, dto.File)
 	}
 }
+
+func (s *videoService) Rate(UUID string, rating float32) error {
+	return s.storage.Rate(UUID, rating)
+}
+
+func (s *videoService) DownloadCountUp(UUID string) error {
+	return s.storage.DownloadCountUp(UUID)
+}

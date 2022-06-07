@@ -24,6 +24,7 @@ const (
 	updateAudioURL     = "/audio"
 	loadAudioFileURL   = "/file/audio"
 	updateAudioFileURL = "/file/audio"
+	rateAudioUrl       = "/rate/audio"
 
 	audioLocalStoragePath = "../store/audios/"
 )
@@ -50,6 +51,7 @@ func (ah *audioHandler) Register(router *httprouter.Router) {
 	router.PUT(updateAudioURL, ah.Update)
 	router.GET(loadAudioFileURL, ah.LoadFile)
 	router.PUT(updateAudioFileURL, ah.Middleware.updateAudioFile(ah.UpdateFile()))
+	router.PUT(rateAudioUrl, ah.Rate)
 }
 
 func (ah *audioHandler) GetAll() http.HandlerFunc {
@@ -214,6 +216,15 @@ func (ah *audioHandler) LoadFile(w http.ResponseWriter, r *http.Request, ps http
 		return
 	}
 
+	err := ah.Service.DownloadCountUp(uuid)
+	if err != nil {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusInternalServerError)
+		ah.logger.Errorf("error occurred while downloading (DB ping to increase dowload count). err: %v", err)
+		json.NewEncoder(w).Encode(JSON.Error{Msg: fmt.Sprintf("error occurred while downloading (DB ping to increase dowload count). err: %v", err)})
+		return
+	}
+
 	w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=%s", file))
 	w.Header().Set("Content-Type", "application/octet-stream")
 
@@ -260,4 +271,40 @@ func (ah *audioHandler) UpdateFile() http.Handler {
 		w.WriteHeader(http.StatusOK)
 		json.NewEncoder(w).Encode(JSON.Info{Msg: "File updated successfully"})
 	})
+}
+
+func (ah *audioHandler) Rate(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	w.Header().Set("Content-Type", "application/json")
+
+	ratingStr := r.URL.Query().Get("rating")
+	if ratingStr == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		ah.logger.Errorf("rating query can't be empty")
+		return
+	}
+	rating, err := strconv.ParseFloat(ratingStr, 32)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		ah.logger.Errorf("error occurred while parsing rating. Should be float32. err: %v.", err)
+		json.NewEncoder(w).Encode(JSON.Error{Msg: fmt.Sprintf("error occurred while parsing rating. Should be float32. err: %v.", err)})
+		return
+	}
+
+	uuid := r.URL.Query().Get("uuid")
+	if uuid == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		ah.logger.Errorf("uuid can't be empty")
+		return
+	}
+
+	err = ah.Service.Rate(uuid, float32(rating))
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		ah.logger.Errorf("error occurred while rating audio image. err: %v.", err)
+		json.NewEncoder(w).Encode(JSON.Error{Msg: fmt.Sprintf("error occurred while rating audio into local store. err: %v.", err)})
+		return
+	}
+
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(JSON.Info{Msg: fmt.Sprintf("Audio rated successfully. UUID: %s", uuid)})
 }
