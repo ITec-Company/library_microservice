@@ -24,11 +24,11 @@ const (
 				      $1, 
 				      $2, 
 				      $3, 
-				      $4 || (SELECT last_value from audio_uuid_seq), 
-				      $5, 
-				      $6
+				      $4 || (SELECT last_value from audio_uuid_seq) || $5,
+				      $6, 
+				      $7
 				WHERE EXISTS(SELECT uuid FROM direction where $3 = direction.uuid) AND
-			    EXISTS(SELECT uuid FROM tag where tag.uuid = any($6)) RETURNING audio.uuid`
+			    EXISTS(SELECT uuid FROM tag where tag.uuid = any($7)) RETURNING audio.uuid`
 
 	updateAudioQuery = `UPDATE audio SET 
 			title = COALESCE(NULLIF($1, ''), title),
@@ -213,11 +213,14 @@ func (as *audioStorage) Create(audioCreateDTO *domain.CreateAudioDTO) (string, e
 
 	var UUID string
 
+	localURL := strings.Split(audioCreateDTO.LocalURL, "|split|")
+
 	row := tx.QueryRow(createAudioQuery,
 		audioCreateDTO.Title,
 		audioCreateDTO.Difficulty,
 		audioCreateDTO.DirectionUUID,
-		audioCreateDTO.LocalURL,
+		localURL[0],
+		localURL[1],
 		audioCreateDTO.Language,
 		pq.Array(audioCreateDTO.TagsUUIDs),
 	)

@@ -77,14 +77,14 @@ const (
 				      $5, 
 				      $6,
 				      $7,
-				      $8 || (SELECT last_value from article_uuid_seq), 
-				      $9, 
+				      $8 || (SELECT last_value from article_uuid_seq) || $9, 
 				      $10, 
-				      $11,
-				      $12 || (SELECT last_value from article_uuid_seq)
+				      $11, 
+				      $12,
+				      $13 || (SELECT last_value from article_uuid_seq) || $14
 				WHERE EXISTS(SELECT uuid FROM author where $3 = author.uuid) AND
 				EXISTS(SELECT uuid FROM direction where $2 = direction.uuid) AND
-			    EXISTS(SELECT uuid FROM tag where tag.uuid = any($11)) RETURNING article.uuid`
+			    EXISTS(SELECT uuid FROM tag where tag.uuid = any($12)) RETURNING article.uuid`
 	deleteArticleQuery = `DELETE FROM article WHERE uuid = $1`
 
 	updateArticleQuery = `UPDATE article SET 
@@ -301,6 +301,8 @@ func (as *articleStorage) Create(articleCreateDTO *domain.CreateArticleDTO) (str
 	}
 
 	var UUID string
+	localURL := strings.Split(articleCreateDTO.LocalURL, "|split|")
+	imageURL := strings.Split(articleCreateDTO.ImageURL, "|split|")
 
 	row := tx.QueryRow(createArticleQuery,
 		articleCreateDTO.Title,
@@ -310,11 +312,13 @@ func (as *articleStorage) Create(articleCreateDTO *domain.CreateArticleDTO) (str
 		articleCreateDTO.EditionDate,
 		articleCreateDTO.Description,
 		articleCreateDTO.Text,
-		articleCreateDTO.LocalURL,
+		localURL[0],
+		localURL[1],
 		articleCreateDTO.WebURL,
 		articleCreateDTO.Language,
 		pq.Array(articleCreateDTO.TagsUUIDs),
-		articleCreateDTO.ImageURL,
+		imageURL[0],
+		imageURL[1],
 	)
 
 	if err := row.Scan(&UUID); err != nil {

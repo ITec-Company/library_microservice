@@ -25,11 +25,12 @@ const (
 	createBookURL      = "/book"
 	deleteBookURL      = "/book/:uuid"
 	updateBookURL      = "/book"
-	loadBookFileURL    = "/file/book"
 	updateBookFileURL  = "/file/book"
-	loadBookImageURL   = "/image/book"
 	updateBookImageURL = "/image/book"
 	rateBookUrl        = "/rate/book"
+
+	loadBookImageURL = "/books/"
+	loadBookFileURL  = "/books/"
 
 	bookLocalStoragePath = "../store/books/"
 )
@@ -54,11 +55,12 @@ func (bh *bookHandler) Register(router *httprouter.Router) {
 	router.POST(createBookURL, bh.Middleware.createBook(bh.Create()))
 	router.DELETE(deleteBookURL, bh.Delete)
 	router.PUT(updateBookURL, bh.Update)
-	router.GET(loadBookFileURL, bh.LoadFile)
 	router.PUT(updateBookFileURL, bh.Middleware.updateBookFile(bh.UpdateFile()))
-	router.GET(loadBookImageURL, bh.LoadImage)
 	router.PUT(updateBookImageURL, bh.UpdateImage)
 	router.PUT(rateBookUrl, bh.Rate)
+
+	//router.GET(loadBookImageURL, bh.LoadImage)
+	//router.GET(loadBookFileURL, bh.LoadFile)
 }
 
 func (bh *bookHandler) GetAll() http.HandlerFunc {
@@ -135,9 +137,15 @@ func (bh *bookHandler) Create() http.Handler {
 		createBookDTO.Description = data["description"].(string)
 		createBookDTO.Language = data["language"].(string)
 		createBookDTO.TagsUUIDs = strings.Split(data["tags_uuids"].(string), ",")
-		fileName := data["fileName"].(string)
-		createBookDTO.LocalURL = fmt.Sprintf("%s?file=%s&uuid=", loadBookFileURL, fileName)
-		createBookDTO.ImageURL = fmt.Sprintf("%s?format=%s&uuid=", loadBookImageURL, string(utils.FormatOriginal))
+		fileName, ok := data["fileName"].(string)
+		if ok {
+			fileName = data["fileName"].(string)
+			createBookDTO.LocalURL = fmt.Sprintf("%s|split|/%s", loadBookFileURL, fileName)
+		} else {
+			createBookDTO.LocalURL = "file wasn't added"
+		}
+
+		createBookDTO.ImageURL = fmt.Sprintf("%s|split|/%s.jpg", loadBookImageURL, string(utils.FormatOriginal))
 
 		UUID, err := bh.Service.Create(&createBookDTO)
 		if err != nil {

@@ -122,7 +122,7 @@ func (vh *videoHandler) Create() http.Handler {
 			fileName = data["fileName"].(string)
 			createVideoDTO.LocalURL = fmt.Sprintf("%s?url=%s", loadVideoFileURL, fileName)
 		} else {
-			createVideoDTO.LocalURL = "no file was added"
+			createVideoDTO.LocalURL = "file wasn't added"
 		}
 		createVideoDTO.WebURL = data["web_url"].(string)
 

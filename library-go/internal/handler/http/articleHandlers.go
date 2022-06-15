@@ -25,11 +25,12 @@ const (
 	createArticleURL      = "/article"
 	deleteArticleURL      = "/article/:uuid"
 	updateArticleURL      = "/article"
-	loadArticleFileURL    = "/file/article"
 	updateArticleFileURL  = "/file/article"
-	loadArticleImageURL   = "/image/article"
 	updateArticleImageURL = "/image/article"
 	rateArticleUrl        = "/rate/article"
+
+	loadArticleFileURL  = "/articles/"
+	loadArticleImageURL = "/articles/"
 
 	articleLocalStoragePath = "../store/articles/"
 )
@@ -54,11 +55,12 @@ func (ah *articleHandler) Register(router *httprouter.Router) {
 	router.POST(createArticleURL, ah.Middleware.createArticle(ah.Create()))
 	router.DELETE(deleteArticleURL, ah.Delete)
 	router.PUT(updateArticleURL, ah.Update)
-	router.GET(loadArticleFileURL, ah.LoadFile)
 	router.PUT(updateArticleFileURL, ah.Middleware.updateArticleFile(ah.UpdateFile()))
-	router.GET(loadArticleImageURL, ah.LoadImage)
 	router.PUT(updateArticleImageURL, ah.UpdateImage)
 	router.PUT(rateArticleUrl, ah.Rate)
+
+	//router.GET(loadArticleImageURL, ah.LoadImage)
+	//router.GET(loadArticleFileURL, ah.LoadFile)
 }
 
 func (ah *articleHandler) GetAll() http.HandlerFunc {
@@ -138,12 +140,12 @@ func (ah *articleHandler) Create() http.Handler {
 		fileName, ok := data["fileName"].(string)
 		if ok {
 			fileName = data["fileName"].(string)
-			createArticleDTO.LocalURL = fmt.Sprintf("%s?file=%s&uuid=", loadArticleFileURL, fileName)
+			createArticleDTO.LocalURL = fmt.Sprintf("%s|split|/%s", loadArticleFileURL, fileName)
 		} else {
-			createArticleDTO.LocalURL = "no file was added"
+			createArticleDTO.LocalURL = "file wasn't added"
 		}
 		createArticleDTO.WebURL = data["web_url"].(string)
-		createArticleDTO.ImageURL = fmt.Sprintf("%s?format=%s&uuid=", loadArticleImageURL, string(utils.FormatOriginal))
+		createArticleDTO.ImageURL = fmt.Sprintf("%s|split|/%s.jpg", loadArticleImageURL, string(utils.FormatOriginal))
 
 		UUID, err := ah.Service.Create(&createArticleDTO)
 		if err != nil {

@@ -76,13 +76,13 @@ const (
 				      $4, 
 				      $5, 
 				      $6,  
-				      $7 || (SELECT last_value from book_uuid_seq), 
-				      $8, 
+				      $7 || (SELECT last_value from book_uuid_seq) || $8, 
 				      $9, 
-				      $10 || (SELECT last_value from book_uuid_seq)
+				      $10, 
+				      $11 || (SELECT last_value from book_uuid_seq) || $12
 				WHERE EXISTS(SELECT uuid FROM author where $3 = author.uuid) AND
 				EXISTS(SELECT uuid FROM direction where $2 = direction.uuid) AND
-			    EXISTS(SELECT uuid FROM tag where tag.uuid = any($9)) RETURNING book.uuid`
+			    EXISTS(SELECT uuid FROM tag where tag.uuid = any($10)) RETURNING book.uuid`
 
 	deleteBookQuery = `DELETE FROM book WHERE uuid = $1`
 
@@ -304,6 +304,9 @@ func (bs *bookStorage) Create(bookCreateDTO *domain.CreateBookDTO) (string, erro
 
 	var UUID string
 
+	localURL := strings.Split(bookCreateDTO.LocalURL, "|split|")
+	imageURL := strings.Split(bookCreateDTO.ImageURL, "|split|")
+
 	row := tx.QueryRow(createBookQuery,
 		bookCreateDTO.Title,
 		bookCreateDTO.DirectionUUID,
@@ -311,10 +314,12 @@ func (bs *bookStorage) Create(bookCreateDTO *domain.CreateBookDTO) (string, erro
 		bookCreateDTO.Difficulty,
 		bookCreateDTO.EditionDate,
 		bookCreateDTO.Description,
-		bookCreateDTO.LocalURL,
+		localURL[0],
+		localURL[1],
 		bookCreateDTO.Language,
 		pq.Array(bookCreateDTO.TagsUUIDs),
-		bookCreateDTO.ImageURL,
+		imageURL[0],
+		imageURL[1],
 	)
 
 	if err := row.Scan(&UUID); err != nil {

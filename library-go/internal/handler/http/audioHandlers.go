@@ -22,9 +22,10 @@ const (
 	createAudioURL     = "/audio"
 	deleteAudioURL     = "/audio/:uuid"
 	updateAudioURL     = "/audio"
-	loadAudioFileURL   = "/file/audio"
 	updateAudioFileURL = "/file/audio"
 	rateAudioUrl       = "/rate/audio"
+
+	loadAudioFileURL = "/audios/"
 
 	audioLocalStoragePath = "../store/audios/"
 )
@@ -49,9 +50,10 @@ func (ah *audioHandler) Register(router *httprouter.Router) {
 	router.POST(createAudioURL, ah.Middleware.createAudio(ah.Create()))
 	router.DELETE(deleteAudioURL, ah.Delete)
 	router.PUT(updateAudioURL, ah.Update)
-	router.GET(loadAudioFileURL, ah.LoadFile)
 	router.PUT(updateAudioFileURL, ah.Middleware.updateAudioFile(ah.UpdateFile()))
 	router.PUT(rateAudioUrl, ah.Rate)
+
+	//router.GET(loadAudioFileURL, ah.LoadFile)
 }
 
 func (ah *audioHandler) GetAll() http.HandlerFunc {
@@ -116,8 +118,13 @@ func (ah *audioHandler) Create() http.Handler {
 		createAudioDTO.Difficulty = data["difficulty"].(string)
 		createAudioDTO.Language = data["language"].(string)
 		createAudioDTO.TagsUUIDs = strings.Split(data["tags_uuids"].(string), ",")
-		fileName := data["fileName"].(string)
-		createAudioDTO.LocalURL = fmt.Sprintf("%s?file=%s&uuid=", loadAudioFileURL, fileName)
+		fileName, ok := data["fileName"].(string)
+		if ok {
+			fileName = data["fileName"].(string)
+			createAudioDTO.LocalURL = fmt.Sprintf("%s|split|/%s", loadAudioFileURL, fileName)
+		} else {
+			createAudioDTO.LocalURL = "file wasn't added"
+		}
 
 		UUID, err := ah.Service.Create(&createAudioDTO)
 		if err != nil {
