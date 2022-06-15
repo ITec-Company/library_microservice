@@ -23,7 +23,7 @@
 							"formdata": []
 						},
 						"url": {
-							"raw": "http://localhost:1000/article/4",
+							"raw": "http://localhost:1000/article/1",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -31,7 +31,7 @@
 							"port": "1000",
 							"path": [
 								"article",
-								"4"
+								"1"
 							]
 						}
 					},
@@ -67,7 +67,7 @@
 								{
 									"key": "file",
 									"type": "file",
-									"src": "/C:/Users/kazbe/Desktop/Golang_Learning_program.docx"
+									"src": "/C:/Users/kazbe/Desktop/author(1)-title(software_testing).docx"
 								},
 								{
 									"key": "title",
@@ -97,6 +97,11 @@
 								{
 									"key": "description",
 									"value": "very usefull ",
+									"type": "text"
+								},
+								{
+									"key": "text",
+									"value": "some article text",
 									"type": "text"
 								},
 								{
@@ -142,7 +147,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"uuid\": \"4\",\r\n    \"title\": \"updated article\",\r\n    \"direction_uuid\": \"1\",\r\n    \"difficulty\": \"junior\",\r\n    \"author_uuid\": \"2\",\r\n    \"edition_date\": \"2000-10-10T00:00:00Z\",\r\n    \"web_url\": \"updated url\",\r\n    \"description\": \"updated description\",\r\n    \"language\": \"eng\",\r\n    \"tags_uuids\": [\"1\", \"4\"]\r\n}",
+							"raw": "{\r\n    \"uuid\": \"1\",\r\n    \"title\": \"updated article\",\r\n    \"direction_uuid\": \"1\",\r\n    \"difficulty\": \"junior\",\r\n    \"author_uuid\": \"2\",\r\n    \"edition_date\": \"2000-10-10T00:00:00Z\",\r\n    \"web_url\": \"updated url\",\r\n    \"description\": \"updated description\",\r\n    \"text\": \"updated text\",\r\n    \"language\": \"eng\",\r\n    \"tags_uuids\": [\"1\", \"4\"]\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"

@@ -28,9 +28,10 @@ type Article struct {
 	Direction     Direction  `json:"direction,omitempty"`
 	Difficulty    Difficulty `json:"difficulty,omitempty"`
 	Author        Author     `json:"author,omitempty"`
-	EditionDate   time.Time  `json:"edition_date"`
+	EditionDate   uint       `json:"edition_date,omitempty"`
 	Rating        float32    `json:"rating,omitempty"`
 	Description   string     `json:"description,omitempty"`
+	Text          string     `json:"text,omitempty"`
 	LocalURL      string     `json:"local_url,omitempty"`
 	ImageURL      string     `json:"image_url,omitempty"`
 	WebURL        string     `json:"web_url,omitempty"`
@@ -62,7 +63,7 @@ type Book struct {
 	Direction     Direction  `json:"direction,omitempty"`
 	Author        Author     `json:"author,omitempty"`
 	Difficulty    Difficulty `json:"difficulty,omitempty"`
-	EditionDate   time.Time  `json:"edition_date"`
+	EditionDate   uint       `json:"edition_date"`
 	Rating        float32    `json:"rating,omitempty"`
 	Description   string     `json:"description,omitempty"`
 	LocalURL      string     `json:"local_url,omitempty"`

@@ -54,6 +54,7 @@ func (m *Middleware) createArticle(next http.Handler) httprouter.Handle {
 			"web_url":        "text",
 			"edition_date":   "text",
 			"description":    "text",
+			"text":           "text",
 			"language":       "text",
 			"tags_uuids":     "text",
 		}
@@ -67,27 +68,28 @@ func (m *Middleware) createArticle(next http.Handler) httprouter.Handle {
 			return
 		}
 
-		file := data["file"].(*bytes.Buffer)
+		file, ok := data["file"].(*bytes.Buffer)
+		if ok && file != nil {
+			if !filetype.IsDocument(file.Bytes()) {
+				w.Header().Set("Content-Type", "application/json")
+				w.WriteHeader(http.StatusBadRequest)
+				m.logger.Errorf("file is not a document, allowed extensions: Doc, Docx, Xls, Xlsx, Ppt, Pptx")
+				json.NewEncoder(w).Encode(JSON.Error{Msg: "file is not a document, allowed extensions: Doc, Docx, Xls, Xlsx, Ppt, Pptx"})
+				return
+			}
 
-		if !filetype.IsDocument(file.Bytes()) {
-			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(http.StatusBadRequest)
-			m.logger.Errorf("file is not a document, allowed extensions: Doc, Docx, Xls, Xlsx, Ppt, Pptx")
-			json.NewEncoder(w).Encode(JSON.Error{Msg: "file is not a document, allowed extensions: Doc, Docx, Xls, Xlsx, Ppt, Pptx"})
-			return
-		}
-
-		kind, err := filetype.Match(file.Bytes())
-		if err != nil {
-			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(http.StatusBadRequest)
-			m.logger.Errorf("error occurred while ckecking file extension. err: %v.", err)
-			json.NewEncoder(w).Encode(JSON.Error{Msg: fmt.Sprintf("error occurred while ckecking file extension. err: %v", err)})
-			return
+			kind, err := filetype.Match(file.Bytes())
+			if err != nil {
+				w.Header().Set("Content-Type", "application/json")
+				w.WriteHeader(http.StatusBadRequest)
+				m.logger.Errorf("error occurred while ckecking file extension. err: %v.", err)
+				json.NewEncoder(w).Encode(JSON.Error{Msg: fmt.Sprintf("error occurred while ckecking file extension. err: %v", err)})
+				return
+			}
+			data["fileName"] = fmt.Sprintf("author(%s)-title(%s).%s", data["author_uuid"].(string), data["title"].(string), kind.Extension)
 		}
 
 		data["title"] = strings.Replace(data["title"].(string), " ", "_", -1)
-		data["fileName"] = fmt.Sprintf("author(%s)-title(%s).%s", data["author_uuid"].(string), data["title"].(string), kind.Extension)
 
 		next.ServeHTTP(w, r.WithContext(context.WithValue(r.Context(), CtxKeyCreateArticle, data)))
 	}
@@ -302,27 +304,28 @@ func (m *Middleware) createVideo(next http.Handler) httprouter.Handle {
 			return
 		}
 
-		file := data["file"].(*bytes.Buffer)
+		file, ok := data["file"].(*bytes.Buffer)
+		if ok && file != nil {
+			if !filetype.IsVideo(file.Bytes()) {
+				w.Header().Set("Content-Type", "application/json")
+				w.WriteHeader(http.StatusBadRequest)
+				m.logger.Errorf("file is not a video, allowed extensions: mp4, m4v, mkv, webm, mov, avi, wmv, mpg, flv, 3gp")
+				json.NewEncoder(w).Encode(JSON.Error{Msg: "file is not a video, allowed extensions: mp4, m4v, mkv, webm, mov, avi, wmv, mpg, flv, 3gp"})
+				return
+			}
 
-		if !filetype.IsVideo(file.Bytes()) {
-			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(http.StatusBadRequest)
-			m.logger.Errorf("file is not a video, allowed extensions: mp4, m4v, mkv, webm, mov, avi, wmv, mpg, flv, 3gp")
-			json.NewEncoder(w).Encode(JSON.Error{Msg: "file is not a video, allowed extensions: mp4, m4v, mkv, webm, mov, avi, wmv, mpg, flv, 3gp"})
-			return
-		}
-
-		kind, err := filetype.Match(file.Bytes())
-		if err != nil {
-			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(http.StatusBadRequest)
-			m.logger.Errorf("error occurred while ckecking file extension. err: %v.", err)
-			json.NewEncoder(w).Encode(JSON.Error{Msg: fmt.Sprintf("error occurred while ckecking file extension. err: %v", err)})
-			return
+			kind, err := filetype.Match(file.Bytes())
+			if err != nil {
+				w.Header().Set("Content-Type", "application/json")
+				w.WriteHeader(http.StatusBadRequest)
+				m.logger.Errorf("error occurred while ckecking file extension. err: %v.", err)
+				json.NewEncoder(w).Encode(JSON.Error{Msg: fmt.Sprintf("error occurred while ckecking file extension. err: %v", err)})
+				return
+			}
+			data["fileName"] = fmt.Sprintf("title(%s).%s", data["title"].(string), kind.Extension)
 		}
 
 		data["title"] = strings.Replace(data["title"].(string), " ", "_", -1)
-		data["fileName"] = fmt.Sprintf("title(%s).%s", data["title"].(string), kind.Extension)
 
 		next.ServeHTTP(w, r.WithContext(context.WithValue(r.Context(), CtxKeyCreateVideo, data)))
 	}

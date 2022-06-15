@@ -3,40 +3,41 @@ package domain
 import (
 	"image"
 	"io"
-	"time"
 )
 
 // Article
 
 type CreateArticleDTO struct {
-	Title         string    `json:"title"`
-	DirectionUUID string    `json:"direction_uuid"`
-	AuthorUUID    string    `json:"author_uuid"`
-	Difficulty    string    `json:"difficulty"`
-	EditionDate   time.Time `json:"edition_date"`
-	Description   string    `json:"description"`
-	LocalURL      string    `json:"local_url"`
-	WebURL        string    `json:"web_url,omitempty"`
-	Language      string    `json:"language"`
-	TagsUUIDs     []string  `json:"tags_uuids"`
-	ImageURL      string    `json:"image_url,omitempty"`
+	Title         string   `json:"title"`
+	DirectionUUID string   `json:"direction_uuid"`
+	AuthorUUID    string   `json:"author_uuid"`
+	Difficulty    string   `json:"difficulty"`
+	EditionDate   uint     `json:"edition_date"`
+	Description   string   `json:"description"`
+	Text          string   `json:"text"`
+	LocalURL      string   `json:"local_url"`
+	WebURL        string   `json:"web_url,omitempty"`
+	Language      string   `json:"language"`
+	TagsUUIDs     []string `json:"tags_uuids"`
+	ImageURL      string   `json:"image_url,omitempty"`
 }
 
 type UpdateArticleDTO struct {
-	UUID          string    `json:"uuid"`
-	Title         string    `json:"title,omitempty"`
-	DirectionUUID string    `json:"direction_uuid,omitempty"`
-	AuthorUUID    string    `json:"author_uuid,omitempty"`
-	Difficulty    string    `json:"difficulty,omitempty"`
-	EditionDate   time.Time `json:"edition_date,omitempty"`
-	Rating        float32   `json:"rating,omitempty"`
-	Description   string    `json:"description,omitempty"`
-	LocalURL      string    `json:"local_url,omitempty"`
-	WebURL        string    `json:"web_url,omitempty"`
-	Language      string    `json:"language,omitempty"`
-	TagsUUIDs     []string  `json:"tags_uuids,omitempty"`
-	DownloadCount uint32    `json:"download_count,omitempty"`
-	ImageURL      string    `json:"image_url,omitempty"`
+	UUID          string   `json:"uuid"`
+	Title         string   `json:"title,omitempty"`
+	DirectionUUID string   `json:"direction_uuid,omitempty"`
+	AuthorUUID    string   `json:"author_uuid,omitempty"`
+	Difficulty    string   `json:"difficulty,omitempty"`
+	EditionDate   uint     `json:"edition_date,omitempty"`
+	Rating        float32  `json:"rating,omitempty"`
+	Description   string   `json:"description,omitempty"`
+	Text          string   `json:"text,omitempty"`
+	LocalURL      string   `json:"local_url,omitempty"`
+	WebURL        string   `json:"web_url,omitempty"`
+	Language      string   `json:"language,omitempty"`
+	TagsUUIDs     []string `json:"tags_uuids,omitempty"`
+	DownloadCount uint32   `json:"download_count,omitempty"`
+	ImageURL      string   `json:"image_url,omitempty"`
 }
 
 type UpdateArticleFileDTO struct {
@@ -100,32 +101,32 @@ type UpdateAuthorDTO struct {
 // Book
 
 type CreateBookDTO struct {
-	Title         string    `json:"title"`
-	DirectionUUID string    `json:"direction_uuid"`
-	AuthorUUID    string    `json:"author_uuid"`
-	Difficulty    string    `json:"difficulty"`
-	EditionDate   time.Time `json:"edition_date"`
-	Description   string    `json:"description"`
-	LocalURL      string    `json:"local_url"`
-	Language      string    `json:"language"`
-	TagsUUIDs     []string  `json:"tags_uuids"`
-	ImageURL      string    `json:"image_url,omitempty"`
+	Title         string   `json:"title"`
+	DirectionUUID string   `json:"direction_uuid"`
+	AuthorUUID    string   `json:"author_uuid"`
+	Difficulty    string   `json:"difficulty"`
+	EditionDate   uint     `json:"edition_date"`
+	Description   string   `json:"description"`
+	LocalURL      string   `json:"local_url"`
+	Language      string   `json:"language"`
+	TagsUUIDs     []string `json:"tags_uuids"`
+	ImageURL      string   `json:"image_url,omitempty"`
 }
 
 type UpdateBookDTO struct {
-	UUID          string    `json:"uuid"`
-	Title         string    `json:"title,omitempty"`
-	DirectionUUID string    `json:"direction_uuid,omitempty"`
-	AuthorUUID    string    `json:"author_uuid,omitempty"`
-	Difficulty    string    `json:"difficulty,omitempty"`
-	EditionDate   time.Time `json:"edition_date,omitempty"`
-	Rating        float32   `json:"rating,omitempty"`
-	Description   string    `json:"description,omitempty"`
-	LocalURL      string    `json:"local_url,omitempty"`
-	Language      string    `json:"language,omitempty"`
-	TagsUUIDs     []string  `json:"tags_uuids,omitempty"`
-	DownloadCount uint32    `json:"download_count,omitempty"`
-	ImageURL      string    `json:"image_url,omitempty"`
+	UUID          string   `json:"uuid"`
+	Title         string   `json:"title,omitempty"`
+	DirectionUUID string   `json:"direction_uuid,omitempty"`
+	AuthorUUID    string   `json:"author_uuid,omitempty"`
+	Difficulty    string   `json:"difficulty,omitempty"`
+	EditionDate   uint     `json:"edition_date,omitempty"`
+	Rating        float32  `json:"rating,omitempty"`
+	Description   string   `json:"description,omitempty"`
+	LocalURL      string   `json:"local_url,omitempty"`
+	Language      string   `json:"language,omitempty"`
+	TagsUUIDs     []string `json:"tags_uuids,omitempty"`
+	DownloadCount uint32   `json:"download_count,omitempty"`
+	ImageURL      string   `json:"image_url,omitempty"`
 }
 
 type UpdateBookFileDTO struct {

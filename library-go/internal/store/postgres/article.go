@@ -63,6 +63,7 @@ const (
                      difficulty,
                      edition_date,
                      description,
+                     text,
                      local_url, 
                      web_url,
                      language, 
@@ -74,15 +75,16 @@ const (
 				      $3, 
 				      $4, 
 				      $5, 
-				      $6,  
-				      $7 || (SELECT last_value from article_uuid_seq), 
-				      $8, 
+				      $6,
+				      $7,
+				      $8 || (SELECT last_value from article_uuid_seq), 
 				      $9, 
-				      $10,
-				      $11 || (SELECT last_value from article_uuid_seq)
+				      $10, 
+				      $11,
+				      $12 || (SELECT last_value from article_uuid_seq)
 				WHERE EXISTS(SELECT uuid FROM author where $3 = author.uuid) AND
 				EXISTS(SELECT uuid FROM direction where $2 = direction.uuid) AND
-			    EXISTS(SELECT uuid FROM tag where tag.uuid = any($10)) RETURNING article.uuid`
+			    EXISTS(SELECT uuid FROM tag where tag.uuid = any($11)) RETURNING article.uuid`
 	deleteArticleQuery = `DELETE FROM article WHERE uuid = $1`
 
 	updateArticleQuery = `UPDATE article SET 
@@ -92,11 +94,12 @@ const (
 			difficulty = (CASE WHEN ($4 = any(enum_range(difficulty))) THEN $4 ELSE difficulty END), 
 			edition_date = (CASE WHEN ($5 != date('0001-01-01 00:00:00')) THEN $5 ELSE edition_date END),
 			description = COALESCE(NULLIF($6, ''), description), 
-			local_url = COALESCE(NULLIF($7, ''), local_url), 
-			web_url = COALESCE(NULLIF($8, ''), web_url), 
-			language = COALESCE(NULLIF($9, ''), language), 
-			tags_uuids = (CASE WHEN (EXISTS(SELECT uuid FROM tag where tag.uuid = any($10))) THEN $10 ELSE tags_uuids END)
-		WHERE uuid = $11`
+			text = COALESCE(NULLIF($7, ''), text),
+			local_url = COALESCE(NULLIF($8, ''), local_url), 
+			web_url = COALESCE(NULLIF($9, ''), web_url), 
+			language = COALESCE(NULLIF($10, ''), language), 
+			tags_uuids = (CASE WHEN (EXISTS(SELECT uuid FROM tag where tag.uuid = any($11))) THEN $11 ELSE tags_uuids END)
+		WHERE uuid = $12`
 
 	rateArticleQuery = `WITH grades AS (
    		 SELECT avg((select avg(a) from unnest(array_append(all_grades, $1)) as a)) AS avg
@@ -133,6 +136,7 @@ func (as *articleStorage) GetOne(UUID string) (*domain.Article, error) {
 		"A.edition_date",
 		"A.rating",
 		"A.description",
+		"A.text",
 		"A.local_url",
 		"A.image_url",
 		"A.web_url",
@@ -149,7 +153,7 @@ func (as *articleStorage) GetOne(UUID string) (*domain.Article, error) {
 		LeftJoin("tag AS T ON  T.uuid = any (A.tags_uuids)").
 		Where("A.uuid = ?", UUID).
 		PlaceholderFormat(squirrel.Dollar).
-		GroupBy("A.uuid", "A.title", "A.difficulty", "A.edition_date", "A.rating", "A.description", "A.local_url", "A.image_url", "A.web_url", "A.language", "A.download_count", "Au.uuid", "Au.full_name", "D.uuid", "D.name").
+		GroupBy("A.uuid", "A.title", "A.difficulty", "A.edition_date", "A.rating", "A.description", "A.text", "A.local_url", "A.image_url", "A.web_url", "A.language", "A.download_count", "Au.uuid", "Au.full_name", "D.uuid", "D.name").
 		ToSql()
 
 	var article domain.Article
@@ -161,6 +165,7 @@ func (as *articleStorage) GetOne(UUID string) (*domain.Article, error) {
 		&article.EditionDate,
 		&article.Rating,
 		&article.Description,
+		&article.Text,
 		&article.LocalURL,
 		&article.ImageURL,
 		&article.WebURL,
@@ -196,6 +201,7 @@ func (as *articleStorage) GetAll(sortOptions *domain.SortFilterPagination) ([]*d
 		"A.edition_date",
 		"A.rating",
 		"A.description",
+		"A.text",
 		"A.local_url",
 		"A.image_url",
 		"A.web_url",
@@ -211,7 +217,7 @@ func (as *articleStorage) GetAll(sortOptions *domain.SortFilterPagination) ([]*d
 		LeftJoin("author AS Au ON Au.uuid = A.author_uuid").
 		LeftJoin("direction AS D ON D.uuid = A.direction_uuid").
 		LeftJoin("tag AS T ON  T.uuid = any (A.tags_uuids)").
-		GroupBy("A.uuid", "A.title", "A.difficulty", "A.edition_date", "A.rating", "A.description", "A.local_url", "A.image_url", "A.web_url", "A.language", "A.download_count", "Au.uuid", "Au.full_name", "D.uuid", "D.name")
+		GroupBy("A.uuid", "A.title", "A.difficulty", "A.edition_date", "A.rating", "A.description", "A.text", "A.local_url", "A.image_url", "A.web_url", "A.language", "A.download_count", "Au.uuid", "Au.full_name", "D.uuid", "D.name")
 	if sortOptions.Limit != 0 {
 		s = s.Limit(sortOptions.Limit)
 		if sortOptions.Page != 0 {
@@ -248,6 +254,7 @@ func (as *articleStorage) GetAll(sortOptions *domain.SortFilterPagination) ([]*d
 			&article.EditionDate,
 			&article.Rating,
 			&article.Description,
+			&article.Text,
 			&article.LocalURL,
 			&article.ImageURL,
 			&article.WebURL,
@@ -302,6 +309,7 @@ func (as *articleStorage) Create(articleCreateDTO *domain.CreateArticleDTO) (str
 		articleCreateDTO.Difficulty,
 		articleCreateDTO.EditionDate,
 		articleCreateDTO.Description,
+		articleCreateDTO.Text,
 		articleCreateDTO.LocalURL,
 		articleCreateDTO.WebURL,
 		articleCreateDTO.Language,
@@ -374,6 +382,7 @@ func (as *articleStorage) Update(articleUpdateDTO *domain.UpdateArticleDTO) erro
 		articleUpdateDTO.Difficulty,
 		articleUpdateDTO.EditionDate,
 		articleUpdateDTO.Description,
+		articleUpdateDTO.Text,
 		articleUpdateDTO.LocalURL,
 		articleUpdateDTO.WebURL,
 		articleUpdateDTO.Language,

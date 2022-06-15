@@ -49,8 +49,8 @@ func (vh *videoHandler) Register(router *httprouter.Router) {
 	router.POST(createVideoURL, vh.Middleware.createVideo(vh.Create()))
 	router.DELETE(deleteVideoURL, vh.Delete)
 	router.PUT(updateVideoURL, vh.Update)
-	router.GET(loadVideoFileURL, vh.LoadFile)
-	router.PUT(updateVideoFileURL, vh.Middleware.updateVideoFile(vh.UpdateFile()))
+	//router.GET(loadVideoFileURL, vh.LoadFile)
+	//router.PUT(updateVideoFileURL, vh.Middleware.updateVideoFile(vh.UpdateFile()))
 	router.PUT(rateVideoUrl, vh.Rate)
 }
 
@@ -112,24 +112,29 @@ func (vh *videoHandler) Create() http.Handler {
 
 		createVideoDTO := domain.CreateVideoDTO{}
 
-		file := data["file"].(*bytes.Buffer)
-
 		createVideoDTO.Title = strings.Replace(data["title"].(string), " ", "_", -1)
 		createVideoDTO.DirectionUUID = data["direction_uuid"].(string)
 		createVideoDTO.Difficulty = data["difficulty"].(string)
 		createVideoDTO.Language = data["language"].(string)
 		createVideoDTO.TagsUUIDs = strings.Split(data["tags_uuids"].(string), ",")
-
-		fileName := data["fileName"].(string)
+		fileName, ok := data["fileName"].(string)
+		if ok {
+			fileName = data["fileName"].(string)
+			createVideoDTO.LocalURL = fmt.Sprintf("%s?url=%s", loadVideoFileURL, fileName)
+		} else {
+			createVideoDTO.LocalURL = "no file was added"
+		}
 		createVideoDTO.WebURL = data["web_url"].(string)
-		createVideoDTO.LocalURL = fmt.Sprintf("%s?url=%s", loadVideoFileURL, fileName)
 
-		err := vh.Service.SaveFile(videoLocalStoragePath, fileName, file)
-		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			vh.logger.Errorf("error occurred while saving video into local database. err: %v.", err)
-			json.NewEncoder(w).Encode(JSON.Error{Msg: fmt.Sprintf("error occurred while saving video into local database. err: %v", err)})
-			return
+		file, ok := data["file"].(*bytes.Buffer)
+		if ok && file != nil {
+			err := vh.Service.SaveFile(videoLocalStoragePath, fileName, file)
+			if err != nil {
+				w.WriteHeader(http.StatusInternalServerError)
+				vh.logger.Errorf("error occurred while saving video into local database. err: %v.", err)
+				json.NewEncoder(w).Encode(JSON.Error{Msg: fmt.Sprintf("error occurred while saving video into local database. err: %v", err)})
+				return
+			}
 		}
 
 		UUID, err := vh.Service.Create(&createVideoDTO)

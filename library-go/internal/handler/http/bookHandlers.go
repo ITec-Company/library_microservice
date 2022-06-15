@@ -17,7 +17,6 @@ import (
 	"os"
 	"strconv"
 	"strings"
-	"time"
 )
 
 const (
@@ -125,8 +124,14 @@ func (bh *bookHandler) Create() http.Handler {
 		createBookDTO.DirectionUUID = data["direction_uuid"].(string)
 		createBookDTO.AuthorUUID = data["author_uuid"].(string)
 		createBookDTO.Difficulty = data["difficulty"].(string)
-		t, _ := time.Parse("2006-01-02", data["edition_date"].(string))
-		createBookDTO.EditionDate = t
+		editionDate, err := strconv.Atoi(data["edition_date"].(string))
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			bh.logger.Errorf("error occurred while creating book (converting edition date string to int). err: %v.", err)
+			json.NewEncoder(w).Encode(JSON.Error{Msg: fmt.Sprintf("error occurred while saving article into local store. err: %v.", err)})
+			return
+		}
+		createBookDTO.EditionDate = uint(editionDate)
 		createBookDTO.Description = data["description"].(string)
 		createBookDTO.Language = data["language"].(string)
 		createBookDTO.TagsUUIDs = strings.Split(data["tags_uuids"].(string), ",")

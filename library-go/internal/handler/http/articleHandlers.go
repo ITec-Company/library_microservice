@@ -17,7 +17,6 @@ import (
 	"os"
 	"strconv"
 	"strings"
-	"time"
 )
 
 const (
@@ -124,14 +123,26 @@ func (ah *articleHandler) Create() http.Handler {
 		createArticleDTO.DirectionUUID = data["direction_uuid"].(string)
 		createArticleDTO.AuthorUUID = data["author_uuid"].(string)
 		createArticleDTO.Difficulty = data["difficulty"].(string)
-		t, _ := time.Parse("2006-01-02", data["edition_date"].(string))
-		createArticleDTO.EditionDate = t
+		editionDate, err := strconv.Atoi(data["edition_date"].(string))
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			ah.logger.Errorf("error occurred while creating article (converting edition date string to int). err: %v.", err)
+			json.NewEncoder(w).Encode(JSON.Error{Msg: fmt.Sprintf("error occurred while saving article into local store. err: %v.", err)})
+			return
+		}
+		createArticleDTO.EditionDate = uint(editionDate)
 		createArticleDTO.Description = data["description"].(string)
+		createArticleDTO.Text = data["text"].(string)
 		createArticleDTO.Language = data["language"].(string)
 		createArticleDTO.TagsUUIDs = strings.Split(data["tags_uuids"].(string), ",")
-		fileName := data["fileName"].(string)
+		fileName, ok := data["fileName"].(string)
+		if ok {
+			fileName = data["fileName"].(string)
+			createArticleDTO.LocalURL = fmt.Sprintf("%s?file=%s&uuid=", loadArticleFileURL, fileName)
+		} else {
+			createArticleDTO.LocalURL = "no file was added"
+		}
 		createArticleDTO.WebURL = data["web_url"].(string)
-		createArticleDTO.LocalURL = fmt.Sprintf("%s?file=%s&uuid=", loadArticleFileURL, fileName)
 		createArticleDTO.ImageURL = fmt.Sprintf("%s?format=%s&uuid=", loadArticleImageURL, string(utils.FormatOriginal))
 
 		UUID, err := ah.Service.Create(&createArticleDTO)
@@ -143,13 +154,15 @@ func (ah *articleHandler) Create() http.Handler {
 
 		path := fmt.Sprintf("%s%s/", articleLocalStoragePath, UUID)
 
-		file := data["file"].(*bytes.Buffer)
-		err = ah.Service.SaveFile(path, fileName, file)
-		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			ah.logger.Errorf("error occurred while saving article into local store. err: %v.", err)
-			json.NewEncoder(w).Encode(JSON.Error{Msg: fmt.Sprintf("error occurred while saving article into local store. err: %v.", err)})
-			return
+		file, ok := data["file"].(*bytes.Buffer)
+		if ok && file != nil {
+			err = ah.Service.SaveFile(path, fileName, file)
+			if err != nil {
+				w.WriteHeader(http.StatusInternalServerError)
+				ah.logger.Errorf("error occurred while saving article into local store. err: %v.", err)
+				json.NewEncoder(w).Encode(JSON.Error{Msg: fmt.Sprintf("error occurred while saving article into local store. err: %v.", err)})
+				return
+			}
 		}
 
 		img := data["image"].(image.Image)

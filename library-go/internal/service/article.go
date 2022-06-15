@@ -56,25 +56,17 @@ func (s *articleService) SaveFile(path, fileName string, file io.Reader) error {
 }
 
 func (s *articleService) UpdateFile(dto *domain.UpdateArticleFileDTO) error {
-	if dto.OldFileName != dto.NewFileName {
-		err := os.Remove(fmt.Sprintf("%s%s", dto.LocalPath, dto.OldFileName))
-		if err != nil {
-			return err
-		}
+	os.Remove(fmt.Sprintf("%s%s", dto.LocalPath, dto.OldFileName))
 
-		err = utils.SaveFile(dto.LocalPath, dto.NewFileName, dto.File)
-		if err != nil {
-			return err
-		}
-
-		return s.storage.Update(&domain.UpdateArticleDTO{
-			UUID:     dto.UUID,
-			LocalURL: dto.LocalURL,
-		})
-
-	} else {
-		return utils.SaveFile(dto.LocalPath, dto.NewFileName, dto.File)
+	err := s.storage.Update(&domain.UpdateArticleDTO{
+		UUID:     dto.UUID,
+		LocalURL: dto.LocalURL,
+	})
+	if err != nil {
+		return err
 	}
+
+	return utils.SaveFile(dto.LocalPath, dto.NewFileName, dto.File)
 }
 
 func (s *articleService) LoadImage(path string, format utils.Format, extension utils.Extension) (*image.Image, error) {

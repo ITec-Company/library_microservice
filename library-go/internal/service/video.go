@@ -51,29 +51,22 @@ func (s *videoService) LoadFile(path string) ([]byte, error) {
 }
 
 func (s *videoService) SaveFile(path, fileName string, file io.Reader) error {
-	return utils.SaveFile(path, fileName, file)
+	return nil
+	//return utils.SaveFile(path, fileName, file)
 }
 
 func (s *videoService) UpdateFile(dto *domain.UpdateVideoFileDTO) error {
-	if dto.OldFileName != dto.NewFileName {
-		err := os.Remove(fmt.Sprintf("%s%s", dto.LocalPath, dto.OldFileName))
-		if err != nil {
-			return err
-		}
+	os.Remove(fmt.Sprintf("%s%s", dto.LocalPath, dto.OldFileName))
 
-		err = utils.SaveFile(dto.LocalPath, dto.NewFileName, dto.File)
-		if err != nil {
-			return err
-		}
-
-		return s.storage.Update(&domain.UpdateVideoDTO{
-			UUID:     dto.UUID,
-			LocalURL: dto.LocalURL,
-		})
-
-	} else {
-		return utils.SaveFile(dto.LocalPath, dto.NewFileName, dto.File)
+	err := s.storage.Update(&domain.UpdateVideoDTO{
+		UUID:     dto.UUID,
+		LocalURL: dto.LocalURL,
+	})
+	if err != nil {
+		return err
 	}
+
+	return utils.SaveFile(dto.LocalPath, dto.NewFileName, dto.File)
 }
 
 func (s *videoService) Rate(UUID string, rating float32) error {

@@ -25,12 +25,12 @@ Content-Type: application/json
 GET http://localhost:1000/books?limit=5&page=2
 Content-Type: application/json
 
-// read article in browser ???
-// video ???
-// review field date - or DB table review column create_at???
-// JSON or query params
-// data validation : middleware/handler/service/repository/database
-// hardcode validations (check if query params are equal to fields name )
+// remove composites
+// editio date leave only year
 
 // query refactor    CREATE (look at book create Storage), UPDATE ?
 // tests
+
+// solve problem with tag validation while creating books/auido/video/article in DB query any/in (tags)
+
+// video save/update/load file functions were disabled
