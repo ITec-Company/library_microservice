@@ -26,7 +26,8 @@ GET http://localhost:1000/books?limit=5&page=2
 Content-Type: application/json
 
 // remove composites
-// editio date leave only year
+// unique direction/tags
+// add ngnix
 
 // query refactor    CREATE (look at book create Storage), UPDATE ?
 // tests

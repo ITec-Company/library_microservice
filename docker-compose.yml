@@ -55,3 +55,14 @@ services:
             ]
         depends_on:
             - librarydb
+
+    nginx:
+        build:
+            dockerfile: nginx.Dockerfile
+            context: .
+        volumes:
+            - ./store:/static
+        ports:
+            - "1500:80"
+        depends_on:
+            - library
