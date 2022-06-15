@@ -7,6 +7,7 @@ import (
 	"library-go/internal/domain"
 	"library-go/internal/store"
 	"library-go/pkg/logging"
+	"strings"
 )
 
 const (
@@ -121,7 +122,7 @@ func (ts *tagStorage) Create(tagCreateDTO *domain.CreateTagDTO) (string, error) 
 
 	var UUID string
 	row := tx.QueryRow(createTagQuery,
-		tagCreateDTO.Name,
+		strings.ToLower(tagCreateDTO.Name),
 	)
 	if err := row.Scan(&UUID); err != nil {
 		tx.Rollback()
@@ -170,7 +171,7 @@ func (ts *tagStorage) Update(tagUpdateDTO *domain.UpdateTagDTO) error {
 	}
 
 	result, err := tx.Exec(updateTagQuery,
-		tagUpdateDTO.Name,
+		strings.ToLower(tagUpdateDTO.Name),
 		tagUpdateDTO.UUID)
 
 	if err != nil {

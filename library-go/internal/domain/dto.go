@@ -188,6 +188,7 @@ type CreateVideoDTO struct {
 	Title         string   `json:"title"`
 	DirectionUUID string   `json:"direction_uuid"`
 	Difficulty    string   `json:"difficulty"`
+	Description   string   `json:"description"`
 	LocalURL      string   `json:"local_url"`
 	WebURL        string   `json:"web_url,omitempty"`
 	Language      string   `json:"language"`
@@ -200,6 +201,7 @@ type UpdateVideoDTO struct {
 	Title         string   `json:"title,omitempty"`
 	Difficulty    string   `json:"difficulty,omitempty"`
 	Rating        float32  `json:"rating,omitempty"`
+	Description   string   `json:"description,omitempty"`
 	LocalURL      string   `json:"local_url,omitempty"`
 	WebURL        string   `json:"web_url,omitempty"`
 	Language      string   `json:"language,omitempty"`

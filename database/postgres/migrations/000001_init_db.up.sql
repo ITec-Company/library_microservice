@@ -11,7 +11,7 @@ CREATE TABLE article
     edition_date            SMALLINT NOT NULL,
     rating                  NUMERIC(9,2) NOT NULL DEFAULT 0.0,
     all_grades              NUMERIC(9,2)[],
-    description             TEXT,
+    description             TEXT DEFAULT '',
     text                    TEXT,
     local_url               TEXT DEFAULT '',
     image_url               TEXT DEFAULT '',
@@ -45,7 +45,7 @@ CREATE TABLE book
     edition_date            SMALLINT NOT NULL,
     rating                  NUMERIC(9,2) NOT NULL DEFAULT 0.0,
     all_grades              NUMERIC(9,2)[],
-    description             TEXT,
+    description             TEXT DEFAULT '',
     local_url               TEXT DEFAULT '',
     image_url               TEXT DEFAULT '',
     language                CHARACTER VARYING(15),
@@ -61,6 +61,7 @@ CREATE TABLE video
     difficulty              difficulty NOT NULL,
     rating                  NUMERIC(9,2) NOT NULL DEFAULT 0.0,
     all_grades              NUMERIC(9,2)[],
+    description             TEXT DEFAULT '',
     local_url               TEXT DEFAULT '',
     web_url                 TEXT DEFAULT '',
     language                CHARACTER VARYING(15),
@@ -83,18 +84,18 @@ CREATE TABLE review
 
 CREATE TABLE author
 (   uuid                    SERIAL PRIMARY KEY,
-    full_name               CHARACTER VARYING(100) NOT NULL,
+    full_name               CHARACTER VARYING(100) NOT NULL UNIQUE ,
     created_at              TIMESTAMP NOT NULL DEFAULT (now() AT TIME ZONE 'utc')
 );
 
 CREATE TABLE direction
 (   uuid                   SERIAL PRIMARY KEY,
-    name                   CHARACTER VARYING(100) NOT NULL,
+    name                   CHARACTER VARYING(100) NOT NULL UNIQUE ,
     created_at             TIMESTAMP NOT NULL DEFAULT (now() AT TIME ZONE 'utc')
 );
 
 CREATE TABLE tag
 (   uuid                   SERIAL PRIMARY KEY,
-    name                   CHARACTER VARYING(100) NOT NULL,
+    name                   CHARACTER VARYING(100) NOT NULL UNIQUE ,
     created_at             TIMESTAMP NOT NULL DEFAULT (now() AT TIME ZONE 'utc')
 );

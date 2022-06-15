@@ -49,9 +49,10 @@ func (vh *videoHandler) Register(router *httprouter.Router) {
 	router.POST(createVideoURL, vh.Middleware.createVideo(vh.Create()))
 	router.DELETE(deleteVideoURL, vh.Delete)
 	router.PUT(updateVideoURL, vh.Update)
+	router.PUT(rateVideoUrl, vh.Rate)
+
 	//router.GET(loadVideoFileURL, vh.LoadFile)
 	//router.PUT(updateVideoFileURL, vh.Middleware.updateVideoFile(vh.UpdateFile()))
-	router.PUT(rateVideoUrl, vh.Rate)
 }
 
 func (vh *videoHandler) GetAll() http.HandlerFunc {
@@ -114,6 +115,7 @@ func (vh *videoHandler) Create() http.Handler {
 
 		createVideoDTO.Title = strings.Replace(data["title"].(string), " ", "_", -1)
 		createVideoDTO.DirectionUUID = data["direction_uuid"].(string)
+		createVideoDTO.Description = data["description"].(string)
 		createVideoDTO.Difficulty = data["difficulty"].(string)
 		createVideoDTO.Language = data["language"].(string)
 		createVideoDTO.TagsUUIDs = strings.Split(data["tags_uuids"].(string), ",")

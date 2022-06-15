@@ -6,6 +6,7 @@ import (
 	"library-go/internal/domain"
 	"library-go/internal/store"
 	"library-go/pkg/logging"
+	"strings"
 )
 
 const (
@@ -91,7 +92,7 @@ func (ds *directionStorage) Create(directionCreateDTO *domain.CreateDirectionDTO
 
 	var UUID string
 	row := tx.QueryRow(createDirectionQuery,
-		directionCreateDTO.Name,
+		strings.Title(strings.ToLower(directionCreateDTO.Name)),
 	)
 	if err := row.Scan(&UUID); err != nil {
 		tx.Rollback()
@@ -140,7 +141,7 @@ func (ds *directionStorage) Update(directionUpdateDTO *domain.UpdateDirectionDTO
 	}
 
 	result, err := tx.Exec(updateDirectionQuery,
-		directionUpdateDTO.Name,
+		strings.Title(strings.ToLower(directionUpdateDTO.Name)),
 		directionUpdateDTO.UUID)
 
 	if err != nil {

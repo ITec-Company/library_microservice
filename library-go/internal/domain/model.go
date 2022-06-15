@@ -99,6 +99,7 @@ type Video struct {
 	Direction     Direction  `json:"direction,omitempty"`
 	Rating        float32    `json:"rating,omitempty"`
 	Difficulty    Difficulty `json:"difficulty,omitempty"`
+	Description   string     `json:"description,omitempty"`
 	LocalURL      string     `json:"local_url,omitempty"`
 	WebURL        string     `json:"web_url,omitempty"`
 	Language      string     `json:"language,omitempty"`

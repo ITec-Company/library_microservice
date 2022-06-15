@@ -289,6 +289,7 @@ func (m *Middleware) createVideo(next http.Handler) httprouter.Handle {
 			"file":           "file",
 			"title":          "text",
 			"direction_uuid": "text",
+			"description":    "text",
 			"difficulty":     "text",
 			"web_url":        "text",
 			"language":       "text",
