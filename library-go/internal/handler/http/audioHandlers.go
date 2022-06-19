@@ -262,7 +262,7 @@ func (ah *AudioHandler) UpdateFile() http.Handler {
 		dto := r.Context().Value(CtxKeyUpdateAudioFile).(domain.UpdateAudioFileDTO)
 
 		dto.LocalPath = fmt.Sprintf("%s%s/", audioLocalStoragePath, dto.UUID)
-		dto.LocalURL = fmt.Sprintf("%s?file=%s&uuid=%s", loadAudioFileURL, dto.NewFileName, dto.UUID)
+		dto.LocalURL = fmt.Sprintf("%s|split|/%s", loadAudioFileURL, dto.NewFileName)
 
 		err := ah.Service.UpdateFile(&dto)
 		if err != nil {

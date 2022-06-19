@@ -98,14 +98,16 @@ func (m *Middleware) createArticle(next http.Handler) httprouter.Handle {
 func (m *Middleware) updateArticleFile(next http.Handler) httprouter.Handle {
 	return func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 
-		fileName := r.URL.Query().Get("file")
+		localURL := r.URL.Query().Get("localurl")
+		localURLSplit := strings.Split(localURL, "/")
+		fileName := localURLSplit[3]
 		if fileName == "" {
 			w.WriteHeader(http.StatusBadRequest)
 			m.logger.Errorf("file query can't be empty")
 			return
 		}
 
-		uuid := r.URL.Query().Get("uuid")
+		uuid := localURLSplit[2]
 		if uuid == "" {
 			w.WriteHeader(http.StatusBadRequest)
 			m.logger.Errorf("uuid query can't be empty")
@@ -217,14 +219,16 @@ func (m *Middleware) createBook(next http.Handler) httprouter.Handle {
 func (m *Middleware) updateBookFile(next http.Handler) httprouter.Handle {
 	return func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 
-		fileName := r.URL.Query().Get("file")
+		localURL := r.URL.Query().Get("localurl")
+		localURLSplit := strings.Split(localURL, "/")
+		fileName := localURLSplit[3]
 		if fileName == "" {
 			w.WriteHeader(http.StatusBadRequest)
 			m.logger.Errorf("file query can't be empty")
 			return
 		}
 
-		uuid := r.URL.Query().Get("uuid")
+		uuid := localURLSplit[2]
 		if uuid == "" {
 			w.WriteHeader(http.StatusBadRequest)
 			m.logger.Errorf("uuid query can't be empty")
@@ -335,14 +339,16 @@ func (m *Middleware) createVideo(next http.Handler) httprouter.Handle {
 func (m *Middleware) updateVideoFile(next http.Handler) httprouter.Handle {
 	return func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 
-		fileName := r.URL.Query().Get("file")
+		localURL := r.URL.Query().Get("localurl")
+		localURLSplit := strings.Split(localURL, "/")
+		fileName := localURLSplit[3]
 		if fileName == "" {
 			w.WriteHeader(http.StatusBadRequest)
 			m.logger.Errorf("file query can't be empty")
 			return
 		}
 
-		uuid := r.URL.Query().Get("uuid")
+		uuid := localURLSplit[2]
 		if uuid == "" {
 			w.WriteHeader(http.StatusBadRequest)
 			m.logger.Errorf("uuid query can't be empty")
@@ -444,14 +450,16 @@ func (m *Middleware) createAudio(next http.Handler) httprouter.Handle {
 func (m *Middleware) updateAudioFile(next http.Handler) httprouter.Handle {
 	return func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 
-		fileName := r.URL.Query().Get("file")
+		localURL := r.URL.Query().Get("localurl")
+		localURLSplit := strings.Split(localURL, "/")
+		fileName := localURLSplit[3]
 		if fileName == "" {
 			w.WriteHeader(http.StatusBadRequest)
 			m.logger.Errorf("file query can't be empty")
 			return
 		}
 
-		uuid := r.URL.Query().Get("uuid")
+		uuid := localURLSplit[2]
 		if uuid == "" {
 			w.WriteHeader(http.StatusBadRequest)
 			m.logger.Errorf("uuid query can't be empty")

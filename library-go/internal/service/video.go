@@ -51,8 +51,7 @@ func (s *videoService) LoadFile(path string) ([]byte, error) {
 }
 
 func (s *videoService) SaveFile(path, fileName string, file io.Reader) error {
-	return nil
-	//return utils.SaveFile(path, fileName, file)
+	return utils.SaveFile(path, fileName, file)
 }
 
 func (s *videoService) UpdateFile(dto *domain.UpdateVideoFileDTO) error {

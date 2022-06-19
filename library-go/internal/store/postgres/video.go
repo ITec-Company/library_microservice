@@ -62,12 +62,12 @@ const (
 				      $2,
 				      $3,
 				      $4, 
-				      $5, 
-				      $6,
+				      $5 || (SELECT last_value from video_uuid_seq) || $6, 
 				      $7,
-				      $8
+				      $8,
+				      $9
 				WHERE EXISTS(SELECT uuid FROM direction where $3 = direction.uuid) AND
-				EXISTS(SELECT uuid FROM tag where tag.uuid = any($8)) RETURNING video.uuid`
+				EXISTS(SELECT uuid FROM tag where tag.uuid = any($9)) RETURNING video.uuid`
 
 	deleteVideoQuery = `DELETE FROM video WHERE uuid = $1`
 
@@ -271,12 +271,18 @@ func (vs *videoStorage) Create(videoCreateDTO *domain.CreateVideoDTO) (string, e
 
 	var UUID string
 
+	localURL := strings.Split(videoCreateDTO.LocalURL, "|split|")
+	if len(localURL) < 2 {
+		localURL = append(localURL, "")
+	}
+
 	row := tx.QueryRow(createVideoQuery,
 		videoCreateDTO.Title,
 		videoCreateDTO.Difficulty,
 		videoCreateDTO.DirectionUUID,
 		videoCreateDTO.Description,
-		videoCreateDTO.LocalURL,
+		localURL[0],
+		localURL[1],
 		videoCreateDTO.WebURL,
 		videoCreateDTO.Language,
 		pq.Array(videoCreateDTO.TagsUUIDs),

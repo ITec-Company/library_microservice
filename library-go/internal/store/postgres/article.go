@@ -92,7 +92,7 @@ const (
 			direction_uuid = (CASE WHEN EXISTS(SELECT uuid FROM direction where direction.uuid = $2) THEN $2 ELSE direction_uuid END), 
 			author_uuid = (CASE WHEN (EXISTS(SELECT uuid FROM author where author.uuid = $3)) THEN $3 ELSE author_uuid END), 
 			difficulty = (CASE WHEN ($4 = any(enum_range(difficulty))) THEN $4 ELSE difficulty END), 
-			edition_date = (CASE WHEN ($5 != date('0001-01-01 00:00:00')) THEN $5 ELSE edition_date END),
+			edition_date = (CASE WHEN ($5 != 0) THEN $5 ELSE edition_date END),
 			description = COALESCE(NULLIF($6, ''), description), 
 			text = COALESCE(NULLIF($7, ''), text),
 			local_url = COALESCE(NULLIF($8, ''), local_url), 

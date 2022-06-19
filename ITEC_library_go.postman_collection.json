@@ -23,7 +23,7 @@
 							"formdata": []
 						},
 						"url": {
-							"raw": "http://localhost:1000/article/1",
+							"raw": "http://localhost:1000/article/3",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -31,7 +31,7 @@
 							"port": "1000",
 							"path": [
 								"article",
-								"1"
+								"3"
 							]
 						}
 					},
@@ -67,7 +67,7 @@
 								{
 									"key": "file",
 									"type": "file",
-									"src": "/C:/Users/kazbe/Desktop/author(1)-title(software_testing).docx"
+									"src": "/C:/Users/kazbe/Desktop/Golang_Learning_program.docx"
 								},
 								{
 									"key": "title",
@@ -91,7 +91,7 @@
 								},
 								{
 									"key": "edition_date",
-									"value": "2000-10-10",
+									"value": "2000",
 									"type": "text"
 								},
 								{
@@ -238,11 +238,11 @@
 						"body": {
 							"mode": "file",
 							"file": {
-								"src": "/C:/Users/kazbe/Desktop/author(1)asdasd-title(software_testing).doc"
+								"src": "/C:/Users/kazbe/Desktop/Golang_Learning_program.docx"
 							}
 						},
 						"url": {
-							"raw": "http://localhost:1000/file/article?file=author(1)-title(article_three).docx&uuid=6",
+							"raw": "http://localhost:1000/file/article?localurl=/articles/3/author(1)-title(article three).docx",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -254,12 +254,8 @@
 							],
 							"query": [
 								{
-									"key": "file",
-									"value": "author(1)-title(article_three).docx"
-								},
-								{
-									"key": "uuid",
-									"value": "6"
+									"key": "localurl",
+									"value": "/articles/3/author(1)-title(article three).docx"
 								}
 							]
 						}
@@ -682,11 +678,11 @@
 						"body": {
 							"mode": "file",
 							"file": {
-								"src": "/C:/Users/kazbe/Desktop/sample-3s.mp3"
+								"src": "/C:/Users/kazbe/Desktop/title(software_testing).mp3"
 							}
 						},
 						"url": {
-							"raw": "http://localhost:1000/file/audio?file=title(software_testing).mp3&uuid=1",
+							"raw": "http://localhost:1000/file/audio?localurl=/audios/1/title(software_testing).mp3",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -698,12 +694,8 @@
 							],
 							"query": [
 								{
-									"key": "file",
-									"value": "title(software_testing).mp3"
-								},
-								{
-									"key": "uuid",
-									"value": "1"
+									"key": "localurl",
+									"value": "/audios/1/title(software_testing).mp3"
 								}
 							]
 						}
@@ -819,7 +811,7 @@
 								},
 								{
 									"key": "edition_date",
-									"value": "2000-10-10",
+									"value": "2000",
 									"type": "text"
 								},
 								{
@@ -960,7 +952,7 @@
 							}
 						},
 						"url": {
-							"raw": "http://localhost:1000/file/book?file=author(1)-title(software_testing).pdf&uuid=4",
+							"raw": "http://localhost:1000/file/book?localurl=/books/1/author(1)-title(software_testing).pdf",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -972,12 +964,8 @@
 							],
 							"query": [
 								{
-									"key": "file",
-									"value": "author(1)-title(software_testing).pdf"
-								},
-								{
-									"key": "uuid",
-									"value": "4"
+									"key": "localurl",
+									"value": "/books/1/author(1)-title(software_testing).pdf"
 								}
 							]
 						}
@@ -1422,7 +1410,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"name\": \"newbies\"\r\n}",
+							"raw": "{\r\n    \"name\": \"middыles\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1509,7 +1497,7 @@
 							"formdata": []
 						},
 						"url": {
-							"raw": "http://localhost:1000/video/4",
+							"raw": "http://localhost:1000/video/1",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -1517,7 +1505,7 @@
 							"port": "1000",
 							"path": [
 								"video",
-								"4"
+								"1"
 							]
 						}
 					},
@@ -1566,6 +1554,11 @@
 									"type": "text"
 								},
 								{
+									"key": "description",
+									"value": "some description",
+									"type": "text"
+								},
+								{
 									"key": "difficulty",
 									"value": "middle",
 									"type": "text"
@@ -1608,7 +1601,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"uuid\": \"4\",\r\n    \"title\": \"updated video\",\r\n    \"direction_uuid\": \"2\",\r\n    \"difficulty\": \"junior\",\r\n    \"language\": \"end\",\r\n    \"web_url\": \"updated url\",\r\n    \"tags_uuids\": [\"1\", \"4\"]\r\n}",
+							"raw": "{\r\n    \"uuid\": \"1\",\r\n    \"title\": \"updated video\",\r\n    \"direction_uuid\": \"2\",\r\n    \"description\": \"updated description\",\r\n    \"difficulty\": \"junior\",\r\n    \"language\": \"end\",\r\n    \"web_url\": \"updated url\",\r\n    \"tags_uuids\": [\"1\", \"4\"]\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1699,7 +1692,7 @@
 							}
 						},
 						"url": {
-							"raw": "http://localhost:1000/file/video?url=title(video_test_one).mp4",
+							"raw": "http://localhost:1000/file/video?localurl=/videos/3/title(video test two).mp4",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -1711,8 +1704,8 @@
 							],
 							"query": [
 								{
-									"key": "url",
-									"value": "title(video_test_one).mp4"
+									"key": "localurl",
+									"value": "/videos/3/title(video test two).mp4"
 								}
 							]
 						}

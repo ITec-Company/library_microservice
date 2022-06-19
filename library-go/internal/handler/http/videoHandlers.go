@@ -21,9 +21,10 @@ const (
 	createVideoURL     = "/video"
 	deleteVideoURL     = "/video/:uuid"
 	updateVideoURL     = "/video"
-	loadVideoFileURL   = "/file/video"
 	updateVideoFileURL = "/file/video"
 	rateVideoUrl       = "/rate/video"
+
+	loadVideoFileURL = "/videos/"
 
 	videoLocalStoragePath = "../store/videos/"
 )
@@ -47,9 +48,9 @@ func (vh *VideoHandler) Register(router *httprouter.Router, middleware *Middlewa
 	router.DELETE(deleteVideoURL, vh.Delete)
 	router.PUT(updateVideoURL, vh.Update)
 	router.PUT(rateVideoUrl, vh.Rate)
+	router.PUT(updateVideoFileURL, middleware.updateVideoFile(vh.UpdateFile()))
 
 	//router.GET(loadVideoFileURL, vh.LoadFile)
-	//router.PUT(updateVideoFileURL, vh.Middleware.updateVideoFile(vh.UpdateFile()))
 }
 
 func (vh *VideoHandler) GetAll() http.HandlerFunc {
@@ -119,27 +120,27 @@ func (vh *VideoHandler) Create() http.Handler {
 		fileName, ok := data["fileName"].(string)
 		if ok {
 			fileName = data["fileName"].(string)
-			createVideoDTO.LocalURL = fmt.Sprintf("%s?url=%s", loadVideoFileURL, fileName)
+			createVideoDTO.LocalURL = fmt.Sprintf("%s|split|/%s", loadVideoFileURL, fileName)
 		} else {
 			createVideoDTO.LocalURL = "file wasn't added"
 		}
 		createVideoDTO.WebURL = data["web_url"].(string)
 
-		file, ok := data["file"].(*bytes.Buffer)
-		if ok && file != nil {
-			err := vh.Service.SaveFile(videoLocalStoragePath, fileName, file)
-			if err != nil {
-				w.WriteHeader(http.StatusInternalServerError)
-				vh.logger.Errorf("error occurred while saving video into local database. err: %v.", err)
-				json.NewEncoder(w).Encode(JSON.Error{Msg: fmt.Sprintf("error occurred while saving video into local database. err: %v", err)})
-				return
-			}
-		}
-
 		UUID, err := vh.Service.Create(&createVideoDTO)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			json.NewEncoder(w).Encode(JSON.Error{Msg: fmt.Sprintf("error occurred while creating video into DB. err: %v", err)})
+			return
+		}
+
+		path := fmt.Sprintf("%s%s/", videoLocalStoragePath, UUID)
+
+		file, ok := data["file"].(*bytes.Buffer)
+		err = vh.Service.SaveFile(path, fileName, file)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			vh.logger.Errorf("error occurred while saving video into local store. err: %v.", err)
+			json.NewEncoder(w).Encode(JSON.Error{Msg: fmt.Sprintf("error occurred while saving video into local database. err: %v", err)})
 			return
 		}
 
@@ -193,6 +194,9 @@ func (vh *VideoHandler) Update(w http.ResponseWriter, r *http.Request, ps httpro
 		return
 	}
 
+	// block changing URL
+	updateVideoDTO.LocalURL = ""
+
 	err := vh.Service.Update(updateVideoDTO)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -205,34 +209,33 @@ func (vh *VideoHandler) Update(w http.ResponseWriter, r *http.Request, ps httpro
 }
 
 func (vh *VideoHandler) LoadFile(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-
-	url := r.URL.Query().Get("url")
-	if url == "" {
+	file := r.URL.Query().Get("file")
+	if file == "" {
 		w.WriteHeader(http.StatusBadRequest)
-		vh.logger.Errorf("url can't be empty")
+		vh.logger.Errorf("file query can't be empty")
 		return
 	}
 
 	uuid := r.URL.Query().Get("uuid")
 	if uuid == "" {
-		vh.logger.Errorf("empty uuid")
+		w.WriteHeader(http.StatusBadRequest)
+		vh.logger.Errorf("uuid query can't be empty")
+		return
 	}
 
-	if uuid != "" {
-		err := vh.Service.DownloadCountUp(uuid)
-		if err != nil {
-			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(http.StatusInternalServerError)
-			vh.logger.Errorf("error occurred while downloading (DB ping to increase dowload count). err: %v", err)
-			json.NewEncoder(w).Encode(JSON.Error{Msg: fmt.Sprintf("error occurred while downloading (DB ping to increase dowload count). err: %v", err)})
-			return
-		}
+	err := vh.Service.DownloadCountUp(uuid)
+	if err != nil {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusInternalServerError)
+		vh.logger.Errorf("error occurred while downloading (DB ping to increase dowload count). err: %v", err)
+		json.NewEncoder(w).Encode(JSON.Error{Msg: fmt.Sprintf("error occurred while downloading (DB ping to increase dowload count). err: %v", err)})
+		return
 	}
 
-	w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=%s", url))
+	w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=%s", file))
 	w.Header().Set("Content-Type", "application/octet-stream")
 
-	path := fmt.Sprintf("%s%s", videoLocalStoragePath, url)
+	path := fmt.Sprintf("%s%s/%s", videoLocalStoragePath, uuid, file)
 
 	fileBytes, err := vh.Service.LoadFile(path)
 	_, pathError := err.(*os.PathError)
@@ -261,7 +264,7 @@ func (vh *VideoHandler) UpdateFile() http.Handler {
 		dto := r.Context().Value(CtxKeyUpdateVideoFile).(domain.UpdateVideoFileDTO)
 
 		dto.LocalPath = fmt.Sprintf("%s%s/", videoLocalStoragePath, dto.UUID)
-		dto.LocalURL = fmt.Sprintf("%s?file=%s&uuid=%s", loadVideoFileURL, dto.NewFileName, dto.UUID)
+		dto.LocalURL = fmt.Sprintf("%s|split|/%s", loadVideoFileURL, dto.NewFileName)
 
 		err := vh.Service.UpdateFile(&dto)
 		if err != nil {

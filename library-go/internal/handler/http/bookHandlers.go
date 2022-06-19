@@ -293,7 +293,7 @@ func (bh *BookHandler) UpdateFile() http.Handler {
 		dto := r.Context().Value(CtxKeyUpdateBookFile).(domain.UpdateBookFileDTO)
 
 		dto.LocalPath = fmt.Sprintf("%s%s/", bookLocalStoragePath, dto.UUID)
-		dto.LocalURL = fmt.Sprintf("%s?file=%s&uuid=%s", loadBookFileURL, dto.NewFileName, dto.UUID)
+		dto.LocalURL = fmt.Sprintf("%s|split|/%s", loadBookFileURL, dto.NewFileName)
 
 		err := bh.Service.UpdateFile(&dto)
 		if err != nil {

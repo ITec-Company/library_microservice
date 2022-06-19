@@ -294,7 +294,7 @@ func (ah *ArticleHandler) UpdateFile() http.Handler {
 		dto := r.Context().Value(CtxKeyUpdateArticleFile).(domain.UpdateArticleFileDTO)
 
 		dto.LocalPath = fmt.Sprintf("%s%s/", articleLocalStoragePath, dto.UUID)
-		dto.LocalURL = fmt.Sprintf("%s?file=%s&uuid=%s", loadArticleFileURL, dto.NewFileName, dto.UUID)
+		dto.LocalURL = fmt.Sprintf("%s|split|/%s", loadArticleFileURL, dto.NewFileName)
 
 		err := ah.Service.UpdateFile(&dto)
 		if err != nil {
