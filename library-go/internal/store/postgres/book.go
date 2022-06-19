@@ -137,6 +137,7 @@ func (bs *bookStorage) GetOne(UUID string) (*domain.Book, error) {
 		"B.image_url",
 		"B.language",
 		"B.download_count",
+		"B.created_at",
 		"Au.uuid",
 		"Au.full_name",
 		"D.uuid as direction_uuid",
@@ -148,7 +149,7 @@ func (bs *bookStorage) GetOne(UUID string) (*domain.Book, error) {
 		LeftJoin("author AS Au ON Au.uuid = B.author_uuid").
 		LeftJoin("direction AS D ON D.uuid = B.direction_uuid").
 		LeftJoin("tag AS T ON  T.uuid = any (B.tags_uuids)").
-		GroupBy("B.uuid, B.title, B.difficulty, B.edition_date, B.rating, B.description, B.local_url, B.image_url, B.language, B.download_count, Au.uuid, Au.full_name, D.uuid, D.name").
+		GroupBy("B.uuid, B.title, B.difficulty, B.edition_date, B.rating, B.description, B.local_url, B.image_url, B.language, B.download_count, B.created_at, Au.uuid, Au.full_name, D.uuid, D.name").
 		ToSql()
 
 	var book domain.Book
@@ -164,6 +165,7 @@ func (bs *bookStorage) GetOne(UUID string) (*domain.Book, error) {
 		&book.ImageURL,
 		&book.Language,
 		&book.DownloadCount,
+		&book.CreatedAt,
 		&book.Author.UUID,
 		&book.Author.FullName,
 		&book.Direction.UUID,
@@ -197,6 +199,7 @@ func (bs *bookStorage) GetAll(sortOptions *domain.SortFilterPagination) ([]*doma
 		"B.image_url",
 		"B.language",
 		"B.download_count",
+		"B.created_at",
 		"Au.uuid",
 		"Au.full_name",
 		"D.uuid as direction_uuid",
@@ -207,7 +210,7 @@ func (bs *bookStorage) GetAll(sortOptions *domain.SortFilterPagination) ([]*doma
 		LeftJoin("author AS Au ON Au.uuid = B.author_uuid").
 		LeftJoin("direction AS D ON D.uuid = B.direction_uuid").
 		LeftJoin("tag AS T ON  T.uuid = any (B.tags_uuids)").
-		GroupBy("B.uuid, B.title, B.difficulty, B.edition_date, B.rating, B.description, B.local_url, B.image_url, B.language, B.download_count, Au.uuid, Au.full_name, D.uuid, D.name")
+		GroupBy("B.uuid, B.title, B.difficulty, B.edition_date, B.rating, B.description, B.local_url, B.image_url, B.language, B.download_count, B.created_at, Au.uuid, Au.full_name, D.uuid, D.name")
 
 	if sortOptions.Limit != 0 {
 		s = s.Limit(sortOptions.Limit)
@@ -250,6 +253,7 @@ func (bs *bookStorage) GetAll(sortOptions *domain.SortFilterPagination) ([]*doma
 			&book.ImageURL,
 			&book.Language,
 			&book.DownloadCount,
+			&book.CreatedAt,
 			&book.Author.UUID,
 			&book.Author.FullName,
 			&book.Direction.UUID,

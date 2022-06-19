@@ -38,6 +38,7 @@ type Article struct {
 	Language      string     `json:"language,omitempty"`
 	Tags          []Tag      `json:"tags,omitempty"`
 	DownloadCount uint32     `json:"download_count,omitempty"`
+	CreatedAt     time.Time  `json:"created_at,omitempty"`
 }
 
 type Audio struct {
@@ -50,6 +51,7 @@ type Audio struct {
 	Language      string     `json:"language,omitempty"`
 	Tags          []Tag      `json:"tags,omitempty"`
 	DownloadCount uint32     `json:"download_count,omitempty"`
+	CreatedAt     time.Time  `json:"created_at,omitempty"`
 }
 
 type Author struct {
@@ -71,6 +73,7 @@ type Book struct {
 	Tags          []Tag      `json:"tags,omitempty"`
 	DownloadCount uint32     `json:"download_count,omitempty"`
 	ImageURL      string     `json:"image_url,omitempty"`
+	CreatedAt     time.Time  `json:"created_at,omitempty"`
 }
 
 type Direction struct {
@@ -105,6 +108,7 @@ type Video struct {
 	Language      string     `json:"language,omitempty"`
 	Tags          []Tag      `json:"tags,omitempty"`
 	DownloadCount uint32     `json:"download_count,omitempty"`
+	CreatedAt     time.Time  `json:"created_at,omitempty"`
 }
 
 type SortFilterPagination struct {

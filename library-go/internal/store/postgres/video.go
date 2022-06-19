@@ -121,6 +121,7 @@ func (vs *videoStorage) GetOne(UUID string) (*domain.Video, error) {
 		"V.web_url",
 		"V.language",
 		"V.download_count",
+		"V.created_at",
 		"V.web_url",
 		"D.uuid as direction_uuid",
 		"D.name as direction_name",
@@ -130,7 +131,7 @@ func (vs *videoStorage) GetOne(UUID string) (*domain.Video, error) {
 		PlaceholderFormat(squirrel.Dollar).
 		LeftJoin("direction AS D ON D.uuid = V.direction_uuid").
 		LeftJoin("tag AS T ON  T.uuid = any (V.tags_uuids)").
-		GroupBy("V.uuid, V.title, V.difficulty, V.rating, V.description, V.local_url, V.web_url, V.language, V.download_count, V.web_url, D.uuid, D.name").
+		GroupBy("V.uuid, V.title, V.difficulty, V.rating, V.description, V.local_url, V.web_url, V.language, V.download_count, V.created_at, V.web_url, D.uuid, D.name").
 		ToSql()
 
 	var video domain.Video
@@ -145,6 +146,7 @@ func (vs *videoStorage) GetOne(UUID string) (*domain.Video, error) {
 		&video.WebURL,
 		&video.Language,
 		&video.DownloadCount,
+		&video.CreatedAt,
 		&video.WebURL,
 		&video.Direction.UUID,
 		&video.Direction.Name,
@@ -176,6 +178,7 @@ func (vs *videoStorage) GetAll(sortOptions *domain.SortFilterPagination) ([]*dom
 		"V.web_url",
 		"V.language",
 		"V.download_count",
+		"V.created_at",
 		"V.web_url",
 		"D.uuid as direction_uuid",
 		"D.name as direction_name",
@@ -184,7 +187,7 @@ func (vs *videoStorage) GetAll(sortOptions *domain.SortFilterPagination) ([]*dom
 		From("video AS V").
 		LeftJoin("direction AS D ON D.uuid = V.direction_uuid").
 		LeftJoin("tag AS T ON  T.uuid = any (V.tags_uuids)").
-		GroupBy("V.uuid, V.title, V.difficulty, V.rating, V.description, V.local_url, V.web_url, V.language, V.download_count, V.web_url, D.uuid, D.name")
+		GroupBy("V.uuid, V.title, V.difficulty, V.rating, V.description, V.local_url, V.web_url, V.language, V.download_count, V.created_at, V.web_url, D.uuid, D.name")
 
 	if sortOptions.Limit != 0 {
 		s = s.Limit(sortOptions.Limit)
@@ -226,6 +229,7 @@ func (vs *videoStorage) GetAll(sortOptions *domain.SortFilterPagination) ([]*dom
 			&video.WebURL,
 			&video.Language,
 			&video.DownloadCount,
+			&video.CreatedAt,
 			&video.WebURL,
 			&video.Direction.UUID,
 			&video.Direction.Name,

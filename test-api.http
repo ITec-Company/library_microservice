@@ -25,10 +25,13 @@ Content-Type: application/json
 GET http://localhost:1000/books?limit=5&page=2
 Content-Type: application/json
 
-// remove composites
 
 // query refactor    CREATE (look at book create Storage), UPDATE ?
 // tests
+
+// review date or created_at?
+
+// load save video
 
 // solve problem with tag validation while creating books/auido/video/article in DB query any/in (tags)
 

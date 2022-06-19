@@ -78,6 +78,7 @@ func (as *audioStorage) GetOne(UUID string) (*domain.Audio, error) {
 		"A.local_url",
 		"A.language",
 		"A.download_count",
+		"A.created_at",
 		"D.uuid as direction_uuid",
 		"D.name as direction_name",
 		"array_agg(DISTINCT T) as tags").
@@ -86,7 +87,7 @@ func (as *audioStorage) GetOne(UUID string) (*domain.Audio, error) {
 		LeftJoin("tag AS T ON  T.uuid = any (A.tags_uuids)").
 		Where("A.uuid = ?", UUID).
 		PlaceholderFormat(squirrel.Dollar).
-		GroupBy("A.uuid", "A.title", "A.difficulty", "A.rating", "A.local_url", "A.language", "A.download_count", "D.uuid", "D.name").
+		GroupBy("A.uuid", "A.title", "A.difficulty", "A.rating", "A.local_url", "A.language", "A.download_count", "A.created_at", "D.uuid", "D.name").
 		ToSql()
 
 	if err := as.db.QueryRow(query, args...).Scan(
@@ -97,6 +98,7 @@ func (as *audioStorage) GetOne(UUID string) (*domain.Audio, error) {
 		&audio.LocalURL,
 		&audio.Language,
 		&audio.DownloadCount,
+		&audio.CreatedAt,
 		&audio.Direction.UUID,
 		&audio.Direction.Name,
 		pq.Array(&tagsStr),
@@ -125,6 +127,7 @@ func (as *audioStorage) GetAll(sortOptions *domain.SortFilterPagination) ([]*dom
 		"A.local_url",
 		"A.language",
 		"A.download_count",
+		"A.created_at",
 		"D.uuid as direction_uuid",
 		"D.name as direction_name",
 		"array_agg(DISTINCT T) as tags",
@@ -132,7 +135,7 @@ func (as *audioStorage) GetAll(sortOptions *domain.SortFilterPagination) ([]*dom
 		From("audio AS A").
 		LeftJoin("direction AS D ON D.uuid = A.direction_uuid").
 		LeftJoin("tag AS T ON  T.uuid = any (A.tags_uuids)").
-		GroupBy("A.uuid, A.title, A.difficulty, A.rating, A.local_url, A.language, A.download_count, D.uuid, D.name")
+		GroupBy("A.uuid, A.title, A.difficulty, A.rating, A.local_url, A.language, A.download_count, A.created_at, D.uuid, D.name")
 
 	if sortOptions.Limit != 0 {
 		s = s.Limit(sortOptions.Limit)
@@ -172,6 +175,7 @@ func (as *audioStorage) GetAll(sortOptions *domain.SortFilterPagination) ([]*dom
 			&audio.LocalURL,
 			&audio.Language,
 			&audio.DownloadCount,
+			&audio.CreatedAt,
 			&audio.Direction.UUID,
 			&audio.Direction.Name,
 			pq.Array(&tagsStr),
