@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/julienschmidt/httprouter"
 	"library-go/internal/domain"
-	"library-go/internal/handler"
 	"library-go/internal/service"
 	"library-go/pkg/JSON"
 	"library-go/pkg/logging"
@@ -21,21 +20,19 @@ const (
 	updateAuthorURL    = "/author"
 )
 
-type authorHandler struct {
-	Service    service.AuthorService
-	logger     *logging.Logger
-	Middleware *Middleware
+type AuthorHandler struct {
+	Service service.AuthorService
+	logger  *logging.Logger
 }
 
-func NewAuthorHandler(service service.AuthorService, logger *logging.Logger, middleware *Middleware) handler.Handler {
-	return &authorHandler{
-		Service:    service,
-		logger:     logger,
-		Middleware: middleware,
+func NewAuthorHandler(service service.AuthorService, logger *logging.Logger) AuthorHandler {
+	return AuthorHandler{
+		Service: service,
+		logger:  logger,
 	}
 }
 
-func (ah *authorHandler) Register(router *httprouter.Router) {
+func (ah *AuthorHandler) Register(router *httprouter.Router) {
 	router.GET(getAllAuthorsURL, ah.GetAll)
 	router.GET(getAuthorByUUIDURL, ah.GetByUUID)
 	router.POST(createAuthorURL, ah.Create)
@@ -43,7 +40,7 @@ func (ah *authorHandler) Register(router *httprouter.Router) {
 	router.PUT(updateAuthorURL, ah.Update)
 }
 
-func (ah *authorHandler) GetAll(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+func (ah *AuthorHandler) GetAll(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	w.Header().Set("Content-Type", "application/json")
 
 	limit, err := strconv.Atoi(r.URL.Query().Get("limit"))
@@ -69,7 +66,7 @@ func (ah *authorHandler) GetAll(w http.ResponseWriter, r *http.Request, ps httpr
 	json.NewEncoder(w).Encode(authors)
 }
 
-func (ah *authorHandler) GetByUUID(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+func (ah *AuthorHandler) GetByUUID(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	w.Header().Set("Content-Type", "application/json")
 
 	uuid := ps.ByName("uuid")
@@ -98,7 +95,7 @@ func (ah *authorHandler) GetByUUID(w http.ResponseWriter, r *http.Request, ps ht
 	json.NewEncoder(w).Encode(author)
 }
 
-func (ah *authorHandler) Create(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+func (ah *AuthorHandler) Create(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	w.Header().Set("Content-Type", "application/json")
 
 	createAuthorDTO := &domain.CreateAuthorDTO{}
@@ -120,7 +117,7 @@ func (ah *authorHandler) Create(w http.ResponseWriter, r *http.Request, ps httpr
 	json.NewEncoder(w).Encode(JSON.Info{Msg: fmt.Sprintf("Author created successfully. UUID: %s", UUID)})
 }
 
-func (ah *authorHandler) Delete(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+func (ah *AuthorHandler) Delete(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	w.Header().Set("Content-Type", "application/json")
 
 	uuid := ps.ByName("uuid")
@@ -148,7 +145,7 @@ func (ah *authorHandler) Delete(w http.ResponseWriter, r *http.Request, ps httpr
 	json.NewEncoder(w).Encode(JSON.Info{Msg: fmt.Sprintf("Author with UUID %s was deleted", uuid)})
 }
 
-func (ah *authorHandler) Update(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+func (ah *AuthorHandler) Update(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	w.Header().Set("Content-Type", "application/json")
 
 	updateAuthorDTO := &domain.UpdateAuthorDTO{}

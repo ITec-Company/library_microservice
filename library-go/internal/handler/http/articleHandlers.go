@@ -8,7 +8,6 @@ import (
 	"image"
 	"image/jpeg"
 	"library-go/internal/domain"
-	"library-go/internal/handler"
 	"library-go/internal/service"
 	"library-go/pkg/JSON"
 	"library-go/pkg/logging"
@@ -35,27 +34,25 @@ const (
 	articleLocalStoragePath = "../store/articles/"
 )
 
-type articleHandler struct {
-	Service    service.ArticleService
-	logger     *logging.Logger
-	Middleware *Middleware
+type ArticleHandler struct {
+	Service service.ArticleService
+	logger  *logging.Logger
 }
 
-func NewArticleHandler(service service.ArticleService, logger *logging.Logger, middleware *Middleware) handler.Handler {
-	return &articleHandler{
-		Service:    service,
-		logger:     logger,
-		Middleware: middleware,
+func NewArticleHandler(service service.ArticleService, logger *logging.Logger) ArticleHandler {
+	return ArticleHandler{
+		Service: service,
+		logger:  logger,
 	}
 }
 
-func (ah *articleHandler) Register(router *httprouter.Router) {
-	router.GET(getAllArticlesURL, ah.Middleware.sortAndFilters(ah.GetAll()))
+func (ah *ArticleHandler) Register(router *httprouter.Router, middleware *Middleware) {
+	router.GET(getAllArticlesURL, middleware.sortAndFilters(ah.GetAll()))
 	router.GET(getArticleByUUIDURL, ah.GetByUUID)
-	router.POST(createArticleURL, ah.Middleware.createArticle(ah.Create()))
+	router.POST(createArticleURL, middleware.createArticle(ah.Create()))
 	router.DELETE(deleteArticleURL, ah.Delete)
 	router.PUT(updateArticleURL, ah.Update)
-	router.PUT(updateArticleFileURL, ah.Middleware.updateArticleFile(ah.UpdateFile()))
+	router.PUT(updateArticleFileURL, middleware.updateArticleFile(ah.UpdateFile()))
 	router.PUT(updateArticleImageURL, ah.UpdateImage)
 	router.PUT(rateArticleUrl, ah.Rate)
 
@@ -63,7 +60,7 @@ func (ah *articleHandler) Register(router *httprouter.Router) {
 	//router.GET(loadArticleFileURL, ah.LoadFile)
 }
 
-func (ah *articleHandler) GetAll() http.HandlerFunc {
+func (ah *ArticleHandler) GetAll() http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 
@@ -84,7 +81,7 @@ func (ah *articleHandler) GetAll() http.HandlerFunc {
 	})
 }
 
-func (ah *articleHandler) GetByUUID(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+func (ah *ArticleHandler) GetByUUID(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	w.Header().Set("Content-Type", "application/json")
 
 	uuid := ps.ByName("uuid")
@@ -113,7 +110,7 @@ func (ah *articleHandler) GetByUUID(w http.ResponseWriter, r *http.Request, ps h
 	json.NewEncoder(w).Encode(article)
 }
 
-func (ah *articleHandler) Create() http.Handler {
+func (ah *ArticleHandler) Create() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 
@@ -181,7 +178,7 @@ func (ah *articleHandler) Create() http.Handler {
 	})
 }
 
-func (ah *articleHandler) Delete(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+func (ah *ArticleHandler) Delete(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	w.Header().Set("Content-Type", "application/json")
 
 	uuid := ps.ByName("uuid")
@@ -209,7 +206,7 @@ func (ah *articleHandler) Delete(w http.ResponseWriter, r *http.Request, ps http
 	json.NewEncoder(w).Encode(JSON.Info{Msg: fmt.Sprintf("Article with UUID %s was deleted", uuid)})
 }
 
-func (ah *articleHandler) Update(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+func (ah *ArticleHandler) Update(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	w.Header().Set("Content-Type", "application/json")
 
 	updateArticleDTO := &domain.UpdateArticleDTO{}
@@ -241,7 +238,7 @@ func (ah *articleHandler) Update(w http.ResponseWriter, r *http.Request, ps http
 	json.NewEncoder(w).Encode(JSON.Info{Msg: "Article updated successfully"})
 }
 
-func (ah *articleHandler) LoadFile(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+func (ah *ArticleHandler) LoadFile(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	file := r.URL.Query().Get("file")
 	if file == "" {
 		w.WriteHeader(http.StatusBadRequest)
@@ -290,7 +287,7 @@ func (ah *articleHandler) LoadFile(w http.ResponseWriter, r *http.Request, ps ht
 	w.Write(fileBytes)
 }
 
-func (ah *articleHandler) UpdateFile() http.Handler {
+func (ah *ArticleHandler) UpdateFile() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 
@@ -312,7 +309,7 @@ func (ah *articleHandler) UpdateFile() http.Handler {
 	})
 }
 
-func (ah *articleHandler) LoadImage(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+func (ah *ArticleHandler) LoadImage(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	w.Header().Set("Content-Type", "image/jpeg")
 
 	format := r.URL.Query().Get("format")
@@ -344,7 +341,7 @@ func (ah *articleHandler) LoadImage(w http.ResponseWriter, r *http.Request, ps h
 	jpeg.Encode(w, *img, nil)
 }
 
-func (ah *articleHandler) UpdateImage(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+func (ah *ArticleHandler) UpdateImage(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	w.Header().Set("Content-Type", "application/json")
 
 	uuid := r.URL.Query().Get("uuid")
@@ -375,7 +372,7 @@ func (ah *articleHandler) UpdateImage(w http.ResponseWriter, r *http.Request, ps
 	json.NewEncoder(w).Encode(JSON.Info{Msg: "Article image updated successfully"})
 }
 
-func (ah *articleHandler) Rate(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+func (ah *ArticleHandler) Rate(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	w.Header().Set("Content-Type", "application/json")
 
 	ratingStr := r.URL.Query().Get("rating")

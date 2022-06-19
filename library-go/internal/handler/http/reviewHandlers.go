@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/julienschmidt/httprouter"
 	"library-go/internal/domain"
-	"library-go/internal/handler"
 	"library-go/internal/service"
 	"library-go/pkg/JSON"
 	"library-go/pkg/logging"
@@ -22,21 +21,20 @@ const (
 	rateReviewUrl      = "/rate/review"
 )
 
-type reviewHandler struct {
+type ReviewHandler struct {
 	Service    service.ReviewService
 	logger     *logging.Logger
 	Middleware *Middleware
 }
 
-func NewReviewHandler(service service.ReviewService, logger *logging.Logger, middleware *Middleware) handler.Handler {
-	return &reviewHandler{
-		Service:    service,
-		logger:     logger,
-		Middleware: middleware,
+func NewReviewHandler(service service.ReviewService, logger *logging.Logger) ReviewHandler {
+	return ReviewHandler{
+		Service: service,
+		logger:  logger,
 	}
 }
 
-func (rh *reviewHandler) Register(router *httprouter.Router) {
+func (rh *ReviewHandler) Register(router *httprouter.Router) {
 	router.GET(getAllReviewsURL, rh.GetAll)
 	router.GET(getReviewByUUIDURL, rh.GetByUUID)
 	router.POST(createReviewURL, rh.Create)
@@ -45,7 +43,7 @@ func (rh *reviewHandler) Register(router *httprouter.Router) {
 	router.PUT(rateReviewUrl, rh.Rate)
 }
 
-func (rh *reviewHandler) GetAll(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+func (rh *ReviewHandler) GetAll(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	w.Header().Set("Content-Type", "application/json")
 
 	limit, err := strconv.Atoi(r.URL.Query().Get("limit"))
@@ -71,7 +69,7 @@ func (rh *reviewHandler) GetAll(w http.ResponseWriter, r *http.Request, ps httpr
 	json.NewEncoder(w).Encode(reviews)
 }
 
-func (rh *reviewHandler) GetByUUID(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+func (rh *ReviewHandler) GetByUUID(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	w.Header().Set("Content-Type", "application/json")
 
 	uuid := ps.ByName("uuid")
@@ -99,7 +97,7 @@ func (rh *reviewHandler) GetByUUID(w http.ResponseWriter, r *http.Request, ps ht
 	json.NewEncoder(w).Encode(review)
 }
 
-func (rh *reviewHandler) Create(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+func (rh *ReviewHandler) Create(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	w.Header().Set("Content-Type", "application/json")
 
 	createReviewDTO := &domain.CreateReviewDTO{}
@@ -121,7 +119,7 @@ func (rh *reviewHandler) Create(w http.ResponseWriter, r *http.Request, ps httpr
 	json.NewEncoder(w).Encode(JSON.Info{Msg: fmt.Sprintf("Review created successfully. UUID: %s", UUID)})
 }
 
-func (rh *reviewHandler) Delete(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+func (rh *ReviewHandler) Delete(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	w.Header().Set("Content-Type", "application/json")
 
 	uuid := ps.ByName("uuid")
@@ -149,7 +147,7 @@ func (rh *reviewHandler) Delete(w http.ResponseWriter, r *http.Request, ps httpr
 	json.NewEncoder(w).Encode(JSON.Info{Msg: fmt.Sprintf("Review with UUID %s was deleted", uuid)})
 }
 
-func (rh *reviewHandler) Update(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+func (rh *ReviewHandler) Update(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	w.Header().Set("Content-Type", "application/json")
 
 	updateReviewDTO := &domain.UpdateReviewDTO{}
@@ -177,7 +175,7 @@ func (rh *reviewHandler) Update(w http.ResponseWriter, r *http.Request, ps httpr
 	json.NewEncoder(w).Encode(JSON.Info{Msg: "Review updated successfully"})
 }
 
-func (rh *reviewHandler) Rate(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+func (rh *ReviewHandler) Rate(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	w.Header().Set("Content-Type", "application/json")
 
 	ratingStr := r.URL.Query().Get("rating")

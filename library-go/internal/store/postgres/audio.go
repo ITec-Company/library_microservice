@@ -214,6 +214,9 @@ func (as *audioStorage) Create(audioCreateDTO *domain.CreateAudioDTO) (string, e
 	var UUID string
 
 	localURL := strings.Split(audioCreateDTO.LocalURL, "|split|")
+	if len(localURL) < 2 {
+		localURL = append(localURL, "")
+	}
 
 	row := tx.QueryRow(createAudioQuery,
 		audioCreateDTO.Title,

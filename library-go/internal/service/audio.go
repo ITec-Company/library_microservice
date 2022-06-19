@@ -15,10 +15,10 @@ type audioService struct {
 	storage store.AudioStorage
 }
 
-func NewAudioService(storage store.AudioStorage, logger *logging.Logger) AudioService {
+func NewAudioService(storage *store.AudioStorage, logger *logging.Logger) AudioService {
 	return &audioService{
 		logger:  logger,
-		storage: storage,
+		storage: *storage,
 	}
 }
 

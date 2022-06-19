@@ -8,7 +8,6 @@ import (
 	"image"
 	"image/jpeg"
 	"library-go/internal/domain"
-	"library-go/internal/handler"
 	"library-go/internal/service"
 	"library-go/pkg/JSON"
 	"library-go/pkg/logging"
@@ -35,27 +34,25 @@ const (
 	bookLocalStoragePath = "../store/books/"
 )
 
-type bookHandler struct {
-	Service    service.BookService
-	logger     *logging.Logger
-	Middleware *Middleware
+type BookHandler struct {
+	Service service.BookService
+	logger  *logging.Logger
 }
 
-func NewBookHandler(service service.BookService, logger *logging.Logger, middleware *Middleware) handler.Handler {
-	return &bookHandler{
-		Service:    service,
-		logger:     logger,
-		Middleware: middleware,
+func NewBookHandler(service service.BookService, logger *logging.Logger) BookHandler {
+	return BookHandler{
+		Service: service,
+		logger:  logger,
 	}
 }
 
-func (bh *bookHandler) Register(router *httprouter.Router) {
-	router.GET(getAllBooksURL, bh.Middleware.sortAndFilters(bh.GetAll()))
+func (bh *BookHandler) Register(router *httprouter.Router, middleware *Middleware) {
+	router.GET(getAllBooksURL, middleware.sortAndFilters(bh.GetAll()))
 	router.GET(getBookByUUIDURL, bh.GetByUUID)
-	router.POST(createBookURL, bh.Middleware.createBook(bh.Create()))
+	router.POST(createBookURL, middleware.createBook(bh.Create()))
 	router.DELETE(deleteBookURL, bh.Delete)
 	router.PUT(updateBookURL, bh.Update)
-	router.PUT(updateBookFileURL, bh.Middleware.updateBookFile(bh.UpdateFile()))
+	router.PUT(updateBookFileURL, middleware.updateBookFile(bh.UpdateFile()))
 	router.PUT(updateBookImageURL, bh.UpdateImage)
 	router.PUT(rateBookUrl, bh.Rate)
 
@@ -63,7 +60,7 @@ func (bh *bookHandler) Register(router *httprouter.Router) {
 	//router.GET(loadBookFileURL, bh.LoadFile)
 }
 
-func (bh *bookHandler) GetAll() http.HandlerFunc {
+func (bh *BookHandler) GetAll() http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 
@@ -85,7 +82,7 @@ func (bh *bookHandler) GetAll() http.HandlerFunc {
 	})
 }
 
-func (bh *bookHandler) GetByUUID(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+func (bh *BookHandler) GetByUUID(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	w.Header().Set("Content-Type", "application/json")
 
 	uuid := ps.ByName("uuid")
@@ -114,7 +111,7 @@ func (bh *bookHandler) GetByUUID(w http.ResponseWriter, r *http.Request, ps http
 	json.NewEncoder(w).Encode(book)
 }
 
-func (bh *bookHandler) Create() http.Handler {
+func (bh *BookHandler) Create() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 
@@ -179,7 +176,7 @@ func (bh *bookHandler) Create() http.Handler {
 	})
 }
 
-func (bh *bookHandler) Delete(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+func (bh *BookHandler) Delete(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	w.Header().Set("Content-Type", "application/json")
 
 	uuid := ps.ByName("uuid")
@@ -207,7 +204,7 @@ func (bh *bookHandler) Delete(w http.ResponseWriter, r *http.Request, ps httprou
 	json.NewEncoder(w).Encode(JSON.Info{Msg: fmt.Sprintf("Book with UUID %s was deleted", uuid)})
 }
 
-func (bh *bookHandler) Update(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+func (bh *BookHandler) Update(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	w.Header().Set("Content-Type", "application/json")
 
 	updateBookDTO := &domain.UpdateBookDTO{}
@@ -239,7 +236,7 @@ func (bh *bookHandler) Update(w http.ResponseWriter, r *http.Request, ps httprou
 	json.NewEncoder(w).Encode(JSON.Info{Msg: "Book updated successfully"})
 }
 
-func (bh *bookHandler) LoadFile(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+func (bh *BookHandler) LoadFile(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	file := r.URL.Query().Get("file")
 	if file == "" {
 		w.WriteHeader(http.StatusBadRequest)
@@ -289,7 +286,7 @@ func (bh *bookHandler) LoadFile(w http.ResponseWriter, r *http.Request, ps httpr
 
 }
 
-func (bh *bookHandler) UpdateFile() http.Handler {
+func (bh *BookHandler) UpdateFile() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 
@@ -311,7 +308,7 @@ func (bh *bookHandler) UpdateFile() http.Handler {
 	})
 }
 
-func (bh *bookHandler) LoadImage(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+func (bh *BookHandler) LoadImage(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	w.Header().Set("Content-Type", "image/jpeg")
 
 	format := r.URL.Query().Get("format")
@@ -344,7 +341,7 @@ func (bh *bookHandler) LoadImage(w http.ResponseWriter, r *http.Request, ps http
 
 }
 
-func (bh *bookHandler) UpdateImage(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+func (bh *BookHandler) UpdateImage(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	w.Header().Set("Content-Type", "application/json")
 
 	uuid := r.URL.Query().Get("uuid")
@@ -375,7 +372,7 @@ func (bh *bookHandler) UpdateImage(w http.ResponseWriter, r *http.Request, ps ht
 	json.NewEncoder(w).Encode(JSON.Info{Msg: "Book image updated successfully"})
 }
 
-func (bh *bookHandler) Rate(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+func (bh *BookHandler) Rate(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	w.Header().Set("Content-Type", "application/json")
 
 	ratingStr := r.URL.Query().Get("rating")

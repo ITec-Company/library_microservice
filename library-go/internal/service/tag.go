@@ -11,10 +11,10 @@ type tagService struct {
 	storage store.TagStorage
 }
 
-func NewTagService(storage store.TagStorage, logger *logging.Logger) TagService {
+func NewTagService(storage *store.TagStorage, logger *logging.Logger) TagService {
 	return &tagService{
 		logger:  logger,
-		storage: storage}
+		storage: *storage}
 }
 
 func (s *tagService) GetByUUID(UUID string) (*domain.Tag, error) {

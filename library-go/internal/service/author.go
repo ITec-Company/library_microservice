@@ -11,10 +11,10 @@ type authorService struct {
 	storage store.AuthorStorage
 }
 
-func NewAuthorService(storage store.AuthorStorage, logger *logging.Logger) AuthorService {
+func NewAuthorService(storage *store.AuthorStorage, logger *logging.Logger) AuthorService {
 	return &authorService{
 		logger:  logger,
-		storage: storage}
+		storage: *storage}
 }
 
 func (s *authorService) GetByUUID(UUID string) (*domain.Author, error) {

@@ -11,10 +11,10 @@ type directionService struct {
 	storage store.DirectionStorage
 }
 
-func NewDirectionService(storage store.DirectionStorage, logger *logging.Logger) DirectionService {
+func NewDirectionService(storage *store.DirectionStorage, logger *logging.Logger) DirectionService {
 	return &directionService{
 		logger:  logger,
-		storage: storage}
+		storage: *storage}
 }
 
 func (s *directionService) GetByUUID(UUID string) (*domain.Direction, error) {

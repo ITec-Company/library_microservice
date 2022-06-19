@@ -305,7 +305,13 @@ func (bs *bookStorage) Create(bookCreateDTO *domain.CreateBookDTO) (string, erro
 	var UUID string
 
 	localURL := strings.Split(bookCreateDTO.LocalURL, "|split|")
+	if len(localURL) < 2 {
+		localURL = append(localURL, "")
+	}
 	imageURL := strings.Split(bookCreateDTO.ImageURL, "|split|")
+	if len(imageURL) < 2 {
+		imageURL = append(imageURL, "")
+	}
 
 	row := tx.QueryRow(createBookQuery,
 		bookCreateDTO.Title,

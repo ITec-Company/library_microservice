@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"github.com/julienschmidt/httprouter"
 	"library-go/internal/domain"
-	"library-go/internal/handler"
 	"library-go/internal/service"
 	"library-go/pkg/JSON"
 	"library-go/pkg/logging"
@@ -29,24 +28,22 @@ const (
 	videoLocalStoragePath = "../store/videos/"
 )
 
-type videoHandler struct {
-	Service    service.VideoService
-	logger     *logging.Logger
-	Middleware *Middleware
+type VideoHandler struct {
+	Service service.VideoService
+	logger  *logging.Logger
 }
 
-func NewVideoHandler(service service.VideoService, logger *logging.Logger, middleware *Middleware) handler.Handler {
-	return &videoHandler{
-		Service:    service,
-		logger:     logger,
-		Middleware: middleware,
+func NewVideoHandler(service service.VideoService, logger *logging.Logger) VideoHandler {
+	return VideoHandler{
+		Service: service,
+		logger:  logger,
 	}
 }
 
-func (vh *videoHandler) Register(router *httprouter.Router) {
-	router.GET(getAllVideosURL, vh.Middleware.sortAndFilters(vh.GetAll()))
+func (vh *VideoHandler) Register(router *httprouter.Router, middleware *Middleware) {
+	router.GET(getAllVideosURL, middleware.sortAndFilters(vh.GetAll()))
 	router.GET(getVideoByUUIDURL, vh.GetByUUID)
-	router.POST(createVideoURL, vh.Middleware.createVideo(vh.Create()))
+	router.POST(createVideoURL, middleware.createVideo(vh.Create()))
 	router.DELETE(deleteVideoURL, vh.Delete)
 	router.PUT(updateVideoURL, vh.Update)
 	router.PUT(rateVideoUrl, vh.Rate)
@@ -55,7 +52,7 @@ func (vh *videoHandler) Register(router *httprouter.Router) {
 	//router.PUT(updateVideoFileURL, vh.Middleware.updateVideoFile(vh.UpdateFile()))
 }
 
-func (vh *videoHandler) GetAll() http.HandlerFunc {
+func (vh *VideoHandler) GetAll() http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 
@@ -77,7 +74,7 @@ func (vh *videoHandler) GetAll() http.HandlerFunc {
 	})
 }
 
-func (vh *videoHandler) GetByUUID(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+func (vh *VideoHandler) GetByUUID(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	w.Header().Set("Content-Type", "application/json")
 
 	uuid := ps.ByName("uuid")
@@ -105,7 +102,7 @@ func (vh *videoHandler) GetByUUID(w http.ResponseWriter, r *http.Request, ps htt
 	json.NewEncoder(w).Encode(video)
 }
 
-func (vh *videoHandler) Create() http.Handler {
+func (vh *VideoHandler) Create() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 
@@ -151,7 +148,7 @@ func (vh *videoHandler) Create() http.Handler {
 	})
 }
 
-func (vh *videoHandler) Delete(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+func (vh *VideoHandler) Delete(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	w.Header().Set("Content-Type", "application/json")
 
 	uuid := ps.ByName("uuid")
@@ -179,7 +176,7 @@ func (vh *videoHandler) Delete(w http.ResponseWriter, r *http.Request, ps httpro
 	json.NewEncoder(w).Encode(JSON.Info{Msg: fmt.Sprintf("Video with UUID %s was deleted", uuid)})
 }
 
-func (vh *videoHandler) Update(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+func (vh *VideoHandler) Update(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	w.Header().Set("Content-Type", "application/json")
 
 	updateVideoDTO := &domain.UpdateVideoDTO{}
@@ -207,7 +204,7 @@ func (vh *videoHandler) Update(w http.ResponseWriter, r *http.Request, ps httpro
 	json.NewEncoder(w).Encode(JSON.Info{Msg: "Video updated successfully"})
 }
 
-func (vh *videoHandler) LoadFile(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+func (vh *VideoHandler) LoadFile(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 
 	url := r.URL.Query().Get("url")
 	if url == "" {
@@ -257,7 +254,7 @@ func (vh *videoHandler) LoadFile(w http.ResponseWriter, r *http.Request, ps http
 	w.Write(fileBytes)
 }
 
-func (vh *videoHandler) UpdateFile() http.Handler {
+func (vh *VideoHandler) UpdateFile() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 
@@ -279,7 +276,7 @@ func (vh *videoHandler) UpdateFile() http.Handler {
 	})
 }
 
-func (vh *videoHandler) Rate(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+func (vh *VideoHandler) Rate(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	w.Header().Set("Content-Type", "application/json")
 
 	ratingStr := r.URL.Query().Get("rating")

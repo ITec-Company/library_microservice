@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/julienschmidt/httprouter"
 	"library-go/internal/domain"
-	"library-go/internal/handler"
 	"library-go/internal/service"
 	"library-go/pkg/JSON"
 	"library-go/pkg/logging"
@@ -23,21 +22,20 @@ const (
 	updateTagURL    = "/tag"
 )
 
-type tagHandler struct {
+type TagHandler struct {
 	Service    service.TagService
 	logger     *logging.Logger
 	Middleware *Middleware
 }
 
-func NewTagHandler(service service.TagService, logger *logging.Logger, middleware *Middleware) handler.Handler {
-	return &tagHandler{
-		Service:    service,
-		logger:     logger,
-		Middleware: middleware,
+func NewTagHandler(service service.TagService, logger *logging.Logger) TagHandler {
+	return TagHandler{
+		Service: service,
+		logger:  logger,
 	}
 }
 
-func (th *tagHandler) Register(router *httprouter.Router) {
+func (th *TagHandler) Register(router *httprouter.Router) {
 	router.GET(getAllTagsURL, th.GetAll)
 	router.GET(GetManyByUUIDs, th.GetManyByUUIDs)
 	router.GET(getTagByUUIDURL, th.GetByUUID)
@@ -46,7 +44,7 @@ func (th *tagHandler) Register(router *httprouter.Router) {
 	router.PUT(updateTagURL, th.Update)
 }
 
-func (th *tagHandler) GetAll(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+func (th *TagHandler) GetAll(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	w.Header().Set("Content-Type", "application/json")
 
 	limit, err := strconv.Atoi(r.URL.Query().Get("limit"))
@@ -72,7 +70,7 @@ func (th *tagHandler) GetAll(w http.ResponseWriter, r *http.Request, ps httprout
 	json.NewEncoder(w).Encode(tags)
 }
 
-func (th *tagHandler) GetByUUID(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+func (th *TagHandler) GetByUUID(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	w.Header().Set("Content-Type", "application/json")
 
 	uuid := ps.ByName("uuid")
@@ -100,7 +98,7 @@ func (th *tagHandler) GetByUUID(w http.ResponseWriter, r *http.Request, ps httpr
 	json.NewEncoder(w).Encode(tag)
 }
 
-func (th *tagHandler) GetManyByUUIDs(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+func (th *TagHandler) GetManyByUUIDs(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	w.Header().Set("Content-Type", "application/json")
 
 	uuid := ps.ByName("uuids")
@@ -131,7 +129,7 @@ func (th *tagHandler) GetManyByUUIDs(w http.ResponseWriter, r *http.Request, ps 
 	json.NewEncoder(w).Encode(tag)
 }
 
-func (th *tagHandler) Create(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+func (th *TagHandler) Create(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	w.Header().Set("Content-Type", "application/json")
 
 	createTagDTO := &domain.CreateTagDTO{}
@@ -153,7 +151,7 @@ func (th *tagHandler) Create(w http.ResponseWriter, r *http.Request, ps httprout
 	json.NewEncoder(w).Encode(JSON.Info{Msg: fmt.Sprintf("Tag created successfully. UUID: %s", UUID)})
 }
 
-func (th *tagHandler) Delete(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+func (th *TagHandler) Delete(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	w.Header().Set("Content-Type", "application/json")
 
 	uuid := ps.ByName("uuid")
@@ -181,7 +179,7 @@ func (th *tagHandler) Delete(w http.ResponseWriter, r *http.Request, ps httprout
 	json.NewEncoder(w).Encode(JSON.Info{Msg: fmt.Sprintf("Tag with UUID %s was deleted", uuid)})
 }
 
-func (th *tagHandler) Update(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+func (th *TagHandler) Update(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	w.Header().Set("Content-Type", "application/json")
 
 	updateTagDTO := &domain.UpdateTagDTO{}

@@ -16,10 +16,10 @@ type bookService struct {
 	storage store.BookStorage
 }
 
-func NewBookService(storage store.BookStorage, logger *logging.Logger) BookService {
+func NewBookService(storage *store.BookStorage, logger *logging.Logger) BookService {
 	return &bookService{
 		logger:  logger,
-		storage: storage,
+		storage: *storage,
 	}
 }
 

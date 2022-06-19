@@ -302,7 +302,13 @@ func (as *articleStorage) Create(articleCreateDTO *domain.CreateArticleDTO) (str
 
 	var UUID string
 	localURL := strings.Split(articleCreateDTO.LocalURL, "|split|")
+	if len(localURL) < 2 {
+		localURL = append(localURL, "")
+	}
 	imageURL := strings.Split(articleCreateDTO.ImageURL, "|split|")
+	if len(imageURL) < 2 {
+		imageURL = append(imageURL, "")
+	}
 
 	row := tx.QueryRow(createArticleQuery,
 		articleCreateDTO.Title,

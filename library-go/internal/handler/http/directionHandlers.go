@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/julienschmidt/httprouter"
 	"library-go/internal/domain"
-	"library-go/internal/handler"
 	"library-go/internal/service"
 	"library-go/pkg/JSON"
 	"library-go/pkg/logging"
@@ -21,21 +20,19 @@ const (
 	updateDirectionURL    = "/direction"
 )
 
-type directionHandler struct {
-	Service    service.DirectionService
-	logger     *logging.Logger
-	Middleware *Middleware
+type DirectionHandler struct {
+	Service service.DirectionService
+	logger  *logging.Logger
 }
 
-func NewDirectionHandler(service service.DirectionService, logger *logging.Logger, middleware *Middleware) handler.Handler {
-	return &directionHandler{
-		Service:    service,
-		logger:     logger,
-		Middleware: middleware,
+func NewDirectionHandler(service service.DirectionService, logger *logging.Logger) DirectionHandler {
+	return DirectionHandler{
+		Service: service,
+		logger:  logger,
 	}
 }
 
-func (dh *directionHandler) Register(router *httprouter.Router) {
+func (dh *DirectionHandler) Register(router *httprouter.Router) {
 	router.GET(getAllDirectionsURL, dh.GetAll)
 	router.GET(getDirectionByUUIDURL, dh.GetByUUID)
 	router.POST(createDirectionURL, dh.Create)
@@ -43,7 +40,7 @@ func (dh *directionHandler) Register(router *httprouter.Router) {
 	router.PUT(updateDirectionURL, dh.Update)
 }
 
-func (dh *directionHandler) GetAll(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+func (dh *DirectionHandler) GetAll(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	w.Header().Set("Content-Type", "application/json")
 
 	limit, err := strconv.Atoi(r.URL.Query().Get("limit"))
@@ -69,7 +66,7 @@ func (dh *directionHandler) GetAll(w http.ResponseWriter, r *http.Request, ps ht
 	json.NewEncoder(w).Encode(directions)
 }
 
-func (dh *directionHandler) GetByUUID(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+func (dh *DirectionHandler) GetByUUID(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	w.Header().Set("Content-Type", "application/json")
 
 	uuid := ps.ByName("uuid")
@@ -97,7 +94,7 @@ func (dh *directionHandler) GetByUUID(w http.ResponseWriter, r *http.Request, ps
 	json.NewEncoder(w).Encode(direction)
 }
 
-func (dh *directionHandler) Create(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+func (dh *DirectionHandler) Create(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	w.Header().Set("Content-Type", "application/json")
 
 	createDirectionDTO := &domain.CreateDirectionDTO{}
@@ -119,7 +116,7 @@ func (dh *directionHandler) Create(w http.ResponseWriter, r *http.Request, ps ht
 	json.NewEncoder(w).Encode(JSON.Info{Msg: fmt.Sprintf("Direction created successfully. UUID: %s", UUID)})
 }
 
-func (dh *directionHandler) Delete(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+func (dh *DirectionHandler) Delete(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	w.Header().Set("Content-Type", "application/json")
 
 	uuid := ps.ByName("uuid")
@@ -147,7 +144,7 @@ func (dh *directionHandler) Delete(w http.ResponseWriter, r *http.Request, ps ht
 	json.NewEncoder(w).Encode(JSON.Info{Msg: fmt.Sprintf("Direction with UUID %s was deleted", uuid)})
 }
 
-func (dh *directionHandler) Update(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+func (dh *DirectionHandler) Update(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	w.Header().Set("Content-Type", "application/json")
 
 	updateDirectionDTO := &domain.UpdateDirectionDTO{}

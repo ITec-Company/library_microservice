@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"github.com/julienschmidt/httprouter"
 	"library-go/internal/domain"
-	"library-go/internal/handler"
 	"library-go/internal/service"
 	"library-go/pkg/JSON"
 	"library-go/pkg/logging"
@@ -30,33 +29,31 @@ const (
 	audioLocalStoragePath = "../store/audios/"
 )
 
-type audioHandler struct {
-	Service    service.AudioService
-	logger     *logging.Logger
-	Middleware *Middleware
+type AudioHandler struct {
+	Service service.AudioService
+	logger  *logging.Logger
 }
 
-func NewAudioHandler(service service.AudioService, logger *logging.Logger, middleware *Middleware) handler.Handler {
-	return &audioHandler{
-		Service:    service,
-		logger:     logger,
-		Middleware: middleware,
+func NewAudioHandler(service service.AudioService, logger *logging.Logger) AudioHandler {
+	return AudioHandler{
+		Service: service,
+		logger:  logger,
 	}
 }
 
-func (ah *audioHandler) Register(router *httprouter.Router) {
-	router.GET(getAllAudiosURL, ah.Middleware.sortAndFilters(ah.GetAll()))
+func (ah *AudioHandler) Register(router *httprouter.Router, middleware *Middleware) {
+	router.GET(getAllAudiosURL, middleware.sortAndFilters(ah.GetAll()))
 	router.GET(getAudioByUUIDURL, ah.GetByUUID)
-	router.POST(createAudioURL, ah.Middleware.createAudio(ah.Create()))
+	router.POST(createAudioURL, middleware.createAudio(ah.Create()))
 	router.DELETE(deleteAudioURL, ah.Delete)
 	router.PUT(updateAudioURL, ah.Update)
-	router.PUT(updateAudioFileURL, ah.Middleware.updateAudioFile(ah.UpdateFile()))
+	router.PUT(updateAudioFileURL, middleware.updateAudioFile(ah.UpdateFile()))
 	router.PUT(rateAudioUrl, ah.Rate)
 
 	//router.GET(loadAudioFileURL, ah.LoadFile)
 }
 
-func (ah *audioHandler) GetAll() http.HandlerFunc {
+func (ah *AudioHandler) GetAll() http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 
@@ -77,7 +74,7 @@ func (ah *audioHandler) GetAll() http.HandlerFunc {
 	})
 }
 
-func (ah *audioHandler) GetByUUID(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+func (ah *AudioHandler) GetByUUID(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	w.Header().Set("Content-Type", "application/json")
 
 	uuid := ps.ByName("uuid")
@@ -105,7 +102,7 @@ func (ah *audioHandler) GetByUUID(w http.ResponseWriter, r *http.Request, ps htt
 	json.NewEncoder(w).Encode(audio)
 }
 
-func (ah *audioHandler) Create() http.Handler {
+func (ah *AudioHandler) Create() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 
@@ -149,7 +146,7 @@ func (ah *audioHandler) Create() http.Handler {
 	})
 }
 
-func (ah *audioHandler) Delete(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+func (ah *AudioHandler) Delete(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	w.Header().Set("Content-Type", "application/json")
 
 	uuid := ps.ByName("uuid")
@@ -177,7 +174,7 @@ func (ah *audioHandler) Delete(w http.ResponseWriter, r *http.Request, ps httpro
 	json.NewEncoder(w).Encode(JSON.Info{Msg: fmt.Sprintf("Audio with UUID %s was deleted", uuid)})
 }
 
-func (ah *audioHandler) Update(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+func (ah *AudioHandler) Update(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	w.Header().Set("Content-Type", "application/json")
 
 	updateAudioDTO := &domain.UpdateAudioDTO{}
@@ -208,7 +205,7 @@ func (ah *audioHandler) Update(w http.ResponseWriter, r *http.Request, ps httpro
 	json.NewEncoder(w).Encode(JSON.Info{Msg: "Audio updated successfully"})
 }
 
-func (ah *audioHandler) LoadFile(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+func (ah *AudioHandler) LoadFile(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	file := r.URL.Query().Get("file")
 	if file == "" {
 		w.WriteHeader(http.StatusBadRequest)
@@ -258,7 +255,7 @@ func (ah *audioHandler) LoadFile(w http.ResponseWriter, r *http.Request, ps http
 
 }
 
-func (ah *audioHandler) UpdateFile() http.Handler {
+func (ah *AudioHandler) UpdateFile() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 
@@ -280,7 +277,7 @@ func (ah *audioHandler) UpdateFile() http.Handler {
 	})
 }
 
-func (ah *audioHandler) Rate(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+func (ah *AudioHandler) Rate(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	w.Header().Set("Content-Type", "application/json")
 
 	ratingStr := r.URL.Query().Get("rating")

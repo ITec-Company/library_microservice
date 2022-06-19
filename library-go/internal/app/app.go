@@ -1,10 +1,9 @@
 package app
 
 import (
-	"github.com/julienschmidt/httprouter"
 	"github.com/rs/cors"
-	"library-go/internal/composite"
 	"library-go/internal/handler/http"
+	"library-go/internal/service"
 	"library-go/internal/store/postgres"
 	"library-go/pkg/db"
 	"library-go/pkg/logging"
@@ -25,18 +24,20 @@ func Run() {
 	}
 
 	logger.Info("Initializing store...")
-	var store postgres.Store
-	store.NewDB(postgresDB.DB, logger)
 
-	middlewares := http.NewMiddlewares(logger)
+	store := postgres.New(postgresDB.DB, logger)
 
-	logger.Info("Initializing postgres composites...")
-	var postgresComposites composite.Composites
-	postgresComposites.NewPostgres(store, &middlewares)
+	logger.Info("Initializing service...")
 
-	logger.Info("Initializing httprouter...")
-	router := httprouter.New()
-	ConfigureRouter(router, postgresComposites)
+	service := service.New(store)
+
+	logger.Info("Initializing router...")
+
+	router := http.New(service)
+
+	logger.Info("Initializing routes...")
+
+	router.InitRoutes()
 
 	logger.Info("Initializing CORS...")
 	CORS := cors.New(cors.Options{
@@ -53,11 +54,11 @@ func Run() {
 		ExposedHeaders:   []string{"Access-Token"},
 	})
 
-	handler := CORS.Handler(router)
+	handler := CORS.Handler(router.Router)
 
 	logger.Info("Initializing server...")
 	var server Server
-	server.New(&config, router, &handler, logger)
+	server.New(&config, router.Router, &handler, logger)
 	if err := server.Start(); err != nil {
 		logger.Fatal("Server falls")
 	}

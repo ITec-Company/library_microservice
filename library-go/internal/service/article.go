@@ -16,10 +16,10 @@ type articleService struct {
 	storage store.ArticleStorage
 }
 
-func NewArticleService(storage store.ArticleStorage, logger *logging.Logger) ArticleService {
+func NewArticleService(storage *store.ArticleStorage, logger *logging.Logger) ArticleService {
 	return &articleService{
 		logger:  logger,
-		storage: storage,
+		storage: *storage,
 	}
 }
 

@@ -15,10 +15,10 @@ type videoService struct {
 	storage store.VideoStorage
 }
 
-func NewService(storage store.VideoStorage, logger *logging.Logger) VideoService {
+func NewVideoService(storage *store.VideoStorage, logger *logging.Logger) VideoService {
 	return &videoService{
 		logger:  logger,
-		storage: storage,
+		storage: *storage,
 	}
 }
 

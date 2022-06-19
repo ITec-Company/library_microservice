@@ -11,10 +11,10 @@ type reviewService struct {
 	storage store.ReviewStorage
 }
 
-func NewReviewService(storage store.ReviewStorage, logger *logging.Logger) ReviewService {
+func NewReviewService(storage *store.ReviewStorage, logger *logging.Logger) ReviewService {
 	return &reviewService{
 		logger:  logger,
-		storage: storage}
+		storage: *storage}
 }
 
 func (s *reviewService) GetByUUID(UUID string) (*domain.Review, error) {
