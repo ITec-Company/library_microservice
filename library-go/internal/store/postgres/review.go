@@ -6,42 +6,16 @@ import (
 	"library-go/internal/domain"
 	"library-go/internal/store"
 	"library-go/pkg/logging"
-	"time"
+	"strings"
 )
 
 const (
-	getOneReviewQuery = `SELECT 
-		uuid,
-		text,
-		rating,
-		date,
-		literature_uuid
-	FROM review WHERE  uuid = $1`
-	getAllReviewsQuery = `SELECT 
-		uuid,
-		full_name,
-		text,
-		source,
-		rating,
-		date,
-		literature_uuid
-	FROM review 
-	GROUP BY uuid, full_name, source,text, rating, date, literature_uuid`
-	createReviewQuery = `INSERT INTO review (
-			text,
-			full_name,
-			source,
-			date,
-			rating,
-			literature_uuid
-		) SELECT $1, $2 , $3, $4, $5, $6 RETURNING uuid`
-	deleteReviewQuery = `DELETE FROM review WHERE uuid = $1`
-	updateReviewQuery = `UPDATE review SET 
+	UpdateReviewQuery = `UPDATE review SET 
 			text = COALESCE(NULLIF($1, ''), text),
 			full_name = COALESCE(NULLIF($2, ''), full_name)
 		WHERE uuid = $3`
 
-	rateReviewQuery = `WITH grades AS (
+	RateReviewQuery = `WITH grades AS (
    		 SELECT avg((select avg(a) from unnest(array_append(all_grades, $1)) as a)) AS avg
    		 FROM review
 		)
@@ -81,7 +55,7 @@ func (rs *reviewStorage) GetOne(UUID string) (*domain.Review, error) {
 		&review.Text,
 		&review.Rating,
 		&review.Source,
-		&review.Date,
+		&review.CreatedAt,
 		&review.LiteratureUUID,
 	); err != nil {
 		rs.logger.Errorf("error occurred while selecting review from DB. err: %v", err)
@@ -112,7 +86,7 @@ func (rs *reviewStorage) GetAll(limit, offset int) ([]*domain.Review, error) {
 			&review.Text,
 			&review.Rating,
 			&review.Source,
-			&review.Date,
+			&review.CreatedAt,
 			&review.LiteratureUUID,
 		)
 		if err != nil {
@@ -125,6 +99,12 @@ func (rs *reviewStorage) GetAll(limit, offset int) ([]*domain.Review, error) {
 }
 
 func (rs *reviewStorage) Create(reviewCreateDTO *domain.CreateReviewDTO) (string, error) {
+	query, args, _ := squirrel.Insert("review").
+		Columns("text", "full_name", "source", "literature_uuid").
+		Values(reviewCreateDTO.Text, reviewCreateDTO.FullName, reviewCreateDTO.Source, reviewCreateDTO.LiteratureUUID).
+		Suffix("RETURNING uuid").
+		ToSql()
+
 	tx, err := rs.db.Begin()
 	if err != nil {
 		rs.logger.Errorf("error occurred while creating transaction. err: %v", err)
@@ -132,14 +112,7 @@ func (rs *reviewStorage) Create(reviewCreateDTO *domain.CreateReviewDTO) (string
 	}
 
 	var UUID string
-	row := tx.QueryRow(createReviewQuery,
-		reviewCreateDTO.Text,
-		reviewCreateDTO.FullName,
-		reviewCreateDTO.Source,
-		time.Now(),
-		0,
-		reviewCreateDTO.LiteratureUUID,
-	)
+	row := tx.QueryRow(query, args...)
 	if err := row.Scan(&UUID); err != nil {
 		tx.Rollback()
 		rs.logger.Errorf("error occurred while creating review. err: %v", err)
@@ -150,13 +123,18 @@ func (rs *reviewStorage) Create(reviewCreateDTO *domain.CreateReviewDTO) (string
 }
 
 func (rs *reviewStorage) Delete(UUID string) error {
+	query, args, _ := squirrel.Delete("review").
+		Where("uuid = ?", UUID).
+		PlaceholderFormat(squirrel.Dollar).
+		ToSql()
+
 	tx, err := rs.db.Begin()
 	if err != nil {
 		rs.logger.Errorf("error occurred while creating transaction. err: %v", err)
 		return err
 	}
 
-	result, err := tx.Exec(deleteReviewQuery, UUID)
+	result, err := tx.Exec(query, args...)
 	if err != nil {
 		tx.Rollback()
 		rs.logger.Errorf("error occurred while deleting review. err: %v.", err)
@@ -186,9 +164,9 @@ func (rs *reviewStorage) Update(reviewUpdateDTO *domain.UpdateReviewDTO) error {
 		return err
 	}
 
-	result, err := tx.Exec(updateReviewQuery,
+	result, err := tx.Exec(UpdateReviewQuery,
 		reviewUpdateDTO.Text,
-		reviewUpdateDTO.FullName,
+		strings.Title(strings.ToLower(reviewUpdateDTO.FullName)),
 		reviewUpdateDTO.UUID,
 	)
 	if err != nil {
@@ -220,7 +198,7 @@ func (rs *reviewStorage) Rate(UUID string, rating float32) error {
 		return err
 	}
 
-	result, err := tx.Exec(rateReviewQuery,
+	result, err := tx.Exec(RateReviewQuery,
 		rating,
 		UUID,
 	)

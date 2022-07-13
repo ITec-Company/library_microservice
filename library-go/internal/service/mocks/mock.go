@@ -68,17 +68,17 @@ func (mr *MockArticleServiceMockRecorder) GetAll(sortingOptions interface{}) *go
 }
 
 // Delete mocks base method
-func (m *MockArticleService) Delete(UUID string) error {
+func (m *MockArticleService) Delete(UUID, path string) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Delete", UUID)
+	ret := m.ctrl.Call(m, "Delete", UUID, path)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // Delete indicates an expected call of Delete
-func (mr *MockArticleServiceMockRecorder) Delete(UUID interface{}) *gomock.Call {
+func (mr *MockArticleServiceMockRecorder) Delete(UUID, path interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockArticleService)(nil).Delete), UUID)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockArticleService)(nil).Delete), UUID, path)
 }
 
 // Create mocks base method
@@ -140,17 +140,17 @@ func (mr *MockArticleServiceMockRecorder) SaveFile(path, fileName, file interfac
 }
 
 // UpdateFile mocks base method
-func (m *MockArticleService) UpdateFile(path, fileName string, file io.Reader) error {
+func (m *MockArticleService) UpdateFile(dto *domain.UpdateArticleFileDTO) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "UpdateFile", path, fileName, file)
+	ret := m.ctrl.Call(m, "UpdateFile", dto)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // UpdateFile indicates an expected call of UpdateFile
-func (mr *MockArticleServiceMockRecorder) UpdateFile(path, fileName, file interface{}) *gomock.Call {
+func (mr *MockArticleServiceMockRecorder) UpdateFile(dto interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateFile", reflect.TypeOf((*MockArticleService)(nil).UpdateFile), path, fileName, file)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateFile", reflect.TypeOf((*MockArticleService)(nil).UpdateFile), dto)
 }
 
 // LoadImage mocks base method
@@ -194,6 +194,34 @@ func (m *MockArticleService) UpdateImage(path string, image *image.Image) error 
 func (mr *MockArticleServiceMockRecorder) UpdateImage(path, image interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateImage", reflect.TypeOf((*MockArticleService)(nil).UpdateImage), path, image)
+}
+
+// Rate mocks base method
+func (m *MockArticleService) Rate(UUID string, rating float32) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Rate", UUID, rating)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Rate indicates an expected call of Rate
+func (mr *MockArticleServiceMockRecorder) Rate(UUID, rating interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Rate", reflect.TypeOf((*MockArticleService)(nil).Rate), UUID, rating)
+}
+
+// DownloadCountUp mocks base method
+func (m *MockArticleService) DownloadCountUp(UUID string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DownloadCountUp", UUID)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// DownloadCountUp indicates an expected call of DownloadCountUp
+func (mr *MockArticleServiceMockRecorder) DownloadCountUp(UUID interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DownloadCountUp", reflect.TypeOf((*MockArticleService)(nil).DownloadCountUp), UUID)
 }
 
 // MockAudioService is a mock of AudioService interface
@@ -251,17 +279,17 @@ func (mr *MockAudioServiceMockRecorder) GetAll(sortingOptions interface{}) *gomo
 }
 
 // Delete mocks base method
-func (m *MockAudioService) Delete(UUID string) error {
+func (m *MockAudioService) Delete(UUID, path string) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Delete", UUID)
+	ret := m.ctrl.Call(m, "Delete", UUID, path)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // Delete indicates an expected call of Delete
-func (mr *MockAudioServiceMockRecorder) Delete(UUID interface{}) *gomock.Call {
+func (mr *MockAudioServiceMockRecorder) Delete(UUID, path interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockAudioService)(nil).Delete), UUID)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockAudioService)(nil).Delete), UUID, path)
 }
 
 // Create mocks base method
@@ -323,17 +351,45 @@ func (mr *MockAudioServiceMockRecorder) SaveFile(path, fileName, file interface{
 }
 
 // UpdateFile mocks base method
-func (m *MockAudioService) UpdateFile(path, fileName string, file io.Reader) error {
+func (m *MockAudioService) UpdateFile(dto *domain.UpdateAudioFileDTO) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "UpdateFile", path, fileName, file)
+	ret := m.ctrl.Call(m, "UpdateFile", dto)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // UpdateFile indicates an expected call of UpdateFile
-func (mr *MockAudioServiceMockRecorder) UpdateFile(path, fileName, file interface{}) *gomock.Call {
+func (mr *MockAudioServiceMockRecorder) UpdateFile(dto interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateFile", reflect.TypeOf((*MockAudioService)(nil).UpdateFile), path, fileName, file)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateFile", reflect.TypeOf((*MockAudioService)(nil).UpdateFile), dto)
+}
+
+// Rate mocks base method
+func (m *MockAudioService) Rate(UUID string, rating float32) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Rate", UUID, rating)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Rate indicates an expected call of Rate
+func (mr *MockAudioServiceMockRecorder) Rate(UUID, rating interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Rate", reflect.TypeOf((*MockAudioService)(nil).Rate), UUID, rating)
+}
+
+// DownloadCountUp mocks base method
+func (m *MockAudioService) DownloadCountUp(UUID string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DownloadCountUp", UUID)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// DownloadCountUp indicates an expected call of DownloadCountUp
+func (mr *MockAudioServiceMockRecorder) DownloadCountUp(UUID interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DownloadCountUp", reflect.TypeOf((*MockAudioService)(nil).DownloadCountUp), UUID)
 }
 
 // MockAuthorService is a mock of AuthorService interface
@@ -487,17 +543,17 @@ func (mr *MockBookServiceMockRecorder) GetAll(sortingOptions interface{}) *gomoc
 }
 
 // Delete mocks base method
-func (m *MockBookService) Delete(UUID string) error {
+func (m *MockBookService) Delete(UUID, path string) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Delete", UUID)
+	ret := m.ctrl.Call(m, "Delete", UUID, path)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // Delete indicates an expected call of Delete
-func (mr *MockBookServiceMockRecorder) Delete(UUID interface{}) *gomock.Call {
+func (mr *MockBookServiceMockRecorder) Delete(UUID, path interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockBookService)(nil).Delete), UUID)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockBookService)(nil).Delete), UUID, path)
 }
 
 // Create mocks base method
@@ -559,17 +615,17 @@ func (mr *MockBookServiceMockRecorder) SaveFile(path, fileName, file interface{}
 }
 
 // UpdateFile mocks base method
-func (m *MockBookService) UpdateFile(path, fileName string, file io.Reader) error {
+func (m *MockBookService) UpdateFile(dto *domain.UpdateBookFileDTO) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "UpdateFile", path, fileName, file)
+	ret := m.ctrl.Call(m, "UpdateFile", dto)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // UpdateFile indicates an expected call of UpdateFile
-func (mr *MockBookServiceMockRecorder) UpdateFile(path, fileName, file interface{}) *gomock.Call {
+func (mr *MockBookServiceMockRecorder) UpdateFile(dto interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateFile", reflect.TypeOf((*MockBookService)(nil).UpdateFile), path, fileName, file)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateFile", reflect.TypeOf((*MockBookService)(nil).UpdateFile), dto)
 }
 
 // LoadImage mocks base method
@@ -613,6 +669,34 @@ func (m *MockBookService) UpdateImage(path string, image *image.Image) error {
 func (mr *MockBookServiceMockRecorder) UpdateImage(path, image interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateImage", reflect.TypeOf((*MockBookService)(nil).UpdateImage), path, image)
+}
+
+// Rate mocks base method
+func (m *MockBookService) Rate(UUID string, rating float32) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Rate", UUID, rating)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Rate indicates an expected call of Rate
+func (mr *MockBookServiceMockRecorder) Rate(UUID, rating interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Rate", reflect.TypeOf((*MockBookService)(nil).Rate), UUID, rating)
+}
+
+// DownloadCountUp mocks base method
+func (m *MockBookService) DownloadCountUp(UUID string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DownloadCountUp", UUID)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// DownloadCountUp indicates an expected call of DownloadCountUp
+func (mr *MockBookServiceMockRecorder) DownloadCountUp(UUID interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DownloadCountUp", reflect.TypeOf((*MockBookService)(nil).DownloadCountUp), UUID)
 }
 
 // MockDirectionService is a mock of DirectionService interface
@@ -807,6 +891,20 @@ func (mr *MockReviewServiceMockRecorder) Update(review interface{}) *gomock.Call
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*MockReviewService)(nil).Update), review)
 }
 
+// Rate mocks base method
+func (m *MockReviewService) Rate(UUID string, rating float32) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Rate", UUID, rating)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Rate indicates an expected call of Rate
+func (mr *MockReviewServiceMockRecorder) Rate(UUID, rating interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Rate", reflect.TypeOf((*MockReviewService)(nil).Rate), UUID, rating)
+}
+
 // MockTagService is a mock of TagService interface
 type MockTagService struct {
 	ctrl     *gomock.Controller
@@ -973,17 +1071,17 @@ func (mr *MockVideoServiceMockRecorder) GetAll(sortingOptions interface{}) *gomo
 }
 
 // Delete mocks base method
-func (m *MockVideoService) Delete(UUID string) error {
+func (m *MockVideoService) Delete(UUID, path string) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Delete", UUID)
+	ret := m.ctrl.Call(m, "Delete", UUID, path)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // Delete indicates an expected call of Delete
-func (mr *MockVideoServiceMockRecorder) Delete(UUID interface{}) *gomock.Call {
+func (mr *MockVideoServiceMockRecorder) Delete(UUID, path interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockVideoService)(nil).Delete), UUID)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockVideoService)(nil).Delete), UUID, path)
 }
 
 // Create mocks base method
@@ -1045,15 +1143,43 @@ func (mr *MockVideoServiceMockRecorder) SaveFile(path, fileName, file interface{
 }
 
 // UpdateFile mocks base method
-func (m *MockVideoService) UpdateFile(path, fileName string, file io.Reader) error {
+func (m *MockVideoService) UpdateFile(dto *domain.UpdateVideoFileDTO) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "UpdateFile", path, fileName, file)
+	ret := m.ctrl.Call(m, "UpdateFile", dto)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // UpdateFile indicates an expected call of UpdateFile
-func (mr *MockVideoServiceMockRecorder) UpdateFile(path, fileName, file interface{}) *gomock.Call {
+func (mr *MockVideoServiceMockRecorder) UpdateFile(dto interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateFile", reflect.TypeOf((*MockVideoService)(nil).UpdateFile), path, fileName, file)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateFile", reflect.TypeOf((*MockVideoService)(nil).UpdateFile), dto)
+}
+
+// Rate mocks base method
+func (m *MockVideoService) Rate(UUID string, rating float32) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Rate", UUID, rating)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Rate indicates an expected call of Rate
+func (mr *MockVideoServiceMockRecorder) Rate(UUID, rating interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Rate", reflect.TypeOf((*MockVideoService)(nil).Rate), UUID, rating)
+}
+
+// DownloadCountUp mocks base method
+func (m *MockVideoService) DownloadCountUp(UUID string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DownloadCountUp", UUID)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// DownloadCountUp indicates an expected call of DownloadCountUp
+func (mr *MockVideoServiceMockRecorder) DownloadCountUp(UUID interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DownloadCountUp", reflect.TypeOf((*MockVideoService)(nil).DownloadCountUp), UUID)
 }

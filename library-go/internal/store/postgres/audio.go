@@ -13,7 +13,7 @@ import (
 )
 
 const (
-	createAudioQuery = `INSERT INTO audio (
+	CreateAudioQuery = `INSERT INTO audio (
                      title, 
                      difficulty,
                      direction_uuid, 
@@ -30,7 +30,7 @@ const (
 				WHERE EXISTS(SELECT uuid FROM direction where $3 = direction.uuid) AND
 			    EXISTS(SELECT uuid FROM tag where tag.uuid = any($7)) RETURNING audio.uuid`
 
-	updateAudioQuery = `UPDATE audio SET 
+	UpdateAudioQuery = `UPDATE audio SET 
 			title = COALESCE(NULLIF($1, ''), title),
 			difficulty = (CASE WHEN ($2 = any(enum_range(difficulty))) THEN $2 ELSE difficulty END), 
 			direction_uuid = (CASE WHEN (EXISTS(SELECT uuid FROM direction where direction.uuid = $3)) THEN $3 ELSE direction_uuid END), 
@@ -39,7 +39,7 @@ const (
 			tags_uuids = (CASE WHEN (EXISTS(SELECT uuid FROM tag where tag.uuid = any($6))) THEN $6 ELSE tags_uuids END)
 		WHERE uuid = $7`
 
-	rateAudioQuery = `WITH grades AS (
+	RateAudioQuery = `WITH grades AS (
    		 SELECT avg((select avg(a) from unnest(array_append(all_grades, $1)) as a)) AS avg
    		 FROM audio
 		)
@@ -49,7 +49,7 @@ const (
 		FROM grades
 		WHERE uuid = $2`
 
-	audioDownloadCountUpQuery = `UPDATE audio SET
+	AudioDownloadCountUpQuery = `UPDATE audio SET
 			download_count = (download_count + 1)
 			WHERE uuid = $1`
 )
@@ -209,6 +209,7 @@ func (as *audioStorage) GetAll(sortOptions *domain.SortFilterPagination) ([]*dom
 }
 
 func (as *audioStorage) Create(audioCreateDTO *domain.CreateAudioDTO) (string, error) {
+
 	tx, err := as.db.Begin()
 	if err != nil {
 		as.logger.Errorf("error occurred while creating transaction. err: %v", err)
@@ -222,7 +223,7 @@ func (as *audioStorage) Create(audioCreateDTO *domain.CreateAudioDTO) (string, e
 		localURL = append(localURL, "")
 	}
 
-	row := tx.QueryRow(createAudioQuery,
+	row := tx.QueryRow(CreateAudioQuery,
 		audioCreateDTO.Title,
 		audioCreateDTO.Difficulty,
 		audioCreateDTO.DirectionUUID,
@@ -290,7 +291,7 @@ func (as *audioStorage) Update(audioUpdateDTO *domain.UpdateAudioDTO) error {
 		return err
 	}
 
-	result, err := tx.Exec(updateAudioQuery,
+	result, err := tx.Exec(UpdateAudioQuery,
 		audioUpdateDTO.Title,
 		audioUpdateDTO.Difficulty,
 		audioUpdateDTO.DirectionUUID,
@@ -328,7 +329,7 @@ func (as *audioStorage) Rate(UUID string, rating float32) error {
 		return err
 	}
 
-	result, err := tx.Exec(rateAudioQuery,
+	result, err := tx.Exec(RateAudioQuery,
 		rating,
 		UUID,
 	)
@@ -361,7 +362,7 @@ func (as *audioStorage) DownloadCountUp(UUID string) error {
 		return err
 	}
 
-	result, err := tx.Exec(audioDownloadCountUpQuery,
+	result, err := tx.Exec(AudioDownloadCountUpQuery,
 		UUID,
 	)
 	if err != nil {

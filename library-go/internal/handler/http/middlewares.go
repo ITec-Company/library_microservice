@@ -182,14 +182,15 @@ func (m *Middleware) createBook(next http.Handler) httprouter.Handle {
 			return
 		}
 
-		file := data["file"].(*bytes.Buffer)
-
-		if !filetype.IsArchive(file.Bytes()) {
-			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(http.StatusBadRequest)
-			m.logger.Errorf("file is not a pdf, allowed extensions: pdf")
-			json.NewEncoder(w).Encode(JSON.Error{Msg: "file is not a pdf, allowed extensions: pdf"})
-			return
+		file, ok := data["file"].(*bytes.Buffer)
+		if ok && file != nil {
+			if !filetype.IsArchive(file.Bytes()) {
+				w.Header().Set("Content-Type", "application/json")
+				w.WriteHeader(http.StatusBadRequest)
+				m.logger.Errorf("file is not a pdf, allowed extensions: pdf")
+				json.NewEncoder(w).Encode(JSON.Error{Msg: "file is not a pdf, allowed extensions: pdf"})
+				return
+			}
 		}
 
 		kind, err := filetype.Match(file.Bytes())
@@ -318,19 +319,19 @@ func (m *Middleware) createVideo(next http.Handler) httprouter.Handle {
 				json.NewEncoder(w).Encode(JSON.Error{Msg: "file is not a video, allowed extensions: mp4, m4v, mkv, webm, mov, avi, wmv, mpg, flv, 3gp"})
 				return
 			}
+		}
 
-			kind, err := filetype.Match(file.Bytes())
-			if err != nil {
-				w.Header().Set("Content-Type", "application/json")
-				w.WriteHeader(http.StatusBadRequest)
-				m.logger.Errorf("error occurred while ckecking file extension. err: %v.", err)
-				json.NewEncoder(w).Encode(JSON.Error{Msg: fmt.Sprintf("error occurred while ckecking file extension. err: %v", err)})
-				return
-			}
-			data["fileName"] = fmt.Sprintf("title(%s).%s", data["title"].(string), kind.Extension)
+		kind, err := filetype.Match(file.Bytes())
+		if err != nil {
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusBadRequest)
+			m.logger.Errorf("error occurred while ckecking file extension. err: %v.", err)
+			json.NewEncoder(w).Encode(JSON.Error{Msg: fmt.Sprintf("error occurred while ckecking file extension. err: %v", err)})
+			return
 		}
 
 		data["title"] = strings.Replace(data["title"].(string), " ", "_", -1)
+		data["fileName"] = fmt.Sprintf("title(%s).%s", data["title"].(string), kind.Extension)
 
 		next.ServeHTTP(w, r.WithContext(context.WithValue(r.Context(), CtxKeyCreateVideo, data)))
 	}
@@ -419,16 +420,15 @@ func (m *Middleware) createAudio(next http.Handler) httprouter.Handle {
 			return
 		}
 
-		file := data["file"].(*bytes.Buffer)
-		if file != nil {
-			m.logger.Errorf("file is not nil %v", file)
-		}
-		if !filetype.IsAudio(file.Bytes()) {
-			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(http.StatusBadRequest)
-			m.logger.Errorf("file is not an audio, allowed extensions: mid, mp3, m4a, ogg, flac, wav, amr, aac, aiff")
-			json.NewEncoder(w).Encode(JSON.Error{Msg: "file is not an audio, allowed extensions: mid, mp3, m4a, ogg, flac, wav, amr, aac, aiff"})
-			return
+		file, ok := data["file"].(*bytes.Buffer)
+		if ok && file != nil {
+			if !filetype.IsAudio(file.Bytes()) {
+				w.Header().Set("Content-Type", "application/json")
+				w.WriteHeader(http.StatusBadRequest)
+				m.logger.Errorf("file is not an audio, allowed extensions: mid, mp3, m4a, ogg, flac, wav, amr, aac, aiff")
+				json.NewEncoder(w).Encode(JSON.Error{Msg: "file is not an audio, allowed extensions: mid, mp3, m4a, ogg, flac, wav, amr, aac, aiff"})
+				return
+			}
 		}
 
 		kind, err := filetype.Match(file.Bytes())

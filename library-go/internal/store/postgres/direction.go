@@ -10,13 +10,7 @@ import (
 )
 
 const (
-	getOneDirectionQuery  = `SELECT * FROM direction WHERE uuid = $1`
-	getAllDirectionsQuery = `SELECT * FROM direction`
-	createDirectionQuery  = `INSERT INTO direction (
-                     name
-	) VALUES ($1) RETURNING uuid`
-	deleteDirectionQuery = `DELETE FROM direction WHERE uuid = $1`
-	updateDirectionQuery = `UPDATE direction SET 
+	UpdateDirectionQuery = `UPDATE direction SET 
                    name = COALESCE(NULLIF($1, ''), name)
 		WHERE uuid = $2 RETURNING *`
 )
@@ -34,7 +28,6 @@ func NewDirectionStorage(db *sql.DB, logger *logging.Logger) store.DirectionStor
 }
 
 func (ds *directionStorage) GetOne(UUID string) (*domain.Direction, error) {
-	var direction domain.Direction
 	query, args, _ := squirrel.Select("uuid", "name").
 		From("direction").
 		Where(squirrel.Eq{
@@ -42,6 +35,8 @@ func (ds *directionStorage) GetOne(UUID string) (*domain.Direction, error) {
 		}).
 		PlaceholderFormat(squirrel.Dollar).
 		ToSql()
+
+	var direction domain.Direction
 
 	if err := ds.db.QueryRow(query, args...).Scan(
 		&direction.UUID,
@@ -84,6 +79,12 @@ func (ds *directionStorage) GetAll(limit, offset int) ([]*domain.Direction, erro
 }
 
 func (ds *directionStorage) Create(directionCreateDTO *domain.CreateDirectionDTO) (string, error) {
+	query, args, _ := squirrel.Insert("direction").
+		Columns("name").
+		Values(strings.Title(strings.ToLower(directionCreateDTO.Name))).
+		Suffix("RETURNING  uuid").
+		ToSql()
+
 	tx, err := ds.db.Begin()
 	if err != nil {
 		ds.logger.Errorf("error occurred while creating transaction. err: %v", err)
@@ -91,9 +92,7 @@ func (ds *directionStorage) Create(directionCreateDTO *domain.CreateDirectionDTO
 	}
 
 	var UUID string
-	row := tx.QueryRow(createDirectionQuery,
-		strings.Title(strings.ToLower(directionCreateDTO.Name)),
-	)
+	row := tx.QueryRow(query, args...)
 	if err := row.Scan(&UUID); err != nil {
 		tx.Rollback()
 		ds.logger.Errorf("error occurred while creating direction. err: %v", err)
@@ -104,13 +103,18 @@ func (ds *directionStorage) Create(directionCreateDTO *domain.CreateDirectionDTO
 }
 
 func (ds *directionStorage) Delete(UUID string) error {
+	query, args, _ := squirrel.Delete("direction").
+		Where("uuid = ?", UUID).
+		PlaceholderFormat(squirrel.Dollar).
+		ToSql()
+
 	tx, err := ds.db.Begin()
 	if err != nil {
 		ds.logger.Errorf("error occurred while creating transaction. err: %v", err)
 		return err
 	}
 
-	result, err := tx.Exec(deleteDirectionQuery, UUID)
+	result, err := tx.Exec(query, args...)
 	if err != nil {
 		tx.Rollback()
 		ds.logger.Errorf("error occurred while deleting direction. err: %v.", err)
@@ -140,7 +144,7 @@ func (ds *directionStorage) Update(directionUpdateDTO *domain.UpdateDirectionDTO
 		return err
 	}
 
-	result, err := tx.Exec(updateDirectionQuery,
+	result, err := tx.Exec(UpdateDirectionQuery,
 		strings.Title(strings.ToLower(directionUpdateDTO.Name)),
 		directionUpdateDTO.UUID)
 

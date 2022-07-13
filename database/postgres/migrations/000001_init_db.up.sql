@@ -77,7 +77,6 @@ CREATE TABLE review
     rating                  NUMERIC(9,2) NOT NULL DEFAULT 0.0,
     all_grades              NUMERIC(9,2)[],
     source                  review_source NOT NULL,
-    date                    DATE NOT NULL,
     literature_uuid         integer,
     created_at              TIMESTAMP NOT NULL DEFAULT (now() AT TIME ZONE 'utc')
 );

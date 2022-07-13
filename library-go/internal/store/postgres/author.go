@@ -9,13 +9,7 @@ import (
 )
 
 const (
-	getOneAuthorQuery  = `SELECT * FROM author WHERE uuid = $1`
-	getAllAuthorsQuery = `SELECT * FROM author`
-	createAuthorQuery  = `INSERT INTO author (
-                     full_name
-	) VALUES ($1) RETURNING uuid`
-	deleteAuthorQuery = `DELETE FROM author WHERE uuid = $1`
-	updateAuthorQuery = `UPDATE author SET
+	UpdateAuthorQuery = `UPDATE author SET
 						full_name = COALESCE(NULLIF($1, ''), full_name)
 						WHERE uuid = $2`
 )
@@ -82,6 +76,12 @@ func (as *authorStorage) GetAll(limit, offset int) ([]*domain.Author, error) {
 }
 
 func (as *authorStorage) Create(authorCreateDTO *domain.CreateAuthorDTO) (string, error) {
+	query, args, _ := squirrel.Insert("author").
+		Columns("full_name").
+		Values(authorCreateDTO.FullName).
+		Suffix("RETURNING  uuid").
+		ToSql()
+
 	tx, err := as.db.Begin()
 	if err != nil {
 		as.logger.Errorf("error occurred while creating transaction. err: %v", err)
@@ -90,9 +90,7 @@ func (as *authorStorage) Create(authorCreateDTO *domain.CreateAuthorDTO) (string
 
 	var UUID string
 
-	row := tx.QueryRow(createAuthorQuery,
-		authorCreateDTO.FullName,
-	)
+	row := tx.QueryRow(query, args...)
 	if err := row.Scan(
 		&UUID,
 	); err != nil {
@@ -105,13 +103,18 @@ func (as *authorStorage) Create(authorCreateDTO *domain.CreateAuthorDTO) (string
 }
 
 func (as *authorStorage) Delete(UUID string) error {
+	query, args, _ := squirrel.Delete("author").
+		Where("uuid = ?", UUID).
+		PlaceholderFormat(squirrel.Dollar).
+		ToSql()
+
 	tx, err := as.db.Begin()
 	if err != nil {
 		as.logger.Errorf("error occurred while creating transaction. err: %v", err)
 		return err
 	}
 
-	result, err := tx.Exec(deleteAuthorQuery, UUID)
+	result, err := tx.Exec(query, args...)
 	if err != nil {
 		tx.Rollback()
 		as.logger.Errorf("error occurred while deleting author. err: %v.", err)
@@ -141,7 +144,7 @@ func (as *authorStorage) Update(authorUpdateDTO *domain.UpdateAuthorDTO) error {
 		return err
 	}
 
-	result, err := tx.Exec(updateAuthorQuery,
+	result, err := tx.Exec(UpdateAuthorQuery,
 		authorUpdateDTO.FullName,
 		authorUpdateDTO.UUID)
 

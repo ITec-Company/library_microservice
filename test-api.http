@@ -27,12 +27,11 @@ Content-Type: application/json
 
 
 // query refactor    CREATE (look at book create Storage), UPDATE ?
-// tests
+// tests handlers: middleware
 
 // review date or created_at?
-
-// load save video
-
+// improve test
+// DB test improve results (delete, rate)
 // solve problem with tag validation while creating books/auido/video/article in DB query any/in (tags)
 
-// video save/update/load file functions were disabled
+

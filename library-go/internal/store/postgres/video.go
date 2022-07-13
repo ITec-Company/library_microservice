@@ -13,42 +13,7 @@ import (
 )
 
 const (
-	getOneVideoQuery = `SELECT 
-		V.uuid,
-		V.title,
-		V.difficulty,
-		V.rating,
-        V.description,
-		V.local_url,
-		V.language,
-		V.download_count,
-		D.uuid as direction_uuid,
-		D.name as direction_name,
-		array_agg(DISTINCT T) as tags
-	FROM video AS V
-	LEFT JOIN direction AS D ON D.uuid = V.direction_uuid
-	LEFT JOIN tag AS T ON  T.uuid = any (V.tags_uuids)
-	WHERE  V.uuid = $1
-	GROUP BY V.uuid, V.title, V.rating, V.description, V.local_url, V.language, V.download_count, D.uuid, D.name`
-
-	getAllVideosQuery = `SELECT
-		V.uuid,
-		V.title,
-		V.difficulty,
-		V.rating,
-		V.description,
-		V.local_url,
-		V.language,
-		V.download_count,
-		D.uuid as direction_uuid,
-		D.name as direction_name,
-		array_agg(DISTINCT T) as tags
-	FROM video AS V
-	LEFT JOIN direction AS D ON D.uuid = V.direction_uuid
-	LEFT JOIN tag AS T ON  T.uuid = any (V.tags_uuids)
-	GROUP BY V.uuid, V.title, V.difficulty, V.rating, V.description, V.local_url, V.language, V.download_count, D.uuid, D.name`
-
-	createVideoQuery = `INSERT INTO video (
+	CreateVideoQuery = `INSERT INTO video (
                      title, 
                    	 difficulty,
                      direction_uuid, 
@@ -69,9 +34,7 @@ const (
 				WHERE EXISTS(SELECT uuid FROM direction where $3 = direction.uuid) AND
 				EXISTS(SELECT uuid FROM tag where tag.uuid = any($9)) RETURNING video.uuid`
 
-	deleteVideoQuery = `DELETE FROM video WHERE uuid = $1`
-
-	updateVideoQuery = `UPDATE video SET 
+	UpdateVideoQuery = `UPDATE video SET 
 			title = COALESCE(NULLIF($1, ''), title), 
 			difficulty = (CASE WHEN ($2 = any(enum_range(difficulty))) THEN $2 ELSE difficulty END), 
 			direction_uuid = (CASE WHEN (EXISTS(SELECT uuid FROM direction where direction.uuid = $3)) THEN $3 ELSE direction_uuid END), 
@@ -82,7 +45,7 @@ const (
 			tags_uuids = (CASE WHEN (EXISTS(SELECT uuid FROM tag where tag.uuid = any($8))) THEN $8 ELSE tags_uuids END)
 		WHERE uuid = $9`
 
-	rateVideoQuery = `WITH grades AS (
+	RateVideoQuery = `WITH grades AS (
    		 SELECT avg((select avg(a) from unnest(array_append(all_grades, $1)) as a)) AS avg
    		 FROM video
 		)
@@ -92,7 +55,7 @@ const (
 		FROM grades
 		WHERE uuid = $2`
 
-	videoDownloadCountUpQuery = `UPDATE video SET
+	VideoDownloadCountUpQuery = `UPDATE video SET
 			download_count = (download_count + 1)
 			WHERE uuid = $1`
 )
@@ -122,7 +85,6 @@ func (vs *videoStorage) GetOne(UUID string) (*domain.Video, error) {
 		"V.language",
 		"V.download_count",
 		"V.created_at",
-		"V.web_url",
 		"D.uuid as direction_uuid",
 		"D.name as direction_name",
 		"array_agg(DISTINCT T) as tags").
@@ -131,7 +93,7 @@ func (vs *videoStorage) GetOne(UUID string) (*domain.Video, error) {
 		PlaceholderFormat(squirrel.Dollar).
 		LeftJoin("direction AS D ON D.uuid = V.direction_uuid").
 		LeftJoin("tag AS T ON  T.uuid = any (V.tags_uuids)").
-		GroupBy("V.uuid, V.title, V.difficulty, V.rating, V.description, V.local_url, V.web_url, V.language, V.download_count, V.created_at, V.web_url, D.uuid, D.name").
+		GroupBy("V.uuid, V.title, V.difficulty, V.rating, V.description, V.local_url, V.web_url, V.language, V.download_count, V.created_at, D.uuid, D.name").
 		ToSql()
 
 	var video domain.Video
@@ -147,7 +109,6 @@ func (vs *videoStorage) GetOne(UUID string) (*domain.Video, error) {
 		&video.Language,
 		&video.DownloadCount,
 		&video.CreatedAt,
-		&video.WebURL,
 		&video.Direction.UUID,
 		&video.Direction.Name,
 		pq.Array(&tagsStr),
@@ -179,7 +140,6 @@ func (vs *videoStorage) GetAll(sortOptions *domain.SortFilterPagination) ([]*dom
 		"V.language",
 		"V.download_count",
 		"V.created_at",
-		"V.web_url",
 		"D.uuid as direction_uuid",
 		"D.name as direction_name",
 		"array_agg(DISTINCT T) as tags",
@@ -187,7 +147,7 @@ func (vs *videoStorage) GetAll(sortOptions *domain.SortFilterPagination) ([]*dom
 		From("video AS V").
 		LeftJoin("direction AS D ON D.uuid = V.direction_uuid").
 		LeftJoin("tag AS T ON  T.uuid = any (V.tags_uuids)").
-		GroupBy("V.uuid, V.title, V.difficulty, V.rating, V.description, V.local_url, V.web_url, V.language, V.download_count, V.created_at, V.web_url, D.uuid, D.name")
+		GroupBy("V.uuid, V.title, V.difficulty, V.rating, V.description, V.local_url, V.web_url, V.language, V.download_count, V.created_at, D.uuid, D.name")
 
 	if sortOptions.Limit != 0 {
 		s = s.Limit(sortOptions.Limit)
@@ -230,7 +190,6 @@ func (vs *videoStorage) GetAll(sortOptions *domain.SortFilterPagination) ([]*dom
 			&video.Language,
 			&video.DownloadCount,
 			&video.CreatedAt,
-			&video.WebURL,
 			&video.Direction.UUID,
 			&video.Direction.Name,
 			pq.Array(&tagsStr),
@@ -276,7 +235,7 @@ func (vs *videoStorage) Create(videoCreateDTO *domain.CreateVideoDTO) (string, e
 		localURL = append(localURL, "")
 	}
 
-	row := tx.QueryRow(createVideoQuery,
+	row := tx.QueryRow(CreateVideoQuery,
 		videoCreateDTO.Title,
 		videoCreateDTO.Difficulty,
 		videoCreateDTO.DirectionUUID,
@@ -342,7 +301,7 @@ func (vs *videoStorage) Update(videoUpdateDTO *domain.UpdateVideoDTO) error {
 		return err
 	}
 
-	result, err := tx.Exec(updateVideoQuery,
+	result, err := tx.Exec(UpdateVideoQuery,
 		videoUpdateDTO.Title,
 		videoUpdateDTO.Difficulty,
 		videoUpdateDTO.DirectionUUID,
@@ -382,7 +341,7 @@ func (vs *videoStorage) Rate(UUID string, rating float32) error {
 		return err
 	}
 
-	result, err := tx.Exec(rateVideoQuery,
+	result, err := tx.Exec(RateVideoQuery,
 		rating,
 		UUID,
 	)
@@ -415,7 +374,7 @@ func (vs *videoStorage) DownloadCountUp(UUID string) error {
 		return err
 	}
 
-	result, err := tx.Exec(videoDownloadCountUpQuery,
+	result, err := tx.Exec(VideoDownloadCountUpQuery,
 		UUID,
 	)
 	if err != nil {

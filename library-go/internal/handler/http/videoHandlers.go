@@ -65,6 +65,11 @@ func (vh *VideoHandler) GetAll() http.HandlerFunc {
 			json.NewEncoder(w).Encode(JSON.Error{Msg: fmt.Sprintf("error occurred while getting all videos. err: %v", err)})
 			return
 		}
+		if videos == nil {
+			w.WriteHeader(http.StatusNotFound)
+			json.NewEncoder(w).Encode(JSON.Error{Msg: fmt.Sprintf("no rows in result")})
+			return
+		}
 
 		if pagesCount > 0 {
 			w.Header().Set("pages", strconv.Itoa(pagesCount))
@@ -136,12 +141,14 @@ func (vh *VideoHandler) Create() http.Handler {
 		path := fmt.Sprintf("%s%s/", videoLocalStoragePath, UUID)
 
 		file, ok := data["file"].(*bytes.Buffer)
-		err = vh.Service.SaveFile(path, fileName, file)
-		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			vh.logger.Errorf("error occurred while saving video into local store. err: %v.", err)
-			json.NewEncoder(w).Encode(JSON.Error{Msg: fmt.Sprintf("error occurred while saving video into local database. err: %v", err)})
-			return
+		if ok && file != nil {
+			err = vh.Service.SaveFile(path, fileName, file)
+			if err != nil {
+				w.WriteHeader(http.StatusInternalServerError)
+				vh.logger.Errorf("error occurred while saving video into local store. err: %v.", err)
+				json.NewEncoder(w).Encode(JSON.Error{Msg: fmt.Sprintf("error occurred while saving video into local database. err: %v", err)})
+				return
+			}
 		}
 
 		w.WriteHeader(http.StatusCreated)
@@ -269,7 +276,7 @@ func (vh *VideoHandler) UpdateFile() http.Handler {
 		err := vh.Service.UpdateFile(&dto)
 		if err != nil {
 			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(http.StatusInternalServerError)
+			w.WriteHeader(http.StatusNotFound)
 			vh.logger.Errorf("error occurred while saving video into local store. err: %v.", err)
 			json.NewEncoder(w).Encode(JSON.Error{Msg: fmt.Sprintf("error occurred while saving video into local store. err: %v.", err)})
 			return
@@ -286,6 +293,7 @@ func (vh *VideoHandler) Rate(w http.ResponseWriter, r *http.Request, ps httprout
 	if ratingStr == "" {
 		w.WriteHeader(http.StatusBadRequest)
 		vh.logger.Errorf("rating query can't be empty")
+		json.NewEncoder(w).Encode(JSON.Error{Msg: fmt.Sprintf("rating query can't be empty")})
 		return
 	}
 	rating, err := strconv.ParseFloat(ratingStr, 32)
@@ -295,22 +303,30 @@ func (vh *VideoHandler) Rate(w http.ResponseWriter, r *http.Request, ps httprout
 		json.NewEncoder(w).Encode(JSON.Error{Msg: fmt.Sprintf("error occurred while parsing rating. Should be float32. err: %v.", err)})
 		return
 	}
+	if rating < 1.0 || rating > 5.0 {
+		w.WriteHeader(http.StatusBadRequest)
+		vh.logger.Errorf("rating should be from 1.0 to 5.0")
+		json.NewEncoder(w).Encode(JSON.Error{Msg: "rating should be from 1.0 to 5.0"})
+		return
+	}
 
 	uuid := r.URL.Query().Get("uuid")
 	if uuid == "" {
 		w.WriteHeader(http.StatusBadRequest)
 		vh.logger.Errorf("uuid can't be empty")
+
+		json.NewEncoder(w).Encode(JSON.Error{Msg: fmt.Sprintf("uuid can't be empty")})
 		return
 	}
 
 	err = vh.Service.Rate(uuid, float32(rating))
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
+		w.WriteHeader(http.StatusBadRequest)
 		vh.logger.Errorf("error occurred while rating video image. err: %v.", err)
 		json.NewEncoder(w).Encode(JSON.Error{Msg: fmt.Sprintf("error occurred while rating video into local store. err: %v.", err)})
 		return
 	}
 
-	w.WriteHeader(http.StatusCreated)
+	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(JSON.Info{Msg: fmt.Sprintf("Video rated successfully. UUID: %s", uuid)})
 }

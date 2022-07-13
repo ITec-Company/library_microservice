@@ -13,52 +13,7 @@ import (
 )
 
 const (
-	getOneBookQuery = `SELECT 
-		B.uuid,
-		B.title,
-		B.difficulty,
-		B.edition_date,
-		B.rating,
-		B.description,
-		B.local_url,
-		B.language,
-		B.download_count,
-		B.image_url,
-		B.created_at,
-		Au.uuid,
-		Au.full_name,
-		D.uuid as direction_uuid,
-		D.name as direction_name,
-		array_agg(DISTINCT T) as tags
-	FROM book AS B
-	lEFT JOIN author AS Au ON Au.uuid = B.author_uuid
-	LEFT JOIN direction AS D ON D.uuid = B.direction_uuid
-	LEFT JOIN tag AS T ON  T.uuid = any (B.tags_uuids)
-	WHERE  B.uuid = $1
-	GROUP BY B.uuid, B.title, B.difficulty, B.edition_date, B.rating, B.description, B.local_url, B.language, B.download_count, B.image_url, B.created_at, Au.uuid, Au.full_name, D.uuid, D.name`
-
-	getAllBooksQuery = `SELECT 
-		B.uuid,
-		B.title,
-		B.difficulty,
-		B.edition_date,
-		B.rating,
-		B.description,
-		B.local_url,
-		B.language,
-		B.download_count,
-		Au.uuid,
-		Au.full_name,
-		D.uuid as direction_uuid,
-		D.name as direction_name,
-		array_agg(DISTINCT T) as tags
-	FROM book AS B
-	lEFT JOIN author AS Au ON Au.uuid = B.author_uuid
-	LEFT JOIN direction AS D ON D.uuid = B.direction_uuid
-	LEFT JOIN tag AS T ON  T.uuid = any (B.tags_uuids)
-	GROUP BY B.uuid, B.title, B.difficulty, B.edition_date, B.rating, B.description, B.local_url, B.language, B.download_count, Au.uuid, Au.full_name, D.uuid, D.name`
-
-	createBookQuery = `INSERT INTO book (
+	CreateBookQuery = `INSERT INTO book (
                      title, 
                      direction_uuid, 
                      author_uuid,
@@ -84,9 +39,7 @@ const (
 				EXISTS(SELECT uuid FROM direction where $2 = direction.uuid) AND
 			    EXISTS(SELECT uuid FROM tag where tag.uuid = any($10)) RETURNING book.uuid`
 
-	deleteBookQuery = `DELETE FROM book WHERE uuid = $1`
-
-	updateBookQuery = `UPDATE book SET 
+	UpdateBookQuery = `UPDATE book SET 
 			title = COALESCE(NULLIF($1, ''), title),  
 			direction_uuid = (CASE WHEN (EXISTS(SELECT uuid FROM direction where direction.uuid = $2)) THEN $2 ELSE direction_uuid END), 
 			author_uuid = (CASE WHEN (EXISTS(SELECT uuid FROM author where author.uuid = $3)) THEN $3 ELSE author_uuid END), 
@@ -98,7 +51,7 @@ const (
 			tags_uuids = (CASE WHEN (EXISTS(SELECT uuid FROM tag where tag.uuid = any($9))) THEN $9 ELSE COALESCE($9, tags_uuids) END)
 		WHERE uuid = $10`
 
-	rateBookQuery = `WITH grades AS (
+	RateBookQuery = `WITH grades AS (
    		 SELECT avg((select avg(a) from unnest(array_append(all_grades, $1)) as a)) AS avg
    		 FROM book
 		)
@@ -108,7 +61,7 @@ const (
 		FROM grades
 		WHERE uuid = $2`
 
-	bookDownloadCountUpQuery = `UPDATE book SET
+	BookDownloadCountUpQuery = `UPDATE book SET
 			download_count = (download_count + 1)
 			WHERE uuid = $1`
 )
@@ -317,7 +270,7 @@ func (bs *bookStorage) Create(bookCreateDTO *domain.CreateBookDTO) (string, erro
 		imageURL = append(imageURL, "")
 	}
 
-	row := tx.QueryRow(createBookQuery,
+	row := tx.QueryRow(CreateBookQuery,
 		bookCreateDTO.Title,
 		bookCreateDTO.DirectionUUID,
 		bookCreateDTO.AuthorUUID,
@@ -342,13 +295,19 @@ func (bs *bookStorage) Create(bookCreateDTO *domain.CreateBookDTO) (string, erro
 }
 
 func (bs *bookStorage) Delete(UUID string) error {
+
+	query, args, _ := squirrel.Delete("book").
+		Where("uuid = ?", UUID).
+		PlaceholderFormat(squirrel.Dollar).
+		ToSql()
+
 	tx, err := bs.db.Begin()
 	if err != nil {
 		bs.logger.Errorf("error occurred while creating transaction. err: %v", err)
 		return err
 	}
 
-	result, err := tx.Exec(deleteBookQuery, UUID)
+	result, err := tx.Exec(query, args...)
 	if err != nil {
 		tx.Rollback()
 		bs.logger.Errorf("error occurred while deleting book. err: %v.", err)
@@ -385,7 +344,7 @@ func (bs *bookStorage) Update(bookUpdateDTO *domain.UpdateBookDTO) error {
 		return err
 	}
 
-	result, err := tx.Exec(updateBookQuery,
+	result, err := tx.Exec(UpdateBookQuery,
 		bookUpdateDTO.Title,
 		bookUpdateDTO.DirectionUUID,
 		bookUpdateDTO.AuthorUUID,
@@ -426,7 +385,7 @@ func (bs *bookStorage) Rate(UUID string, rating float32) error {
 		return err
 	}
 
-	result, err := tx.Exec(rateBookQuery,
+	result, err := tx.Exec(RateBookQuery,
 		rating,
 		UUID,
 	)
@@ -459,7 +418,7 @@ func (bs *bookStorage) DownloadCountUp(UUID string) error {
 		return err
 	}
 
-	result, err := tx.Exec(bookDownloadCountUpQuery,
+	result, err := tx.Exec(BookDownloadCountUpQuery,
 		UUID,
 	)
 	if err != nil {

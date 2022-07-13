@@ -11,14 +11,7 @@ import (
 )
 
 const (
-	getOneTagQuery   = `SELECT * FROM tag WHERE uuid = $1`
-	getManyTagsQuery = `SELECT * FROM tag WHERE uuid = any($1)`
-	getAllTagsQuery  = `SELECT * FROM tag`
-	createTagQuery   = `INSERT INTO tag (
-                     name
-	) VALUES ($1) RETURNING uuid`
-	deleteTagQuery = `DELETE FROM tag WHERE uuid = $1`
-	updateTagQuery = `UPDATE tag SET 
+	UpdateTagQuery = `UPDATE tag SET 
                    name = $1 
 		WHERE uuid = $2 RETURNING *`
 )
@@ -114,6 +107,12 @@ func (ts *tagStorage) GetAll(limit, offset int) ([]*domain.Tag, error) {
 }
 
 func (ts *tagStorage) Create(tagCreateDTO *domain.CreateTagDTO) (string, error) {
+	query, args, _ := squirrel.Insert("tag").
+		Columns("name").
+		Values(strings.ToLower(tagCreateDTO.Name)).
+		Suffix("RETURNING uuid").
+		ToSql()
+
 	tx, err := ts.db.Begin()
 	if err != nil {
 		ts.logger.Errorf("error occurred while creating transaction. err: %v", err)
@@ -121,9 +120,7 @@ func (ts *tagStorage) Create(tagCreateDTO *domain.CreateTagDTO) (string, error) 
 	}
 
 	var UUID string
-	row := tx.QueryRow(createTagQuery,
-		strings.ToLower(tagCreateDTO.Name),
-	)
+	row := tx.QueryRow(query, args...)
 	if err := row.Scan(&UUID); err != nil {
 		tx.Rollback()
 		ts.logger.Errorf("error occurred while creating tag. err: %v", err)
@@ -134,13 +131,18 @@ func (ts *tagStorage) Create(tagCreateDTO *domain.CreateTagDTO) (string, error) 
 }
 
 func (ts *tagStorage) Delete(UUID string) error {
+	query, args, _ := squirrel.Delete("tag").
+		Where("uuid = ?", UUID).
+		PlaceholderFormat(squirrel.Dollar).
+		ToSql()
+
 	tx, err := ts.db.Begin()
 	if err != nil {
 		ts.logger.Errorf("error occurred while creating transaction. err: %v", err)
 		return err
 	}
 
-	result, err := tx.Exec(deleteTagQuery, UUID)
+	result, err := tx.Exec(query, args...)
 	if err != nil {
 		tx.Rollback()
 		ts.logger.Errorf("error occurred while deleting tag. err: %v.", err)
@@ -170,7 +172,7 @@ func (ts *tagStorage) Update(tagUpdateDTO *domain.UpdateTagDTO) error {
 		return err
 	}
 
-	result, err := tx.Exec(updateTagQuery,
+	result, err := tx.Exec(UpdateTagQuery,
 		strings.ToLower(tagUpdateDTO.Name),
 		tagUpdateDTO.UUID)
 

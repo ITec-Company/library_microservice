@@ -13,50 +13,7 @@ import (
 )
 
 const (
-	getOneArticleQuery = `SELECT 
-		A.uuid,
-		A.title,
-		A.difficulty,
-		A.edition_date,
-		A.rating,
-		A.description,
-		A.local_url,
-		A.language,
-		A.download_count,
-		A.image_url, 
-		A.created_at, 
-		Au.uuid,
-		Au.full_name,
-		D.uuid as direction_uuid,
-		D.name as direction_name,
-		array_agg(DISTINCT T) as tags
-	FROM article AS A
-	lEFT JOIN author AS Au ON Au.uuid = A.author_uuid
-	LEFT JOIN direction AS D ON D.uuid = A.direction_uuid
-	LEFT JOIN tag AS T ON  T.uuid = any (A.tags_uuids)
-	WHERE  A.uuid = $1
-	GROUP BY A.uuid, A.title, A.difficulty, A.edition_date, A.rating, A.description, A.local_url, A.language, A.download_count, A.image_url, A.created_at, Au.uuid, Au.full_name, D.uuid, D.name`
-	getAllArticlesQuery = `SELECT 
-		A.uuid,
-		A.title,
-		A.difficulty,
-		A.edition_date,
-		A.rating,
-		A.description,
-		A.local_url,
-		A.language,
-		A.download_count,
-		Au.uuid,
-		Au.full_name,
-		D.uuid as direction_uuid,
-		D.name as direction_name,
-		array_agg(DISTINCT T) as tags
-	FROM article AS A
-	lEFT JOIN author AS Au ON Au.uuid = A.author_uuid
-	LEFT JOIN direction AS D ON D.uuid = A.direction_uuid
-	LEFT JOIN tag AS T ON  T.uuid = any (A.tags_uuids)
-	GROUP BY A.uuid, A.title, A.difficulty, A.edition_date, A.rating, A.description, A.local_url, A.language, A.download_count, Au.uuid, Au.full_name, D.uuid, D.name`
-	createArticleQuery = `INSERT INTO article (
+	CreateArticleQuery = `INSERT INTO article (
                      title, 
                      direction_uuid, 
                      author_uuid,
@@ -85,9 +42,8 @@ const (
 				WHERE EXISTS(SELECT uuid FROM author where $3 = author.uuid) AND
 				EXISTS(SELECT uuid FROM direction where $2 = direction.uuid) AND
 			    EXISTS(SELECT uuid FROM tag where tag.uuid = any($12)) RETURNING article.uuid`
-	deleteArticleQuery = `DELETE FROM article WHERE uuid = $1`
 
-	updateArticleQuery = `UPDATE article SET 
+	UpdateArticleQuery = `UPDATE article SET 
 			title = COALESCE(NULLIF($1, ''), title),  
 			direction_uuid = (CASE WHEN EXISTS(SELECT uuid FROM direction where direction.uuid = $2) THEN $2 ELSE direction_uuid END), 
 			author_uuid = (CASE WHEN (EXISTS(SELECT uuid FROM author where author.uuid = $3)) THEN $3 ELSE author_uuid END), 
@@ -101,7 +57,7 @@ const (
 			tags_uuids = (CASE WHEN (EXISTS(SELECT uuid FROM tag where tag.uuid = any($11))) THEN $11 ELSE tags_uuids END)
 		WHERE uuid = $12`
 
-	rateArticleQuery = `WITH grades AS (
+	RateArticleQuery = `WITH grades AS (
    		 SELECT avg((select avg(a) from unnest(array_append(all_grades, $1)) as a)) AS avg
    		 FROM article
 		)
@@ -111,7 +67,7 @@ const (
 		FROM grades
 		WHERE uuid = $2`
 
-	articleDownloadCountUpQuery = `UPDATE article SET
+	ArticleDownloadCountUpQuery = `UPDATE article SET
 			download_count = (download_count + 1)
 			WHERE uuid = $1`
 )
@@ -314,7 +270,7 @@ func (as *articleStorage) Create(articleCreateDTO *domain.CreateArticleDTO) (str
 		imageURL = append(imageURL, "")
 	}
 
-	row := tx.QueryRow(createArticleQuery,
+	row := tx.QueryRow(CreateArticleQuery,
 		articleCreateDTO.Title,
 		articleCreateDTO.DirectionUUID,
 		articleCreateDTO.AuthorUUID,
@@ -389,7 +345,7 @@ func (as *articleStorage) Update(articleUpdateDTO *domain.UpdateArticleDTO) erro
 		return err
 	}
 
-	result, err := tx.Exec(updateArticleQuery,
+	result, err := tx.Exec(UpdateArticleQuery,
 		articleUpdateDTO.Title,
 		articleUpdateDTO.DirectionUUID,
 		articleUpdateDTO.AuthorUUID,
@@ -432,7 +388,7 @@ func (as *articleStorage) Rate(UUID string, rating float32) error {
 		return err
 	}
 
-	result, err := tx.Exec(rateArticleQuery,
+	result, err := tx.Exec(RateArticleQuery,
 		rating,
 		UUID,
 	)
@@ -465,7 +421,7 @@ func (as *articleStorage) DownloadCountUp(UUID string) error {
 		return err
 	}
 
-	result, err := tx.Exec(articleDownloadCountUpQuery,
+	result, err := tx.Exec(ArticleDownloadCountUpQuery,
 		UUID,
 	)
 	if err != nil {

@@ -45,20 +45,20 @@ func TestDirectionUpdateDTO() *UpdateDirectionDTO {
 func TestTag() *Tag {
 	return &Tag{
 		UUID: "1",
-		Name: "Test Tag",
+		Name: "test tag",
 	}
 }
 
 func TestTagCreateDTO() *CreateTagDTO {
 	return &CreateTagDTO{
-		Name: "Test Tag",
+		Name: "test tag",
 	}
 }
 
 func TestTagUpdateDTO() *UpdateTagDTO {
 	return &UpdateTagDTO{
 		UUID: "1",
-		Name: "Test Tag",
+		Name: "test tag",
 	}
 }
 
@@ -68,30 +68,35 @@ func TestArticle() *Article {
 		Title:         "Test Title",
 		Direction:     *TestDirection(),
 		Difficulty:    "Test Difficulty",
+		Text:          "Test Text",
 		Author:        *TestAuthor(),
 		EditionDate:   2000,
 		Rating:        5.0,
 		Description:   "Test Description",
 		LocalURL:      "Test LocalURL",
+		WebURL:        "Test WebURL",
+		ImageURL:      "Test ImageURL",
 		Language:      "Test Language",
 		Tags:          []Tag{*TestTag()},
 		DownloadCount: 10,
-		ImageURL:      "imageURL",
+		CreatedAt:     time.Date(2000, 01, 01, 0, 0, 0, 0, time.UTC),
 	}
 }
 
 func TestArticleCreateDTO() *CreateArticleDTO {
 	return &CreateArticleDTO{
-		Title:         "Test Title",
+		Title:         "Test_Title",
 		DirectionUUID: "1",
 		AuthorUUID:    "1",
 		Difficulty:    "Test Difficulty",
 		EditionDate:   2000,
 		Description:   "Test Description",
-		LocalURL:      "Test LocalURL",
+		Text:          "text",
+		LocalURL:      "/articles/|split|/author(1)-title(Test Title).docx",
+		WebURL:        "Test URL",
+		ImageURL:      "/articles/|split|/original.jpg",
 		Language:      "Test Language",
 		TagsUUIDs:     []string{"1"},
-		ImageURL:      "imageURL",
 	}
 }
 
@@ -105,11 +110,9 @@ func TestArticleUpdateDTO() *UpdateArticleDTO {
 		EditionDate:   2000,
 		Rating:        5.5,
 		Description:   "Test Description",
-		LocalURL:      "Test LocalURL",
 		Language:      "Test Language",
 		TagsUUIDs:     []string{"1"},
 		DownloadCount: 10,
-		ImageURL:      "imageURL",
 	}
 }
 
@@ -124,25 +127,26 @@ func TestBook() *Book {
 		Rating:        5.0,
 		Description:   "Test Description",
 		LocalURL:      "Test LocalURL",
+		ImageURL:      "Test ImageURL",
 		Language:      "Test Language",
 		Tags:          []Tag{*TestTag()},
 		DownloadCount: 10,
-		ImageURL:      "imageURL",
+		CreatedAt:     time.Date(2000, 01, 01, 0, 0, 0, 0, time.UTC),
 	}
 }
 
 func TestBookCreateDTO() *CreateBookDTO {
 	return &CreateBookDTO{
-		Title:         "Test Title",
+		Title:         "Test_Title",
 		DirectionUUID: "1",
 		AuthorUUID:    "1",
 		Difficulty:    "Test Difficulty",
 		EditionDate:   2000,
 		Description:   "Test Description",
-		LocalURL:      "Test LocalURL",
+		LocalURL:      "/books/|split|/author(1)-title(Test_Title).pdf",
+		ImageURL:      "/books/|split|/original.jpg",
 		Language:      "Test Language",
 		TagsUUIDs:     []string{"1"},
-		ImageURL:      "imageURL",
 	}
 }
 
@@ -154,13 +158,9 @@ func TestBookUpdateDTO() *UpdateBookDTO {
 		AuthorUUID:    "1",
 		Difficulty:    "Test Difficulty",
 		EditionDate:   2000,
-		Rating:        5.5,
 		Description:   "Test Description",
-		LocalURL:      "Test LocalURL",
 		Language:      "Test Language",
 		TagsUUIDs:     []string{"1"},
-		DownloadCount: 10,
-		ImageURL:      "imageURL",
 	}
 }
 
@@ -171,18 +171,19 @@ func TestAudio() *Audio {
 		Direction:     *TestDirection(),
 		Difficulty:    "Test Difficulty",
 		Rating:        5.0,
-		LocalURL:      "Test LocalURL",
+		LocalURL:      "Test URL",
 		Language:      "Test Language",
 		Tags:          []Tag{*TestTag()},
 		DownloadCount: 10,
+		CreatedAt:     time.Date(2000, 01, 01, 0, 0, 0, 0, time.UTC),
 	}
 }
 
 func TestAudioCreateDTO() *CreateAudioDTO {
 	return &CreateAudioDTO{
-		Title:         "Test Title",
+		Title:         "Test_Title",
 		Difficulty:    "Test Difficulty",
-		LocalURL:      "Test LocalURL",
+		LocalURL:      "/audios/|split|/title(Test_Title).mp3",
 		Language:      "Test Language",
 		DirectionUUID: "1",
 		TagsUUIDs:     []string{"1"},
@@ -196,7 +197,6 @@ func TestAudioUpdateDTO() *UpdateAudioDTO {
 		DirectionUUID: "1",
 		Difficulty:    "Test Difficulty",
 		Rating:        5.5,
-		LocalURL:      "Test LocalURL",
 		Language:      "Test Language",
 		TagsUUIDs:     []string{"1"},
 		DownloadCount: 10,
@@ -212,19 +212,22 @@ func TestVideo() *Video {
 		Difficulty:    "Test Difficulty",
 		Description:   "Test Description",
 		LocalURL:      "Test LocalURL",
+		WebURL:        "Test WebURL",
 		Language:      "Test Language",
 		Tags:          []Tag{*TestTag()},
 		DownloadCount: 10,
+		CreatedAt:     time.Date(2000, 01, 01, 0, 0, 0, 0, time.UTC),
 	}
 }
 
 func TestVideoCreateDTO() *CreateVideoDTO {
 	return &CreateVideoDTO{
-		Title:         "Test Title",
+		Title:         "Test_Title",
 		DirectionUUID: "1",
 		Difficulty:    "Test Difficulty",
 		Description:   "Test Description",
-		LocalURL:      "Test LocalURL",
+		LocalURL:      "/videos/|split|/title(Test_Title).mp4",
+		WebURL:        "text",
 		Language:      "Test Language",
 		TagsUUIDs:     []string{"1"},
 	}
@@ -238,7 +241,7 @@ func TestVideoUpdateDTO() *UpdateVideoDTO {
 		Difficulty:    "Test Difficulty",
 		Rating:        5.5,
 		Description:   "Test Description",
-		LocalURL:      "Test LocalURL",
+		WebURL:        "Test URL",
 		Language:      "Test Language",
 		TagsUUIDs:     []string{"1"},
 		DownloadCount: 10,
@@ -251,7 +254,7 @@ func TestReview() *Review {
 		FullName:       "Test Review",
 		Text:           "Test Text",
 		Rating:         5.5,
-		Date:           time.Date(2000, 01, 01, 0, 0, 0, 0, time.UTC),
+		CreatedAt:      time.Date(2000, 01, 01, 0, 0, 0, 0, time.UTC),
 		Source:         "Test Source",
 		LiteratureUUID: "1",
 	}

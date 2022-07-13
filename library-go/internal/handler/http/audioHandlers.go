@@ -10,7 +10,6 @@ import (
 	"library-go/pkg/JSON"
 	"library-go/pkg/logging"
 	"net/http"
-	"os"
 	"strconv"
 	"strings"
 )
@@ -63,6 +62,11 @@ func (ah *AudioHandler) GetAll() http.HandlerFunc {
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			json.NewEncoder(w).Encode(JSON.Error{Msg: fmt.Sprintf("error occurred while getting all audios. err: %v", err)})
+			return
+		}
+		if audios == nil {
+			w.WriteHeader(http.StatusNotFound)
+			json.NewEncoder(w).Encode(JSON.Error{Msg: fmt.Sprintf("no rows in result")})
 			return
 		}
 
@@ -132,13 +136,15 @@ func (ah *AudioHandler) Create() http.Handler {
 
 		path := fmt.Sprintf("%s%s/", audioLocalStoragePath, UUID)
 
-		file := data["file"].(*bytes.Buffer)
-		err = ah.Service.SaveFile(path, fileName, file)
-		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			ah.logger.Errorf("error occurred while saving audio into local store. err: %v.", err)
-			json.NewEncoder(w).Encode(JSON.Error{Msg: fmt.Sprintf("error occurred while saving audio into local database. err: %v", err)})
-			return
+		file, ok := data["file"].(*bytes.Buffer)
+		if ok && file != nil {
+			err = ah.Service.SaveFile(path, fileName, file)
+			if err != nil {
+				w.WriteHeader(http.StatusInternalServerError)
+				ah.logger.Errorf("error occurred while saving audio into local store. err: %v.", err)
+				json.NewEncoder(w).Encode(JSON.Error{Msg: fmt.Sprintf("error occurred while saving audio into local database. err: %v", err)})
+				return
+			}
 		}
 
 		w.WriteHeader(http.StatusCreated)
@@ -205,56 +211,6 @@ func (ah *AudioHandler) Update(w http.ResponseWriter, r *http.Request, ps httpro
 	json.NewEncoder(w).Encode(JSON.Info{Msg: "Audio updated successfully"})
 }
 
-func (ah *AudioHandler) LoadFile(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	file := r.URL.Query().Get("file")
-	if file == "" {
-		w.WriteHeader(http.StatusBadRequest)
-		ah.logger.Errorf("file query can't be empty")
-		return
-	}
-
-	uuid := r.URL.Query().Get("uuid")
-	if uuid == "" {
-		w.WriteHeader(http.StatusBadRequest)
-		ah.logger.Errorf("uuid query can't be empty")
-		return
-	}
-
-	err := ah.Service.DownloadCountUp(uuid)
-	if err != nil {
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusInternalServerError)
-		ah.logger.Errorf("error occurred while downloading (DB ping to increase dowload count). err: %v", err)
-		json.NewEncoder(w).Encode(JSON.Error{Msg: fmt.Sprintf("error occurred while downloading (DB ping to increase dowload count). err: %v", err)})
-		return
-	}
-
-	w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=%s", file))
-	w.Header().Set("Content-Type", "application/octet-stream")
-
-	path := fmt.Sprintf("%s%s/%s", audioLocalStoragePath, uuid, file)
-
-	fileBytes, err := ah.Service.LoadFile(path)
-	_, pathError := err.(*os.PathError)
-	if pathError {
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusInternalServerError)
-		ah.logger.Errorf("error occurred while searching file: invalid path. err: %v", err)
-		json.NewEncoder(w).Encode(JSON.Error{Msg: fmt.Sprintf("error occurred while searching file: invalid path. err: %v", err)})
-		return
-	}
-	if err != nil {
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusInternalServerError)
-		ah.logger.Errorf("error occurred while reading file. err: %v", err)
-		json.NewEncoder(w).Encode(JSON.Error{Msg: fmt.Sprintf("error occurred while reading file. err: %v", err)})
-		return
-	}
-
-	w.Write(fileBytes)
-
-}
-
 func (ah *AudioHandler) UpdateFile() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
@@ -267,7 +223,7 @@ func (ah *AudioHandler) UpdateFile() http.Handler {
 		err := ah.Service.UpdateFile(&dto)
 		if err != nil {
 			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(http.StatusInternalServerError)
+			w.WriteHeader(http.StatusNotFound)
 			ah.logger.Errorf("error occurred while saving audio into local store. err: %v.", err)
 			json.NewEncoder(w).Encode(JSON.Error{Msg: fmt.Sprintf("error occurred while saving audio into local store. err: %v.", err)})
 			return
@@ -284,6 +240,7 @@ func (ah *AudioHandler) Rate(w http.ResponseWriter, r *http.Request, ps httprout
 	if ratingStr == "" {
 		w.WriteHeader(http.StatusBadRequest)
 		ah.logger.Errorf("rating query can't be empty")
+		json.NewEncoder(w).Encode(JSON.Error{Msg: fmt.Sprintf("rating query can't be empty")})
 		return
 	}
 	rating, err := strconv.ParseFloat(ratingStr, 32)
@@ -293,22 +250,79 @@ func (ah *AudioHandler) Rate(w http.ResponseWriter, r *http.Request, ps httprout
 		json.NewEncoder(w).Encode(JSON.Error{Msg: fmt.Sprintf("error occurred while parsing rating. Should be float32. err: %v.", err)})
 		return
 	}
+	if rating < 1.0 || rating > 5.0 {
+		w.WriteHeader(http.StatusBadRequest)
+		ah.logger.Errorf("rating should be from 1.0 to 5.0")
+		json.NewEncoder(w).Encode(JSON.Error{Msg: "rating should be from 1.0 to 5.0"})
+		return
+	}
 
 	uuid := r.URL.Query().Get("uuid")
 	if uuid == "" {
 		w.WriteHeader(http.StatusBadRequest)
 		ah.logger.Errorf("uuid can't be empty")
+		json.NewEncoder(w).Encode(JSON.Error{Msg: fmt.Sprintf("uuid can't be empty")})
 		return
 	}
 
 	err = ah.Service.Rate(uuid, float32(rating))
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
+		w.WriteHeader(http.StatusBadRequest)
 		ah.logger.Errorf("error occurred while rating audio image. err: %v.", err)
 		json.NewEncoder(w).Encode(JSON.Error{Msg: fmt.Sprintf("error occurred while rating audio into local store. err: %v.", err)})
 		return
 	}
 
-	w.WriteHeader(http.StatusCreated)
+	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(JSON.Info{Msg: fmt.Sprintf("Audio rated successfully. UUID: %s", uuid)})
 }
+
+//func (ah *AudioHandler) LoadFile(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+//	file := r.URL.Query().Get("file")
+//	if file == "" {
+//		w.WriteHeader(http.StatusBadRequest)
+//		ah.logger.Errorf("file query can't be empty")
+//		return
+//	}
+//
+//	uuid := r.URL.Query().Get("uuid")
+//	if uuid == "" {
+//		w.WriteHeader(http.StatusBadRequest)
+//		ah.logger.Errorf("uuid query can't be empty")
+//		return
+//	}
+//
+//	err := ah.Service.DownloadCountUp(uuid)
+//	if err != nil {
+//		w.Header().Set("Content-Type", "application/json")
+//		w.WriteHeader(http.StatusInternalServerError)
+//		ah.logger.Errorf("error occurred while downloading (DB ping to increase dowload count). err: %v", err)
+//		json.NewEncoder(w).Encode(JSON.Error{Msg: fmt.Sprintf("error occurred while downloading (DB ping to increase dowload count). err: %v", err)})
+//		return
+//	}
+//
+//	w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=%s", file))
+//	w.Header().Set("Content-Type", "application/octet-stream")
+//
+//	path := fmt.Sprintf("%s%s/%s", audioLocalStoragePath, uuid, file)
+//
+//	fileBytes, err := ah.Service.LoadFile(path)
+//	_, pathError := err.(*os.PathError)
+//	if pathError {
+//		w.Header().Set("Content-Type", "application/json")
+//		w.WriteHeader(http.StatusInternalServerError)
+//		ah.logger.Errorf("error occurred while searching file: invalid path. err: %v", err)
+//		json.NewEncoder(w).Encode(JSON.Error{Msg: fmt.Sprintf("error occurred while searching file: invalid path. err: %v", err)})
+//		return
+//	}
+//	if err != nil {
+//		w.Header().Set("Content-Type", "application/json")
+//		w.WriteHeader(http.StatusInternalServerError)
+//		ah.logger.Errorf("error occurred while reading file. err: %v", err)
+//		json.NewEncoder(w).Encode(JSON.Error{Msg: fmt.Sprintf("error occurred while reading file. err: %v", err)})
+//		return
+//	}
+//
+//	w.Write(fileBytes)
+//
+//}

@@ -86,7 +86,7 @@ type Review struct {
 	FullName       string    `json:"full_name,omitempty"`
 	Text           string    `json:"text,omitempty"`
 	Rating         float32   `json:"rating,omitempty"`
-	Date           time.Time `json:"date"`
+	CreatedAt      time.Time `json:"created_at"`
 	Source         Source    `json:"source,omitempty"`
 	LiteratureUUID string    `json:"literature_uuid,omitempty"`
 }

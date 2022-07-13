@@ -1,1 +1,0 @@
-i'm a Testfile and i don't want to Testsomething i want to return an EOF error.
