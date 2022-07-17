@@ -100,3 +100,7 @@ type VideoService interface {
 	Rate(UUID string, rating float32) error
 	DownloadCountUp(UUID string) error
 }
+
+type AuthService interface {
+	VerifyToken(token string) (bool, error)
+}

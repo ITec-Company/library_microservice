@@ -172,6 +172,7 @@ func TestDirectionStorage_Create(t *testing.T) {
 				query, _, _ := squirrel.Insert("direction").
 					Columns("name").
 					Values(strings.ToLower(dto.Name)).
+					PlaceholderFormat(squirrel.Dollar).
 					Suffix("RETURNING  uuid").
 					ToSql()
 				rows := sqlmock.NewRows([]string{"uuid"}).AddRow("1")
@@ -190,6 +191,7 @@ func TestDirectionStorage_Create(t *testing.T) {
 				query, _, _ := squirrel.Insert("direction").
 					Columns("name").
 					Values(strings.ToLower(dto.Name)).
+					PlaceholderFormat(squirrel.Dollar).
 					Suffix("RETURNING  uuid").
 					ToSql()
 

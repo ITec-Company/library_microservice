@@ -82,6 +82,7 @@ func (ds *directionStorage) Create(directionCreateDTO *domain.CreateDirectionDTO
 	query, args, _ := squirrel.Insert("direction").
 		Columns("name").
 		Values(strings.Title(strings.ToLower(directionCreateDTO.Name))).
+		PlaceholderFormat(squirrel.Dollar).
 		Suffix("RETURNING  uuid").
 		ToSql()
 

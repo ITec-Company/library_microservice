@@ -159,6 +159,7 @@ func TestAuthorStorage_Create(t *testing.T) {
 				query, _, _ := squirrel.Insert("author").
 					Columns("full_name").
 					Values(dto.FullName).
+					PlaceholderFormat(squirrel.Dollar).
 					Suffix("RETURNING  uuid").
 					ToSql()
 
@@ -175,6 +176,7 @@ func TestAuthorStorage_Create(t *testing.T) {
 			mock: func(dto *domain.CreateAuthorDTO) {
 				query, _, _ := squirrel.Insert("author").
 					Columns("full_name").
+					PlaceholderFormat(squirrel.Dollar).
 					Values(dto.FullName).
 					ToSql()
 

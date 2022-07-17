@@ -272,7 +272,6 @@ func (vh *VideoHandler) UpdateFile() http.Handler {
 
 		dto.LocalPath = fmt.Sprintf("%s%s/", videoLocalStoragePath, dto.UUID)
 		dto.LocalURL = fmt.Sprintf("%s|split|/%s", loadVideoFileURL, dto.NewFileName)
-
 		err := vh.Service.UpdateFile(&dto)
 		if err != nil {
 			w.Header().Set("Content-Type", "application/json")

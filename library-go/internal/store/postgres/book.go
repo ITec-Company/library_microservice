@@ -46,10 +46,10 @@ const (
 			difficulty = (CASE WHEN ($4 = any(enum_range(difficulty))) THEN $4 ELSE difficulty END), 
 			edition_date = (CASE WHEN ($5 != 0) THEN $5 ELSE edition_date END),
 			description = COALESCE(NULLIF($6, ''), description), 
-			local_url = COALESCE(NULLIF($7, ''), local_url), 
-			language = COALESCE(NULLIF($8, ''), language), 
-			tags_uuids = (CASE WHEN (EXISTS(SELECT uuid FROM tag where tag.uuid = any($9))) THEN $9 ELSE COALESCE($9, tags_uuids) END)
-		WHERE uuid = $10`
+			local_url = COALESCE(NULLIF(($7 || ($11::text) || $8), $11::text), local_url), 
+			language = COALESCE(NULLIF($9, ''), language), 
+			tags_uuids = (CASE WHEN (EXISTS(SELECT uuid FROM tag where tag.uuid = any($10))) THEN $10 ELSE COALESCE($10, tags_uuids) END)
+		WHERE uuid = $11`
 
 	RateBookQuery = `WITH grades AS (
    		 SELECT avg((select avg(a) from unnest(array_append(all_grades, $1)) as a)) AS avg
@@ -338,6 +338,11 @@ func (bs *bookStorage) Update(bookUpdateDTO *domain.UpdateBookDTO) error {
 		bookUpdateDTO.AuthorUUID = "0"
 	}
 
+	localURL := strings.Split(bookUpdateDTO.LocalURL, "|split|")
+	if len(localURL) < 2 {
+		localURL = append(localURL, "")
+	}
+
 	tx, err := bs.db.Begin()
 	if err != nil {
 		bs.logger.Errorf("error occurred while creating transaction. err: %v", err)
@@ -351,7 +356,8 @@ func (bs *bookStorage) Update(bookUpdateDTO *domain.UpdateBookDTO) error {
 		bookUpdateDTO.Difficulty,
 		bookUpdateDTO.EditionDate,
 		bookUpdateDTO.Description,
-		bookUpdateDTO.LocalURL,
+		localURL[0],
+		localURL[1],
 		bookUpdateDTO.Language,
 		pq.Array(bookUpdateDTO.TagsUUIDs),
 		bookUpdateDTO.UUID,

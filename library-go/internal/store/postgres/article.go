@@ -51,11 +51,11 @@ const (
 			edition_date = (CASE WHEN ($5 != 0) THEN $5 ELSE edition_date END),
 			description = COALESCE(NULLIF($6, ''), description), 
 			text = COALESCE(NULLIF($7, ''), text),
-			local_url = COALESCE(NULLIF($8, ''), local_url), 
-			web_url = COALESCE(NULLIF($9, ''), web_url), 
-			language = COALESCE(NULLIF($10, ''), language), 
-			tags_uuids = (CASE WHEN (EXISTS(SELECT uuid FROM tag where tag.uuid = any($11))) THEN $11 ELSE tags_uuids END)
-		WHERE uuid = $12`
+			local_url = COALESCE(NULLIF(($8 || ($13::text) || $9), $13::text), local_url), 
+			web_url = COALESCE(NULLIF($10, ''), web_url), 
+			language = COALESCE(NULLIF($11, ''), language), 
+			tags_uuids = (CASE WHEN (EXISTS(SELECT uuid FROM tag where tag.uuid = any($12))) THEN $12 ELSE tags_uuids END)
+		WHERE uuid = $13`
 
 	RateArticleQuery = `WITH grades AS (
    		 SELECT avg((select avg(a) from unnest(array_append(all_grades, $1)) as a)) AS avg
@@ -339,6 +339,11 @@ func (as *articleStorage) Update(articleUpdateDTO *domain.UpdateArticleDTO) erro
 		articleUpdateDTO.AuthorUUID = "0"
 	}
 
+	localURL := strings.Split(articleUpdateDTO.LocalURL, "|split|")
+	if len(localURL) < 2 {
+		localURL = append(localURL, "")
+	}
+
 	tx, err := as.db.Begin()
 	if err != nil {
 		as.logger.Errorf("error occurred while creating transaction. err: %v", err)
@@ -353,7 +358,8 @@ func (as *articleStorage) Update(articleUpdateDTO *domain.UpdateArticleDTO) erro
 		articleUpdateDTO.EditionDate,
 		articleUpdateDTO.Description,
 		articleUpdateDTO.Text,
-		articleUpdateDTO.LocalURL,
+		localURL[0],
+		localURL[1],
 		articleUpdateDTO.WebURL,
 		articleUpdateDTO.Language,
 		pq.Array(articleUpdateDTO.TagsUUIDs),

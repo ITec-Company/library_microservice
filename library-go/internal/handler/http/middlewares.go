@@ -8,6 +8,7 @@ import (
 	"github.com/h2non/filetype"
 	"github.com/julienschmidt/httprouter"
 	"library-go/internal/domain"
+	"library-go/internal/service"
 	"library-go/pkg/JSON"
 	"library-go/pkg/logging"
 	"library-go/pkg/utils"
@@ -19,8 +20,7 @@ import (
 type CtxKey int8
 
 const (
-	defaultLimit = 20
-
+	defaultLimit                   = 20
 	CtxKeyCreateArticle     CtxKey = 1
 	CtxKeyCreateBook        CtxKey = 2
 	CtxKeyCreateVideo       CtxKey = 3
@@ -33,15 +33,16 @@ const (
 )
 
 type Middleware struct {
-	logger *logging.Logger
+	service *service.Service
+	logger  *logging.Logger
 }
 
-func NewMiddlewares(logger *logging.Logger) Middleware {
+func NewMiddlewares(logger *logging.Logger, service *service.Service) Middleware {
 	return Middleware{
-		logger: logger,
+		logger:  logger,
+		service: service,
 	}
 }
-
 func (m *Middleware) createArticle(next http.Handler) httprouter.Handle {
 	return func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		data := map[string]interface{}{
@@ -99,11 +100,18 @@ func (m *Middleware) updateArticleFile(next http.Handler) httprouter.Handle {
 	return func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 
 		localURL := r.URL.Query().Get("localurl")
+		if localURL == "" {
+			w.WriteHeader(http.StatusBadRequest)
+			m.logger.Errorf("localurl is empty")
+			json.NewEncoder(w).Encode(JSON.Error{Msg: "localurl is empty"})
+			return
+		}
 		localURLSplit := strings.Split(localURL, "/")
 		fileName := localURLSplit[3]
 		if fileName == "" {
 			w.WriteHeader(http.StatusBadRequest)
 			m.logger.Errorf("file query can't be empty")
+			json.NewEncoder(w).Encode(JSON.Error{Msg: "file query can't be empty"})
 			return
 		}
 
@@ -111,6 +119,7 @@ func (m *Middleware) updateArticleFile(next http.Handler) httprouter.Handle {
 		if uuid == "" {
 			w.WriteHeader(http.StatusBadRequest)
 			m.logger.Errorf("uuid query can't be empty")
+			json.NewEncoder(w).Encode(JSON.Error{Msg: "uuid query can't be empty"})
 			return
 		}
 
@@ -221,11 +230,18 @@ func (m *Middleware) updateBookFile(next http.Handler) httprouter.Handle {
 	return func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 
 		localURL := r.URL.Query().Get("localurl")
+		if localURL == "" {
+			w.WriteHeader(http.StatusBadRequest)
+			m.logger.Errorf("localurl is empty")
+			json.NewEncoder(w).Encode(JSON.Error{Msg: "localurl is empty"})
+			return
+		}
 		localURLSplit := strings.Split(localURL, "/")
 		fileName := localURLSplit[3]
 		if fileName == "" {
 			w.WriteHeader(http.StatusBadRequest)
 			m.logger.Errorf("file query can't be empty")
+			json.NewEncoder(w).Encode(JSON.Error{Msg: "file query can't be empty"})
 			return
 		}
 
@@ -233,6 +249,7 @@ func (m *Middleware) updateBookFile(next http.Handler) httprouter.Handle {
 		if uuid == "" {
 			w.WriteHeader(http.StatusBadRequest)
 			m.logger.Errorf("uuid query can't be empty")
+			json.NewEncoder(w).Encode(JSON.Error{Msg: "uuid query can't be empty"})
 			return
 		}
 
@@ -341,11 +358,18 @@ func (m *Middleware) updateVideoFile(next http.Handler) httprouter.Handle {
 	return func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 
 		localURL := r.URL.Query().Get("localurl")
+		if localURL == "" {
+			w.WriteHeader(http.StatusBadRequest)
+			m.logger.Errorf("localurl is empty")
+			json.NewEncoder(w).Encode(JSON.Error{Msg: "localurl is empty"})
+			return
+		}
 		localURLSplit := strings.Split(localURL, "/")
 		fileName := localURLSplit[3]
 		if fileName == "" {
 			w.WriteHeader(http.StatusBadRequest)
 			m.logger.Errorf("file query can't be empty")
+			json.NewEncoder(w).Encode(JSON.Error{Msg: "file query can't be empty"})
 			return
 		}
 
@@ -353,6 +377,7 @@ func (m *Middleware) updateVideoFile(next http.Handler) httprouter.Handle {
 		if uuid == "" {
 			w.WriteHeader(http.StatusBadRequest)
 			m.logger.Errorf("uuid query can't be empty")
+			json.NewEncoder(w).Encode(JSON.Error{Msg: "uuid query can't be empty"})
 			return
 		}
 
@@ -395,7 +420,6 @@ func (m *Middleware) updateVideoFile(next http.Handler) httprouter.Handle {
 			OldFileName: fileName,
 			File:        file,
 		}
-
 		next.ServeHTTP(w, r.WithContext(context.WithValue(r.Context(), CtxKeyUpdateVideoFile, data)))
 	}
 }
@@ -451,11 +475,18 @@ func (m *Middleware) updateAudioFile(next http.Handler) httprouter.Handle {
 	return func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 
 		localURL := r.URL.Query().Get("localurl")
+		if localURL == "" {
+			w.WriteHeader(http.StatusBadRequest)
+			m.logger.Errorf("localurl is empty")
+			json.NewEncoder(w).Encode(JSON.Error{Msg: "localurl is empty"})
+			return
+		}
 		localURLSplit := strings.Split(localURL, "/")
 		fileName := localURLSplit[3]
 		if fileName == "" {
 			w.WriteHeader(http.StatusBadRequest)
 			m.logger.Errorf("file query can't be empty")
+			json.NewEncoder(w).Encode(JSON.Error{Msg: "file query can't be empty"})
 			return
 		}
 
@@ -463,6 +494,7 @@ func (m *Middleware) updateAudioFile(next http.Handler) httprouter.Handle {
 		if uuid == "" {
 			w.WriteHeader(http.StatusBadRequest)
 			m.logger.Errorf("uuid query can't be empty")
+			json.NewEncoder(w).Encode(JSON.Error{Msg: "uuid query can't be empty"})
 			return
 		}
 
@@ -589,6 +621,46 @@ func (m *Middleware) sortAndFilters(next http.HandlerFunc) httprouter.Handle {
 		}
 
 		r = r.WithContext(context.WithValue(r.Context(), CtxKeySortAndFilters, sortAndFilters))
+		next(w, r)
+	}
+}
+
+func (m *Middleware) auth(next http.HandlerFunc) httprouter.Handle {
+	return func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+
+		header := r.Header.Get("Authorization")
+		if header == "" {
+			w.WriteHeader(http.StatusUnauthorized)
+			m.logger.Errorf("empty auth header")
+			json.NewEncoder(w).Encode(JSON.Error{Msg: "empty auth header"})
+			return
+		}
+		headerParts := strings.Split(header, " ")
+		if len(headerParts) != 2 || headerParts[0] != "Bearer" {
+			w.WriteHeader(http.StatusUnauthorized)
+			m.logger.Errorf("invalid auth header")
+			json.NewEncoder(w).Encode(JSON.Error{Msg: "invalid auth header"})
+			return
+		}
+		if len(headerParts[1]) == 0 {
+			w.WriteHeader(http.StatusUnauthorized)
+			m.logger.Errorf("token is empty")
+			json.NewEncoder(w).Encode(JSON.Error{Msg: "token is empty"})
+			return
+		}
+		result, err := m.service.Auth.VerifyToken(headerParts[1])
+		if err != nil {
+			w.WriteHeader(http.StatusUnauthorized)
+			m.logger.Errorf("error occured while veryfying token: %s", err.Error())
+			json.NewEncoder(w).Encode(JSON.Error{Msg: fmt.Sprintf("error occured while veryfying token: %s", err.Error())})
+			return
+		}
+		if result == false {
+			w.WriteHeader(http.StatusUnauthorized)
+			m.logger.Errorf("token expired")
+			json.NewEncoder(w).Encode(JSON.Error{Msg: "token expired"})
+			return
+		}
 		next(w, r)
 	}
 }

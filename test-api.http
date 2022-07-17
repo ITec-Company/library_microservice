@@ -25,13 +25,11 @@ Content-Type: application/json
 GET http://localhost:1000/books?limit=5&page=2
 Content-Type: application/json
 
-
-// query refactor    CREATE (look at book create Storage), UPDATE ?
 // tests handlers: middleware
 
-// review date or created_at?
 // improve test
 // DB test improve results (delete, rate)
+
 // solve problem with tag validation while creating books/auido/video/article in DB query any/in (tags)
 
 

@@ -39,11 +39,11 @@ const (
 			difficulty = (CASE WHEN ($2 = any(enum_range(difficulty))) THEN $2 ELSE difficulty END), 
 			direction_uuid = (CASE WHEN (EXISTS(SELECT uuid FROM direction where direction.uuid = $3)) THEN $3 ELSE direction_uuid END), 
 			description = COALESCE(NULLIF($4, ''), description),
-			local_url = COALESCE(NULLIF($5, ''), local_url), 
-			web_url = COALESCE(NULLIF($6, ''), web_url), 
-			language = COALESCE(NULLIF($7, ''), language), 
-			tags_uuids = (CASE WHEN (EXISTS(SELECT uuid FROM tag where tag.uuid = any($8))) THEN $8 ELSE tags_uuids END)
-		WHERE uuid = $9`
+			local_url = COALESCE(NULLIF(($5 || ($10::text) || $6), $10::text), local_url),
+			web_url = COALESCE(NULLIF($7, ''), web_url), 
+			language = COALESCE(NULLIF($8, ''), language), 
+			tags_uuids = (CASE WHEN (EXISTS(SELECT uuid FROM tag where tag.uuid = any($9))) THEN $9 ELSE tags_uuids END)
+		WHERE uuid = $10`
 
 	RateVideoQuery = `WITH grades AS (
    		 SELECT avg((select avg(a) from unnest(array_append(all_grades, $1)) as a)) AS avg
@@ -294,6 +294,12 @@ func (vs *videoStorage) Update(videoUpdateDTO *domain.UpdateVideoDTO) error {
 	if videoUpdateDTO.DirectionUUID == "" {
 		videoUpdateDTO.DirectionUUID = "0"
 	}
+	vs.logger.Errorf("%s", videoUpdateDTO.LocalURL)
+
+	localURL := strings.Split(videoUpdateDTO.LocalURL, "|split|")
+	if len(localURL) < 2 {
+		localURL = append(localURL, "")
+	}
 
 	tx, err := vs.db.Begin()
 	if err != nil {
@@ -306,7 +312,8 @@ func (vs *videoStorage) Update(videoUpdateDTO *domain.UpdateVideoDTO) error {
 		videoUpdateDTO.Difficulty,
 		videoUpdateDTO.DirectionUUID,
 		videoUpdateDTO.Description,
-		videoUpdateDTO.LocalURL,
+		localURL[0],
+		localURL[1],
 		videoUpdateDTO.WebURL,
 		videoUpdateDTO.Language,
 		pq.Array(videoUpdateDTO.TagsUUIDs),

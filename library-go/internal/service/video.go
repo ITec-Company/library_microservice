@@ -57,6 +57,7 @@ func (s *videoService) SaveFile(path, fileName string, file io.Reader) error {
 func (s *videoService) UpdateFile(dto *domain.UpdateVideoFileDTO) error {
 	os.Remove(fmt.Sprintf("%s%s", dto.LocalPath, dto.OldFileName))
 
+	s.logger.Errorf("HERE")
 	err := s.storage.Update(&domain.UpdateVideoDTO{
 		UUID:     dto.UUID,
 		LocalURL: dto.LocalURL,

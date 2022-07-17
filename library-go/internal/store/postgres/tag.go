@@ -110,6 +110,7 @@ func (ts *tagStorage) Create(tagCreateDTO *domain.CreateTagDTO) (string, error) 
 	query, args, _ := squirrel.Insert("tag").
 		Columns("name").
 		Values(strings.ToLower(tagCreateDTO.Name)).
+		PlaceholderFormat(squirrel.Dollar).
 		Suffix("RETURNING uuid").
 		ToSql()
 

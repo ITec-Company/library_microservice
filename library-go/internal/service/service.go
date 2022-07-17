@@ -16,6 +16,7 @@ type Service struct {
 	Tag       TagService
 	Video     VideoService
 	Direction DirectionService
+	Auth      AuthService
 }
 
 func New(store *postgres.Store) *Service {
@@ -30,5 +31,6 @@ func New(store *postgres.Store) *Service {
 		Tag:       NewTagService(&store.TagStorage, store.Logger),
 		Video:     NewVideoService(&store.VideoStorage, store.Logger),
 		Direction: NewDirectionService(&store.DirectionStorage, store.Logger),
+		Auth:      NewAuthService(store.Logger),
 	}
 }

@@ -174,6 +174,7 @@ func TestReviewStorage_Create(t *testing.T) {
 				query, _, _ := squirrel.Insert("review").
 					Columns("text", "full_name", "source", "literature_uuid").
 					Values(dto.Text, dto.FullName, dto.Source, dto.LiteratureUUID).
+					PlaceholderFormat(squirrel.Dollar).
 					Suffix("RETURNING uuid").
 					ToSql()
 				rows := sqlmock.NewRows([]string{"uuid"}).AddRow("1")
@@ -192,6 +193,7 @@ func TestReviewStorage_Create(t *testing.T) {
 				query, _, _ := squirrel.Insert("review").
 					Columns("text", "full_name", "source", "literature_uuid").
 					Values(dto.Text, dto.FullName, dto.Source, dto.LiteratureUUID).
+					PlaceholderFormat(squirrel.Dollar).
 					Suffix("RETURNING uuid").
 					ToSql()
 

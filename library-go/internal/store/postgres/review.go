@@ -102,6 +102,7 @@ func (rs *reviewStorage) Create(reviewCreateDTO *domain.CreateReviewDTO) (string
 	query, args, _ := squirrel.Insert("review").
 		Columns("text", "full_name", "source", "literature_uuid").
 		Values(reviewCreateDTO.Text, reviewCreateDTO.FullName, reviewCreateDTO.Source, reviewCreateDTO.LiteratureUUID).
+		PlaceholderFormat(squirrel.Dollar).
 		Suffix("RETURNING uuid").
 		ToSql()
 

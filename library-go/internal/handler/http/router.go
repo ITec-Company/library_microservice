@@ -26,7 +26,7 @@ func New(service *service.Service) *Router {
 		Logger:     service.Logger,
 		Service:    service,
 		Router:     httprouter.New(),
-		Middleware: NewMiddlewares(service.Logger),
+		Middleware: NewMiddlewares(service.Logger, service),
 		Article:    NewArticleHandler(service.Article, service.Logger),
 		Audio:      NewAudioHandler(service.Audio, service.Logger),
 		Author:     NewAuthorHandler(service.Author, service.Logger),

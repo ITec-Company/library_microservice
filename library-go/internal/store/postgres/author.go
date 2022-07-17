@@ -79,6 +79,7 @@ func (as *authorStorage) Create(authorCreateDTO *domain.CreateAuthorDTO) (string
 	query, args, _ := squirrel.Insert("author").
 		Columns("full_name").
 		Values(authorCreateDTO.FullName).
+		PlaceholderFormat(squirrel.Dollar).
 		Suffix("RETURNING  uuid").
 		ToSql()
 

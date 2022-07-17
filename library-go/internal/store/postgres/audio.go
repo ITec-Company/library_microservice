@@ -34,10 +34,10 @@ const (
 			title = COALESCE(NULLIF($1, ''), title),
 			difficulty = (CASE WHEN ($2 = any(enum_range(difficulty))) THEN $2 ELSE difficulty END), 
 			direction_uuid = (CASE WHEN (EXISTS(SELECT uuid FROM direction where direction.uuid = $3)) THEN $3 ELSE direction_uuid END), 
-			local_url = COALESCE(NULLIF($4, ''), local_url), 
-			language = COALESCE(NULLIF($5, ''), language), 
-			tags_uuids = (CASE WHEN (EXISTS(SELECT uuid FROM tag where tag.uuid = any($6))) THEN $6 ELSE tags_uuids END)
-		WHERE uuid = $7`
+			local_url = COALESCE(NULLIF(($4 || ($8::text) || $5), $8::text), local_url),
+			language = COALESCE(NULLIF($6, ''), language), 
+			tags_uuids = (CASE WHEN (EXISTS(SELECT uuid FROM tag where tag.uuid = any($7))) THEN $7 ELSE tags_uuids END)
+		WHERE uuid = $8`
 
 	RateAudioQuery = `WITH grades AS (
    		 SELECT avg((select avg(a) from unnest(array_append(all_grades, $1)) as a)) AS avg
@@ -285,6 +285,11 @@ func (as *audioStorage) Update(audioUpdateDTO *domain.UpdateAudioDTO) error {
 		audioUpdateDTO.DirectionUUID = "0"
 	}
 
+	localURL := strings.Split(audioUpdateDTO.LocalURL, "|split|")
+	if len(localURL) < 2 {
+		localURL = append(localURL, "")
+	}
+
 	tx, err := as.db.Begin()
 	if err != nil {
 		as.logger.Errorf("error occurred while creating transaction. err: %v", err)
@@ -295,7 +300,8 @@ func (as *audioStorage) Update(audioUpdateDTO *domain.UpdateAudioDTO) error {
 		audioUpdateDTO.Title,
 		audioUpdateDTO.Difficulty,
 		audioUpdateDTO.DirectionUUID,
-		audioUpdateDTO.LocalURL,
+		localURL[0],
+		localURL[1],
 		audioUpdateDTO.Language,
 		pq.Array(audioUpdateDTO.TagsUUIDs),
 		audioUpdateDTO.UUID,
